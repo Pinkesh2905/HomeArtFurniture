@@ -1,6 +1,6 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Billing Details | SRDC Admin{% endblock %}
+{% block title %}Billing Details | Home Art Furniture Admin{% endblock %}
 
 {% block content %}
 <!-- Screen Content -->
@@ -58,73 +58,73 @@
             <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
                 <div class="space-y-2">
                     <label class="text-xs font-bold text-theme-primary uppercase tracking-widest pl-1">SALESPERSON</label>
-                    <div class="srdc-dropdown">
+                    <div class="haf-dropdown">
                         <input type="checkbox" id="salesperson-dropdown">
                         <input type="hidden" name="salesperson" value="">
-                        <label class="srdc-dropdown__face bg-theme-input border-theme-input rounded-[12px] hover:bg-theme-input/80 transition-colors" for="salesperson-dropdown">
-                            <div class="srdc-dropdown__text text-theme-primary font-bold">Select Salesperson</div>
-                            <div class="srdc-dropdown__arrow border-theme-secondary"></div>
+                        <label class="haf-dropdown__face bg-theme-input border-theme-input rounded-[12px] hover:bg-theme-input/80 transition-colors" for="salesperson-dropdown">
+                            <div class="haf-dropdown__text text-theme-primary font-bold">Select Salesperson</div>
+                            <div class="haf-dropdown__arrow border-theme-secondary"></div>
                         </label>
-                        <ul class="srdc-dropdown__items">
-                            <li class="srdc-dropdown__item" data-value="">No salesperson</li>
+                        <ul class="haf-dropdown__items">
+                            <li class="haf-dropdown__item" data-value="">No salesperson</li>
                             {% for person in salespeople %}
-                            <li class="srdc-dropdown__item" data-value="{{ person.id }}">{{ person.full_name }}</li>
+                            <li class="haf-dropdown__item" data-value="{{ person.id }}">{{ person.full_name }}</li>
                             {% endfor %}
                         </ul>
                     </div>
                 </div>
                 <div class="space-y-2">
                     <label class="text-xs font-bold text-theme-primary uppercase tracking-widest pl-1">ORDER TYPE</label>
-                    <div class="srdc-dropdown">
+                    <div class="haf-dropdown">
                         <input type="checkbox" id="order-type-dropdown">
                         <input type="hidden" name="order_type" value="{{ current_order_type|default:'custom' }}">
-                        <label class="srdc-dropdown__face bg-theme-input border-theme-input rounded-[12px] hover:bg-theme-input/80 transition-colors" for="order-type-dropdown">
-                            <div class="srdc-dropdown__text text-theme-primary font-bold">
+                        <label class="haf-dropdown__face bg-theme-input border-theme-input rounded-[12px] hover:bg-theme-input/80 transition-colors" for="order-type-dropdown">
+                            <div class="haf-dropdown__text text-theme-primary font-bold">
                                 {% if current_order_type == 'custom' or not current_order_type %}Custom Tailoring
                                 {% elif current_order_type == 'rental' %}Rental Service
                                 {% else %}Select Order Type{% endif %}
                             </div>
-                            <div class="srdc-dropdown__arrow border-theme-secondary"></div>
+                            <div class="haf-dropdown__arrow border-theme-secondary"></div>
                         </label>
-                        <ul class="srdc-dropdown__items">
+                        <ul class="haf-dropdown__items">
                             {% for value,label in order_types %}
-                            <li class="srdc-dropdown__item" data-value="{{ value }}">{{ label }}</li>
+                            <li class="haf-dropdown__item" data-value="{{ value }}">{{ label }}</li>
                             {% endfor %}
                         </ul>
                     </div>
                 </div>
                 <div class="space-y-2">
                     <label class="text-xs font-bold text-theme-primary uppercase tracking-widest pl-1">DELIVERY DATE</label>
-                    <div class="srdc-datepicker">
+                    <div class="haf-datepicker">
                         <input type="hidden" name="delivery_date" value="">
-                        <div class="srdc-datepicker__face">
-                            <input type="text" class="srdc-datepicker__text" placeholder="dd/mm/yyyy" value="">
+                        <div class="haf-datepicker__face">
+                            <input type="text" class="haf-datepicker__text" placeholder="dd/mm/yyyy" value="">
                             <span class="material-symbols-outlined text-secondary text-[20px]">calendar_today</span>
                         </div>
-                        <div class="srdc-datepicker__popup">
-                            <div class="srdc-calendar">
-                                <div class="srdc-calendar__header">
-                                    <div class="srdc-calendar__header-info">
+                        <div class="haf-datepicker__popup">
+                            <div class="haf-calendar">
+                                <div class="haf-calendar__header">
+                                    <div class="haf-calendar__header-info">
                                         <h3>---</h3>
                                         <h2>Select Date</h2>
                                     </div>
                                 </div>
-                                <div class="srdc-calendar__nav">
+                                <div class="haf-calendar__nav">
                                     <button type="button" class="prev-month"><span class="material-symbols-outlined">chevron_left</span></button>
-                                    <div class="srdc-calendar__nav-title">Month Year</div>
+                                    <div class="haf-calendar__nav-title">Month Year</div>
                                     <button type="button" class="next-month"><span class="material-symbols-outlined">chevron_right</span></button>
                                 </div>
-                                <div class="srdc-calendar__body">
-                                    <div class="srdc-calendar__days">
-                                        <div class="srdc-calendar__day-name">S</div>
-                                        <div class="srdc-calendar__day-name">M</div>
-                                        <div class="srdc-calendar__day-name">T</div>
-                                        <div class="srdc-calendar__day-name">W</div>
-                                        <div class="srdc-calendar__day-name">T</div>
-                                        <div class="srdc-calendar__day-name">F</div>
-                                        <div class="srdc-calendar__day-name">S</div>
+                                <div class="haf-calendar__body">
+                                    <div class="haf-calendar__days">
+                                        <div class="haf-calendar__day-name">S</div>
+                                        <div class="haf-calendar__day-name">M</div>
+                                        <div class="haf-calendar__day-name">T</div>
+                                        <div class="haf-calendar__day-name">W</div>
+                                        <div class="haf-calendar__day-name">T</div>
+                                        <div class="haf-calendar__day-name">F</div>
+                                        <div class="haf-calendar__day-name">S</div>
                                     </div>
-                                    <div class="srdc-calendar__numbers"></div>
+                                    <div class="haf-calendar__numbers"></div>
                                 </div>
                             </div>
                         </div>
@@ -132,36 +132,36 @@
                 </div>
                 <div class="space-y-2">
                     <label class="text-xs font-bold text-theme-primary uppercase tracking-widest pl-1">RETURN DATE</label>
-                    <div class="srdc-datepicker">
+                    <div class="haf-datepicker">
                         <input type="hidden" name="return_date" value="">
-                        <div class="srdc-datepicker__face">
-                            <input type="text" class="srdc-datepicker__text" placeholder="dd/mm/yyyy" value="">
+                        <div class="haf-datepicker__face">
+                            <input type="text" class="haf-datepicker__text" placeholder="dd/mm/yyyy" value="">
                             <span class="material-symbols-outlined text-secondary text-[20px]">calendar_today</span>
                         </div>
-                        <div class="srdc-datepicker__popup">
-                            <div class="srdc-calendar">
-                                <div class="srdc-calendar__header">
-                                    <div class="srdc-calendar__header-info">
+                        <div class="haf-datepicker__popup">
+                            <div class="haf-calendar">
+                                <div class="haf-calendar__header">
+                                    <div class="haf-calendar__header-info">
                                         <h3>---</h3>
                                         <h2>Select Date</h2>
                                     </div>
                                 </div>
-                                <div class="srdc-calendar__nav">
+                                <div class="haf-calendar__nav">
                                     <button type="button" class="prev-month"><span class="material-symbols-outlined">chevron_left</span></button>
-                                    <div class="srdc-calendar__nav-title">Month Year</div>
+                                    <div class="haf-calendar__nav-title">Month Year</div>
                                     <button type="button" class="next-month"><span class="material-symbols-outlined">chevron_right</span></button>
                                 </div>
-                                <div class="srdc-calendar__body">
-                                    <div class="srdc-calendar__days">
-                                        <div class="srdc-calendar__day-name">S</div>
-                                        <div class="srdc-calendar__day-name">M</div>
-                                        <div class="srdc-calendar__day-name">T</div>
-                                        <div class="srdc-calendar__day-name">W</div>
-                                        <div class="srdc-calendar__day-name">T</div>
-                                        <div class="srdc-calendar__day-name">F</div>
-                                        <div class="srdc-calendar__day-name">S</div>
+                                <div class="haf-calendar__body">
+                                    <div class="haf-calendar__days">
+                                        <div class="haf-calendar__day-name">S</div>
+                                        <div class="haf-calendar__day-name">M</div>
+                                        <div class="haf-calendar__day-name">T</div>
+                                        <div class="haf-calendar__day-name">W</div>
+                                        <div class="haf-calendar__day-name">T</div>
+                                        <div class="haf-calendar__day-name">F</div>
+                                        <div class="haf-calendar__day-name">S</div>
                                     </div>
-                                    <div class="srdc-calendar__numbers"></div>
+                                    <div class="haf-calendar__numbers"></div>
                                 </div>
                             </div>
                         </div>
@@ -373,18 +373,18 @@
                         </div>
                         <div class="flex justify-between items-center mt-3">
                             <span class="text-theme-secondary">Payment Method</span>
-                            <div class="srdc-dropdown w-48 text-right z-50">
+                            <div class="haf-dropdown w-48 text-right z-50">
                                 <input type="checkbox" id="payment-method-dropdown">
                                 <input type="hidden" name="payment_method" value="cash">
-                                <label class="srdc-dropdown__face bg-theme-input border-theme-input rounded-[12px] hover:bg-theme-input/80 transition-colors" for="payment-method-dropdown">
-                                    <div class="srdc-dropdown__text text-theme-primary font-bold">Cash</div>
-                                    <div class="srdc-dropdown__arrow border-theme-secondary"></div>
+                                <label class="haf-dropdown__face bg-theme-input border-theme-input rounded-[12px] hover:bg-theme-input/80 transition-colors" for="payment-method-dropdown">
+                                    <div class="haf-dropdown__text text-theme-primary font-bold">Cash</div>
+                                    <div class="haf-dropdown__arrow border-theme-secondary"></div>
                                 </label>
-                                <ul class="srdc-dropdown__items text-left">
-                                    <li class="srdc-dropdown__item" data-value="cash">Cash</li>
-                                    <li class="srdc-dropdown__item" data-value="upi">UPI / QR Code</li>
-                                    <li class="srdc-dropdown__item" data-value="card">Credit/Debit Card</li>
-                                    <li class="srdc-dropdown__item" data-value="bank_transfer">Bank Transfer</li>
+                                <ul class="haf-dropdown__items text-left">
+                                    <li class="haf-dropdown__item" data-value="cash">Cash</li>
+                                    <li class="haf-dropdown__item" data-value="upi">UPI / QR Code</li>
+                                    <li class="haf-dropdown__item" data-value="card">Credit/Debit Card</li>
+                                    <li class="haf-dropdown__item" data-value="bank_transfer">Bank Transfer</li>
                                 </ul>
                             </div>
                         </div>
@@ -621,8 +621,8 @@
                     
                     // Reset the return date input and display
                     returnInput.value = "";
-                    const picker = returnInput.closest('.srdc-datepicker');
-                    const textDisplay = picker.querySelector('.srdc-datepicker__text');
+                    const picker = returnInput.closest('.haf-datepicker');
+                    const textDisplay = picker.querySelector('.haf-datepicker__text');
                     
                     if (textDisplay.tagName === 'INPUT') {
                         textDisplay.value = "";
@@ -632,8 +632,8 @@
                     textDisplay.classList.add('placeholder');
                     
                     // Reset the header display in the popup if it exists
-                    const headerDay = picker.querySelector('.srdc-calendar__header-info h2');
-                    const headerMonth = picker.querySelector('.srdc-calendar__header-info h3');
+                    const headerDay = picker.querySelector('.haf-calendar__header-info h2');
+                    const headerMonth = picker.querySelector('.haf-calendar__header-info h3');
                     if (headerDay) headerDay.textContent = "Select Date";
                     if (headerMonth) headerMonth.textContent = "---";
                 }

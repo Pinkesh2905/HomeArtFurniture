@@ -1,5 +1,5 @@
 """
-WSGI config for srdc project.
+WSGI config for homeartfurniture project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'srdc.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'homeartfurniture.settings')
 
 application = get_wsgi_application()

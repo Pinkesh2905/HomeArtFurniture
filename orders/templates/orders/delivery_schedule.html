@@ -1,6 +1,6 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Delivery Schedule | SRDC Admin{% endblock %}
+{% block title %}Delivery Schedule | Home Art Furniture Admin{% endblock %}
 
 {% block content %}
 <div class="p-4 sm:p-8 max-w-[1440px] mx-auto w-full">
@@ -56,36 +56,36 @@
             </div>
             <div>
                 <label class="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1 px-1">Exact Date</label>
-                <div class="srdc-datepicker srdc-datepicker--glass">
+                <div class="haf-datepicker haf-datepicker--glass">
                     <input type="hidden" name="date" value="{{ filter_date|default:'' }}">
-                    <div class="srdc-datepicker__face">
-                        <input type="text" class="srdc-datepicker__text" placeholder="dd/mm/yyyy" value="{% if filter_date %}{{ filter_date|date:'d/m/Y' }}{% endif %}">
+                    <div class="haf-datepicker__face">
+                        <input type="text" class="haf-datepicker__text" placeholder="dd/mm/yyyy" value="{% if filter_date %}{{ filter_date|date:'d/m/Y' }}{% endif %}">
                         <span class="material-symbols-outlined text-secondary text-[20px]">calendar_today</span>
                     </div>
-                    <div class="srdc-datepicker__popup">
-                        <div class="srdc-calendar">
-                            <div class="srdc-calendar__header">
-                                <div class="srdc-calendar__header-info">
+                    <div class="haf-datepicker__popup">
+                        <div class="haf-calendar">
+                            <div class="haf-calendar__header">
+                                <div class="haf-calendar__header-info">
                                     <h3>---</h3>
                                     <h2>Select Date</h2>
                                 </div>
                             </div>
-                            <div class="srdc-calendar__nav">
+                            <div class="haf-calendar__nav">
                                 <button type="button" class="prev-month"><span class="material-symbols-outlined">chevron_left</span></button>
-                                <div class="srdc-calendar__nav-title">Month Year</div>
+                                <div class="haf-calendar__nav-title">Month Year</div>
                                 <button type="button" class="next-month"><span class="material-symbols-outlined">chevron_right</span></button>
                             </div>
-                            <div class="srdc-calendar__body">
-                                <div class="srdc-calendar__days">
-                                    <div class="srdc-calendar__day-name">S</div>
-                                    <div class="srdc-calendar__day-name">M</div>
-                                    <div class="srdc-calendar__day-name">T</div>
-                                    <div class="srdc-calendar__day-name">W</div>
-                                    <div class="srdc-calendar__day-name">T</div>
-                                    <div class="srdc-calendar__day-name">F</div>
-                                    <div class="srdc-calendar__day-name">S</div>
+                            <div class="haf-calendar__body">
+                                <div class="haf-calendar__days">
+                                    <div class="haf-calendar__day-name">S</div>
+                                    <div class="haf-calendar__day-name">M</div>
+                                    <div class="haf-calendar__day-name">T</div>
+                                    <div class="haf-calendar__day-name">W</div>
+                                    <div class="haf-calendar__day-name">T</div>
+                                    <div class="haf-calendar__day-name">F</div>
+                                    <div class="haf-calendar__day-name">S</div>
                                 </div>
-                                <div class="srdc-calendar__numbers"></div>
+                                <div class="haf-calendar__numbers"></div>
                             </div>
                         </div>
                     </div>
@@ -93,36 +93,36 @@
             </div>
             <div>
                 <label class="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1 px-1">From</label>
-                <div class="srdc-datepicker srdc-datepicker--glass">
+                <div class="haf-datepicker haf-datepicker--glass">
                     <input type="hidden" name="from" value="{{ filter_from|default:'' }}">
-                    <div class="srdc-datepicker__face">
-                        <input type="text" class="srdc-datepicker__text" placeholder="dd/mm/yyyy" value="{% if filter_from %}{{ filter_from|date:'d/m/Y' }}{% endif %}">
+                    <div class="haf-datepicker__face">
+                        <input type="text" class="haf-datepicker__text" placeholder="dd/mm/yyyy" value="{% if filter_from %}{{ filter_from|date:'d/m/Y' }}{% endif %}">
                         <span class="material-symbols-outlined text-secondary text-[20px]">calendar_today</span>
                     </div>
-                    <div class="srdc-datepicker__popup">
-                        <div class="srdc-calendar">
-                            <div class="srdc-calendar__header">
-                                <div class="srdc-calendar__header-info">
+                    <div class="haf-datepicker__popup">
+                        <div class="haf-calendar">
+                            <div class="haf-calendar__header">
+                                <div class="haf-calendar__header-info">
                                     <h3>---</h3>
                                     <h2>Select Date</h2>
                                 </div>
                             </div>
-                            <div class="srdc-calendar__nav">
+                            <div class="haf-calendar__nav">
                                 <button type="button" class="prev-month"><span class="material-symbols-outlined">chevron_left</span></button>
-                                <div class="srdc-calendar__nav-title">Month Year</div>
+                                <div class="haf-calendar__nav-title">Month Year</div>
                                 <button type="button" class="next-month"><span class="material-symbols-outlined">chevron_right</span></button>
                             </div>
-                            <div class="srdc-calendar__body">
-                                <div class="srdc-calendar__days">
-                                    <div class="srdc-calendar__day-name">S</div>
-                                    <div class="srdc-calendar__day-name">M</div>
-                                    <div class="srdc-calendar__day-name">T</div>
-                                    <div class="srdc-calendar__day-name">W</div>
-                                    <div class="srdc-calendar__day-name">T</div>
-                                    <div class="srdc-calendar__day-name">F</div>
-                                    <div class="srdc-calendar__day-name">S</div>
+                            <div class="haf-calendar__body">
+                                <div class="haf-calendar__days">
+                                    <div class="haf-calendar__day-name">S</div>
+                                    <div class="haf-calendar__day-name">M</div>
+                                    <div class="haf-calendar__day-name">T</div>
+                                    <div class="haf-calendar__day-name">W</div>
+                                    <div class="haf-calendar__day-name">T</div>
+                                    <div class="haf-calendar__day-name">F</div>
+                                    <div class="haf-calendar__day-name">S</div>
                                 </div>
-                                <div class="srdc-calendar__numbers"></div>
+                                <div class="haf-calendar__numbers"></div>
                             </div>
                         </div>
                     </div>
@@ -130,36 +130,36 @@
             </div>
             <div>
                 <label class="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1 px-1">To</label>
-                <div class="srdc-datepicker srdc-datepicker--glass">
+                <div class="haf-datepicker haf-datepicker--glass">
                     <input type="hidden" name="to" value="{{ filter_to|default:'' }}">
-                    <div class="srdc-datepicker__face">
-                        <span class="srdc-datepicker__text">{% if filter_to %}{{ filter_to|date:"d/m/Y" }}{% else %}mm/dd/yyyy{% endif %}</span>
+                    <div class="haf-datepicker__face">
+                        <span class="haf-datepicker__text">{% if filter_to %}{{ filter_to|date:"d/m/Y" }}{% else %}mm/dd/yyyy{% endif %}</span>
                         <span class="material-symbols-outlined text-secondary text-[20px]">calendar_today</span>
                     </div>
-                    <div class="srdc-datepicker__popup">
-                        <div class="srdc-calendar">
-                            <div class="srdc-calendar__header">
-                                <div class="srdc-calendar__header-info">
+                    <div class="haf-datepicker__popup">
+                        <div class="haf-calendar">
+                            <div class="haf-calendar__header">
+                                <div class="haf-calendar__header-info">
                                     <h3>---</h3>
                                     <h2>Select Date</h2>
                                 </div>
                             </div>
-                            <div class="srdc-calendar__nav">
+                            <div class="haf-calendar__nav">
                                 <button type="button" class="prev-month"><span class="material-symbols-outlined">chevron_left</span></button>
-                                <div class="srdc-calendar__nav-title">Month Year</div>
+                                <div class="haf-calendar__nav-title">Month Year</div>
                                 <button type="button" class="next-month"><span class="material-symbols-outlined">chevron_right</span></button>
                             </div>
-                            <div class="srdc-calendar__body">
-                                <div class="srdc-calendar__days">
-                                    <div class="srdc-calendar__day-name">S</div>
-                                    <div class="srdc-calendar__day-name">M</div>
-                                    <div class="srdc-calendar__day-name">T</div>
-                                    <div class="srdc-calendar__day-name">W</div>
-                                    <div class="srdc-calendar__day-name">T</div>
-                                    <div class="srdc-calendar__day-name">F</div>
-                                    <div class="srdc-calendar__day-name">S</div>
+                            <div class="haf-calendar__body">
+                                <div class="haf-calendar__days">
+                                    <div class="haf-calendar__day-name">S</div>
+                                    <div class="haf-calendar__day-name">M</div>
+                                    <div class="haf-calendar__day-name">T</div>
+                                    <div class="haf-calendar__day-name">W</div>
+                                    <div class="haf-calendar__day-name">T</div>
+                                    <div class="haf-calendar__day-name">F</div>
+                                    <div class="haf-calendar__day-name">S</div>
                                 </div>
-                                <div class="srdc-calendar__numbers"></div>
+                                <div class="haf-calendar__numbers"></div>
                             </div>
                         </div>
                     </div>
@@ -167,11 +167,11 @@
             </div>
             <div>
                 <label class="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1 px-1">Status</label>
-                <div class="srdc-dropdown srdc-dropdown--glass">
+                <div class="haf-dropdown haf-dropdown--glass">
                     <input type="checkbox" id="status-dropdown">
                     <input type="hidden" name="status" value="{{ filter_status|default:'' }}">
-                    <label class="srdc-dropdown__face" for="status-dropdown">
-                        <div class="srdc-dropdown__text">
+                    <label class="haf-dropdown__face" for="status-dropdown">
+                        <div class="haf-dropdown__text">
                             {% if filter_status %}
                                 {% for value, label in statuses %}
                                     {% if filter_status == value %}{{ label }}{% endif %}
@@ -180,12 +180,12 @@
                                 All Statuses
                             {% endif %}
                         </div>
-                        <div class="srdc-dropdown__arrow"></div>
+                        <div class="haf-dropdown__arrow"></div>
                     </label>
-                    <ul class="srdc-dropdown__items">
-                        <li class="srdc-dropdown__item" data-value="">All Statuses</li>
+                    <ul class="haf-dropdown__items">
+                        <li class="haf-dropdown__item" data-value="">All Statuses</li>
                         {% for value, label in statuses %}
-                        <li class="srdc-dropdown__item" data-value="{{ value }}">{{ label }}</li>
+                        <li class="haf-dropdown__item" data-value="{{ value }}">{{ label }}</li>
                         {% endfor %}
                     </ul>
                 </div>

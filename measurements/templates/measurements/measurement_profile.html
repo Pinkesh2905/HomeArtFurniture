@@ -1,6 +1,6 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Customer & Measurements | SRDC Admin{% endblock %}
+{% block title %}Customer & Measurements | Home Art Furniture Admin{% endblock %}
 
 {% block content %}
 <div class="p-4 sm:p-8 max-w-[1440px] mx-auto w-full space-y-6 relative z-10">
@@ -282,14 +282,14 @@
             </div>
         </li>`;
         globalCategories.forEach(cat => {
-            options += `<li class="srdc-dropdown__item" data-value="${cat.value}">${cat.label}</li>`;
+            options += `<li class="haf-dropdown__item" data-value="${cat.value}">${cat.label}</li>`;
         });
         return options;
     }
 
     function filterDropdownOptions(input) {
         const filter = input.value.toLowerCase();
-        const items = input.closest('ul').querySelectorAll('.srdc-dropdown__item');
+        const items = input.closest('ul').querySelectorAll('.haf-dropdown__item');
         items.forEach(item => {
             const text = item.textContent.toLowerCase();
             if (text.includes(filter)) {
@@ -329,14 +329,14 @@
                         <span class="text-xs font-black text-theme-secondary tracking-[0.2em]">#${garmentCounter.toString().padStart(2, '0')}</span>
                         
                         <!-- Premium Dropdown -->
-                        <div class="srdc-dropdown flex-1 min-w-[200px] srdc-dropdown--glass">
+                        <div class="haf-dropdown flex-1 min-w-[200px] haf-dropdown--glass">
                             <input type="checkbox" id="check-${blockId}">
                             <input type="hidden" name="garment_type_${garmentCounter}" class="garment-type-input" value="${garmentType}">
-                            <label class="srdc-dropdown__face h-14 border-theme-input bg-theme-input rounded-[12px] hover:bg-theme-input/80 transition-colors" for="check-${blockId}">
-                                <div class="srdc-dropdown__text font-bold text-theme-primary text-sm">${selectedLabel}</div>
-                                <div class="srdc-dropdown__arrow border-theme-secondary"></div>
+                            <label class="haf-dropdown__face h-14 border-theme-input bg-theme-input rounded-[12px] hover:bg-theme-input/80 transition-colors" for="check-${blockId}">
+                                <div class="haf-dropdown__text font-bold text-theme-primary text-sm">${selectedLabel}</div>
+                                <div class="haf-dropdown__arrow border-theme-secondary"></div>
                             </label>
-                            <ul class="srdc-dropdown__items">
+                            <ul class="haf-dropdown__items">
                                 ${options}
                             </ul>
                         </div>
@@ -377,10 +377,10 @@
         const cb = document.getElementById(`check-${blockId}`);
         cb.addEventListener('change', (e) => {
             if (e.target.checked) {
-                const searchInput = e.target.closest('.srdc-dropdown').querySelector('.dropdown-search-input');
+                const searchInput = e.target.closest('.haf-dropdown').querySelector('.dropdown-search-input');
                 if (searchInput) {
                     searchInput.value = '';
-                    const items = e.target.closest('.srdc-dropdown').querySelectorAll('.srdc-dropdown__item');
+                    const items = e.target.closest('.haf-dropdown').querySelectorAll('.haf-dropdown__item');
                     items.forEach(item => item.style.display = 'block');
                     setTimeout(() => searchInput.focus(), 150);
                 }
@@ -724,8 +724,8 @@
                     if (data.success) {
                         globalCategories.push({ value: data.slug, label: data.name });
                         garmentParameters[data.slug] = [];
-                        document.querySelectorAll('.srdc-dropdown__items').forEach(itemsList => {
-                            const dropdown = itemsList.closest('.srdc-dropdown');
+                        document.querySelectorAll('.haf-dropdown__items').forEach(itemsList => {
+                            const dropdown = itemsList.closest('.haf-dropdown');
                             const hiddenInput = dropdown.querySelector('input[name^="garment_type_"]');
                             if (hiddenInput) {
                                 itemsList.innerHTML = getOptionsHTML(hiddenInput.value);

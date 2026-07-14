@@ -1,6 +1,6 @@
-# SRDC Admin
+# Home Art Furniture Admin
 
-Django app for local/LAN boutique customer, measurement, order, billing, and print workflows.
+Django app for local/LAN customer, measurement, order, billing, and print workflows.
 
 ## Local setup
 
@@ -9,15 +9,15 @@ python -m venv venv
 venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-Create a PostgreSQL database named `srdc`, then set environment variables if your local values differ:
+Create a PostgreSQL database named `homeartfurniture`, then set environment variables if your local values differ:
 
 ```powershell
 $env:DJANGO_SECRET_KEY="change-this"
 $env:DJANGO_DEBUG="true"
 $env:DJANGO_ALLOWED_HOSTS="localhost,127.0.0.1,0.0.0.0,192.168.1.10"
-$env:DB_NAME="srdc"
+$env:DB_NAME="homeartfurniture"
 $env:DB_USER="postgres"
-$env:DB_PASSWORD="pg@123"
+$env:DB_PASSWORD="your-password"
 $env:DB_HOST="localhost"
 $env:DB_PORT="5432"
 ```
@@ -35,9 +35,9 @@ Open `http://localhost:8000/` on the store machine. Other devices on the same LA
 ## Backup and restore
 
 ```powershell
-pg_dump -h localhost -U postgres -Fc srdc > srdc-backup.dump
-createdb -h localhost -U postgres srdc_restored
-pg_restore -h localhost -U postgres -d srdc_restored srdc-backup.dump
+pg_dump -h localhost -U postgres -Fc homeartfurniture > homeartfurniture-backup.dump
+createdb -h localhost -U postgres homeartfurniture_restored
+pg_restore -h localhost -U postgres -d homeartfurniture_restored homeartfurniture-backup.dump
 ```
 
 ## Checks

@@ -1,6 +1,6 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Order Details | SRDC Admin{% endblock %}
+{% block title %}Order Details | Home Art Furniture Admin{% endblock %}
 
 {% block content %}
 <div class="p-4 sm:p-8 max-w-[1000px] mx-auto">
@@ -97,20 +97,20 @@
                 
                 <form method="POST" action="{% url 'order_detail' order.id %}">
                     {% csrf_token %}
-                    <div class="srdc-dropdown mb-4">
+                    <div class="haf-dropdown mb-4">
                         <input type="checkbox" id="status-dropdown">
                         <input type="hidden" name="status" value="{{ order.status }}">
-                        <label class="srdc-dropdown__face rounded-[12px] hover:bg-theme-input/80 transition-colors" for="status-dropdown">
-                            <div class="srdc-dropdown__text text-theme-primary font-bold">
+                        <label class="haf-dropdown__face rounded-[12px] hover:bg-theme-input/80 transition-colors" for="status-dropdown">
+                            <div class="haf-dropdown__text text-theme-primary font-bold">
                                 {% for value,label in statuses %}
                                     {% if order.status == value %}{{ label }}{% endif %}
                                 {% endfor %}
                             </div>
-                            <div class="srdc-dropdown__arrow border-theme-primary/40"></div>
+                            <div class="haf-dropdown__arrow border-theme-primary/40"></div>
                         </label>
-                        <ul class="srdc-dropdown__items">
+                        <ul class="haf-dropdown__items">
                             {% for value,label in statuses %}
-                            <li class="srdc-dropdown__item" data-value="{{ value }}">{{ label }}</li>
+                            <li class="haf-dropdown__item" data-value="{{ value }}">{{ label }}</li>
                             {% endfor %}
                         </ul>
                     </div>
@@ -265,24 +265,24 @@
                         </div>
                         <div class="col-span-5">
                             <label class="block text-xs font-bold text-theme-secondary uppercase tracking-widest mb-1 px-1">Method</label>
-                            <div class="srdc-dropdown w-full z-10">
+                            <div class="haf-dropdown w-full z-10">
                                 <input type="checkbox" id="detail-payment-method">
                                 <input type="hidden" name="payment_method" value="{{ order.payment_method }}">
-                                <label class="srdc-dropdown__face rounded-[12px] hover:bg-theme-input/80 transition-colors !h-[38px]" for="detail-payment-method">
-                                    <div class="srdc-dropdown__text text-theme-primary font-bold text-[11px] sm:text-xs truncate">
+                                <label class="haf-dropdown__face rounded-[12px] hover:bg-theme-input/80 transition-colors !h-[38px]" for="detail-payment-method">
+                                    <div class="haf-dropdown__text text-theme-primary font-bold text-[11px] sm:text-xs truncate">
                                         {% if order.payment_method == 'cash' %}Cash
                                         {% elif order.payment_method == 'upi' %}UPI / QR
                                         {% elif order.payment_method == 'card' %}Card
                                         {% elif order.payment_method == 'bank_transfer' %}Bank
                                         {% else %}Cash{% endif %}
                                     </div>
-                                    <div class="srdc-dropdown__arrow border-theme-primary/40 !mr-0"></div>
+                                    <div class="haf-dropdown__arrow border-theme-primary/40 !mr-0"></div>
                                 </label>
-                                <ul class="srdc-dropdown__items">
-                                    <li class="srdc-dropdown__item text-sm" data-value="cash">Cash</li>
-                                    <li class="srdc-dropdown__item text-sm" data-value="upi">UPI / QR</li>
-                                    <li class="srdc-dropdown__item text-sm" data-value="card">Card</li>
-                                    <li class="srdc-dropdown__item text-sm" data-value="bank_transfer">Bank</li>
+                                <ul class="haf-dropdown__items">
+                                    <li class="haf-dropdown__item text-sm" data-value="cash">Cash</li>
+                                    <li class="haf-dropdown__item text-sm" data-value="upi">UPI / QR</li>
+                                    <li class="haf-dropdown__item text-sm" data-value="card">Card</li>
+                                    <li class="haf-dropdown__item text-sm" data-value="bank_transfer">Bank</li>
                                 </ul>
                             </div>
                         </div>

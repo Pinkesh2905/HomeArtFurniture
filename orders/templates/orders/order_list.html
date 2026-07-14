@@ -1,6 +1,6 @@
 {% extends 'core/base.html' %}
 
-{% block title %}All Orders | SRDC Admin{% endblock %}
+{% block title %}All Orders | Home Art Furniture Admin{% endblock %}
 
 {% block content %}
 <div class="p-4 sm:p-8 max-w-[1440px] mx-auto w-full">
@@ -32,11 +32,11 @@
             
             <div>
                 <label class="block text-xs font-bold text-theme-secondary uppercase tracking-widest mb-2 px-1">Status</label>
-                <div class="srdc-dropdown">
+                <div class="haf-dropdown">
                     <input type="checkbox" id="status-dropdown">
                     <input type="hidden" name="status" value="{{ current_status|default:'' }}">
-                    <label class="srdc-dropdown__face rounded-[12px] transition-colors" for="status-dropdown">
-                        <div class="srdc-dropdown__text text-slate-900 dark:text-white font-bold text-xs sm:text-sm">
+                    <label class="haf-dropdown__face rounded-[12px] transition-colors" for="status-dropdown">
+                        <div class="haf-dropdown__text text-slate-900 dark:text-white font-bold text-xs sm:text-sm">
                             {% if current_status %}
                                 {% for value,label in statuses %}
                                     {% if current_status == value %}{{ label }}{% endif %}
@@ -47,10 +47,10 @@
                         </div>
                         <span class="material-symbols-outlined text-slate-500 dark:text-white/40">expand_more</span>
                     </label>
-                    <ul class="srdc-dropdown__items">
-                        <li class="srdc-dropdown__item" data-value="">All Statuses</li>
+                    <ul class="haf-dropdown__items">
+                        <li class="haf-dropdown__item" data-value="">All Statuses</li>
                         {% for value,label in statuses %}
-                        <li class="srdc-dropdown__item" data-value="{{ value }}">{{ label }}</li>
+                        <li class="haf-dropdown__item" data-value="{{ value }}">{{ label }}</li>
                         {% endfor %}
                     </ul>
                 </div>
@@ -58,17 +58,17 @@
 
             <div>
                 <label class="block text-xs font-bold text-theme-secondary uppercase tracking-widest mb-2 px-1">Delivery Date</label>
-                <div class="srdc-datepicker">
+                <div class="haf-datepicker">
                     <input type="hidden" name="delivery_date" value="{% if delivery_date %}{{ delivery_date|date:'Y-m-d' }}{% endif %}">
-                    <div class="srdc-datepicker__face">
-                        <input type="text" class="srdc-datepicker__text text-xs sm:text-sm" placeholder="dd/mm/yyyy" value="{% if delivery_date %}{{ delivery_date|date:'d/m/Y' }}{% endif %}">
+                    <div class="haf-datepicker__face">
+                        <input type="text" class="haf-datepicker__text text-xs sm:text-sm" placeholder="dd/mm/yyyy" value="{% if delivery_date %}{{ delivery_date|date:'d/m/Y' }}{% endif %}">
                         <span class="material-symbols-outlined text-amber-700 dark:text-secondary text-[20px]">calendar_today</span>
                     </div>
-                    <div class="srdc-datepicker__popup">
-                        <div class="srdc-calendar">
-                            <div class="srdc-calendar__header"><div class="srdc-calendar__header-info"><h3>---</h3><h2>Select Date</h2></div></div>
-                            <div class="srdc-calendar__nav"><button type="button" class="prev-month"><span class="material-symbols-outlined">chevron_left</span></button><div class="srdc-calendar__nav-title">Month Year</div><button type="button" class="next-month"><span class="material-symbols-outlined">chevron_right</span></button></div>
-                            <div class="srdc-calendar__body"><div class="srdc-calendar__days"><div class="srdc-calendar__day-name">S</div><div class="srdc-calendar__day-name">M</div><div class="srdc-calendar__day-name">T</div><div class="srdc-calendar__day-name">W</div><div class="srdc-calendar__day-name">T</div><div class="srdc-calendar__day-name">F</div><div class="srdc-calendar__day-name">S</div></div><div class="srdc-calendar__numbers"></div></div>
+                    <div class="haf-datepicker__popup">
+                        <div class="haf-calendar">
+                            <div class="haf-calendar__header"><div class="haf-calendar__header-info"><h3>---</h3><h2>Select Date</h2></div></div>
+                            <div class="haf-calendar__nav"><button type="button" class="prev-month"><span class="material-symbols-outlined">chevron_left</span></button><div class="haf-calendar__nav-title">Month Year</div><button type="button" class="next-month"><span class="material-symbols-outlined">chevron_right</span></button></div>
+                            <div class="haf-calendar__body"><div class="haf-calendar__days"><div class="haf-calendar__day-name">S</div><div class="haf-calendar__day-name">M</div><div class="haf-calendar__day-name">T</div><div class="haf-calendar__day-name">W</div><div class="haf-calendar__day-name">T</div><div class="haf-calendar__day-name">F</div><div class="haf-calendar__day-name">S</div></div><div class="haf-calendar__numbers"></div></div>
                         </div>
                     </div>
                 </div>
@@ -76,17 +76,17 @@
 
             <div>
                 <label class="block text-xs font-bold text-theme-secondary uppercase tracking-widest mb-2 px-1">Return Date</label>
-                <div class="srdc-datepicker">
+                <div class="haf-datepicker">
                     <input type="hidden" name="return_date" value="{% if return_date %}{{ return_date|date:'Y-m-d' }}{% endif %}">
-                    <div class="srdc-datepicker__face">
-                        <input type="text" class="srdc-datepicker__text text-xs sm:text-sm" placeholder="dd/mm/yyyy" value="{% if return_date %}{{ return_date|date:'d/m/Y' }}{% endif %}">
+                    <div class="haf-datepicker__face">
+                        <input type="text" class="haf-datepicker__text text-xs sm:text-sm" placeholder="dd/mm/yyyy" value="{% if return_date %}{{ return_date|date:'d/m/Y' }}{% endif %}">
                         <span class="material-symbols-outlined text-amber-700 dark:text-secondary text-[20px]">calendar_today</span>
                     </div>
-                    <div class="srdc-datepicker__popup">
-                        <div class="srdc-calendar">
-                            <div class="srdc-calendar__header"><div class="srdc-calendar__header-info"><h3>---</h3><h2>Select Date</h2></div></div>
-                            <div class="srdc-calendar__nav"><button type="button" class="prev-month"><span class="material-symbols-outlined">chevron_left</span></button><div class="srdc-calendar__nav-title">Month Year</div><button type="button" class="next-month"><span class="material-symbols-outlined">chevron_right</span></button></div>
-                            <div class="srdc-calendar__body"><div class="srdc-calendar__days"><div class="srdc-calendar__day-name">S</div><div class="srdc-calendar__day-name">M</div><div class="srdc-calendar__day-name">T</div><div class="srdc-calendar__day-name">W</div><div class="srdc-calendar__day-name">T</div><div class="srdc-calendar__day-name">F</div><div class="srdc-calendar__day-name">S</div></div><div class="srdc-calendar__numbers"></div></div>
+                    <div class="haf-datepicker__popup">
+                        <div class="haf-calendar">
+                            <div class="haf-calendar__header"><div class="haf-calendar__header-info"><h3>---</h3><h2>Select Date</h2></div></div>
+                            <div class="haf-calendar__nav"><button type="button" class="prev-month"><span class="material-symbols-outlined">chevron_left</span></button><div class="haf-calendar__nav-title">Month Year</div><button type="button" class="next-month"><span class="material-symbols-outlined">chevron_right</span></button></div>
+                            <div class="haf-calendar__body"><div class="haf-calendar__days"><div class="haf-calendar__day-name">S</div><div class="haf-calendar__day-name">M</div><div class="haf-calendar__day-name">T</div><div class="haf-calendar__day-name">W</div><div class="haf-calendar__day-name">T</div><div class="haf-calendar__day-name">F</div><div class="haf-calendar__day-name">S</div></div><div class="haf-calendar__numbers"></div></div>
                         </div>
                     </div>
                 </div>
@@ -94,18 +94,18 @@
 
             <div>
                 <label class="block text-xs font-bold text-theme-secondary uppercase tracking-widest mb-2 px-1">Red Flag</label>
-                <div class="srdc-dropdown">
+                <div class="haf-dropdown">
                     <input type="checkbox" id="redflag-dropdown">
                     <input type="hidden" name="red_flag" value="{{ red_flag|default:'' }}">
-                    <label class="srdc-dropdown__face rounded-[12px] transition-colors {% if red_flag == '1' %}bg-red-500/10 border-red-500/30 text-red-400{% endif %}" for="redflag-dropdown">
-                        <div class="srdc-dropdown__text {% if red_flag == '1' %}text-red-400{% else %}text-slate-900 dark:text-white{% endif %} font-bold text-xs sm:text-sm">
+                    <label class="haf-dropdown__face rounded-[12px] transition-colors {% if red_flag == '1' %}bg-red-500/10 border-red-500/30 text-red-400{% endif %}" for="redflag-dropdown">
+                        <div class="haf-dropdown__text {% if red_flag == '1' %}text-red-400{% else %}text-slate-900 dark:text-white{% endif %} font-bold text-xs sm:text-sm">
                             {% if red_flag == '1' %}🚩 Flagged{% else %}Any{% endif %}
                         </div>
                         <span class="material-symbols-outlined {% if red_flag == '1' %}text-red-400{% else %}text-slate-500 dark:text-white/40{% endif %}">expand_more</span>
                     </label>
-                    <ul class="srdc-dropdown__items">
-                        <li class="srdc-dropdown__item" data-value="">Any</li>
-                        <li class="srdc-dropdown__item" data-value="1">🚩 Flagged</li>
+                    <ul class="haf-dropdown__items">
+                        <li class="haf-dropdown__item" data-value="">Any</li>
+                        <li class="haf-dropdown__item" data-value="1">🚩 Flagged</li>
                     </ul>
                 </div>
             </div>
@@ -174,20 +174,20 @@
                                            placeholder="Amt" id="pay-amount-{{ order.id }}">
                                     
                                     <!-- Custom Payment Method Dropdown aligned with orders/num -->
-                                    <div class="srdc-dropdown w-20 z-10">
+                                    <div class="haf-dropdown w-20 z-10">
                                         <input type="checkbox" id="pay-method-checkbox-{{ order.id }}">
                                         <input type="hidden" id="pay-method-{{ order.id }}" value="cash">
-                                        <label class="srdc-dropdown__face rounded-[8px] hover:bg-theme-input/80 transition-colors !h-[32px] !px-2 !py-1" for="pay-method-checkbox-{{ order.id }}">
-                                            <div class="srdc-dropdown__text text-theme-primary font-bold text-xs truncate" id="pay-method-label-{{ order.id }}">
+                                        <label class="haf-dropdown__face rounded-[8px] hover:bg-theme-input/80 transition-colors !h-[32px] !px-2 !py-1" for="pay-method-checkbox-{{ order.id }}">
+                                            <div class="haf-dropdown__text text-theme-primary font-bold text-xs truncate" id="pay-method-label-{{ order.id }}">
                                                 Cash
                                             </div>
                                             <span class="material-symbols-outlined text-[14px] text-slate-500 dark:text-white/30">expand_more</span>
                                         </label>
-                                        <ul class="srdc-dropdown__items !w-24">
-                                            <li class="srdc-dropdown__item text-xs" data-value="cash">Cash</li>
-                                            <li class="srdc-dropdown__item text-xs" data-value="upi">UPI</li>
-                                            <li class="srdc-dropdown__item text-xs" data-value="card">Card</li>
-                                            <li class="srdc-dropdown__item text-xs" data-value="bank_transfer">Bank</li>
+                                        <ul class="haf-dropdown__items !w-24">
+                                            <li class="haf-dropdown__item text-xs" data-value="cash">Cash</li>
+                                            <li class="haf-dropdown__item text-xs" data-value="upi">UPI</li>
+                                            <li class="haf-dropdown__item text-xs" data-value="card">Card</li>
+                                            <li class="haf-dropdown__item text-xs" data-value="bank_transfer">Bank</li>
                                         </ul>
                                     </div>
 
@@ -586,12 +586,12 @@ document.addEventListener('click', function(event) {
     
     // Check if we clicked outside to close native-designed dropdowns
     const checkedPayCbs = document.querySelectorAll('input[id^="pay-method-checkbox-"]:checked');
-    if (checkedPayCbs.length > 0 && !event.target.closest('.srdc-dropdown')) {
+    if (checkedPayCbs.length > 0 && !event.target.closest('.haf-dropdown')) {
         closedAny = true;
     }
     
     // Remove active row stacking on close
-    if (closedAny || !event.target.closest('.srdc-dropdown') || event.target.closest('.srdc-dropdown__item')) {
+    if (closedAny || !event.target.closest('.haf-dropdown') || event.target.closest('.haf-dropdown__item')) {
         document.querySelectorAll('table tbody tr').forEach(r => {
             r.classList.remove('relative', 'z-50');
         });
@@ -733,9 +733,9 @@ function submitQuickPay(orderId) {
             // Reset custom dropdown value and label back to Cash
             if (methodInput) {
                 methodInput.value = 'cash';
-                const dropdown = methodInput.closest('.srdc-dropdown');
+                const dropdown = methodInput.closest('.haf-dropdown');
                 if (dropdown) {
-                    dropdown.querySelectorAll('.srdc-dropdown__item').forEach(i => {
+                    dropdown.querySelectorAll('.haf-dropdown__item').forEach(i => {
                         if (i.getAttribute('data-value') === 'cash') {
                             i.classList.add('bg-secondary/10', 'font-bold');
                         } else {

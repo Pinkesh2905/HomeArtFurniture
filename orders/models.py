@@ -76,7 +76,7 @@ class Order(models.Model):
         if self.order_number and not self.order_number.startswith('TMP-'):
             return
         date_value = self.booking_date or timezone.localdate()
-        self.order_number = f"SRD-{date_value:%Y%m%d}-{self.pk:03d}"
+        self.order_number = f"HAF-{date_value:%Y%m%d}-{self.pk:03d}"
         self.save(update_fields=['order_number'])
 
     def __str__(self):

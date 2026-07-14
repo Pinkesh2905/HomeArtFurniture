@@ -41,7 +41,7 @@ def order_create(request):
     
     # Generate temporary order number for display (will be finalized on save)
     today = timezone.localdate().strftime('%Y%m%d')
-    mock_order_id = f"SRD-{today}-auto"
+    mock_order_id = f"HAF-{today}-auto"
 
     from measurements.models import Measurement
     # Build initial list of items

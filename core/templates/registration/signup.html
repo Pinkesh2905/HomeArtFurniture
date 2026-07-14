@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>{% if is_first_setup %}Setup Account{% else %}Add Staff Member{% endif %} | Shree Ram Dulha Collections</title>
+    <title>{% if is_first_setup %}Setup Account{% else %}Add Staff Member{% endif %} | Home Art Furniture</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=Noto+Serif:wght@500;600;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -93,18 +93,18 @@
             100% { transform: translateX(100%); }
         }
         /* Role toggle replaced with premium dropdown */
-        .srdc-dropdown {
+        .haf-dropdown {
             position: relative;
             width: 100%;
-            filter: url(#srdc-goo);
+            filter: url(#haf-goo);
         }
-        .srdc-dropdown__face, .srdc-dropdown__items {
+        .haf-dropdown__face, .haf-dropdown__items {
             background-color: #fff;
             padding: 14px 20px;
             border-radius: 12px;
             border: 2px solid #e2bfb9;
         }
-        .srdc-dropdown__face {
+        .haf-dropdown__face {
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -112,14 +112,14 @@
             user-select: none;
             transition: border-color 0.3s;
         }
-        .srdc-dropdown__face:hover { border-color: #735c00; }
-        .srdc-dropdown__text {
+        .haf-dropdown__face:hover { border-color: #735c00; }
+        .haf-dropdown__text {
             font-family: 'Manrope', sans-serif;
             font-size: 14px;
             font-weight: 600;
             color: #1b1c1b;
         }
-        .srdc-dropdown__arrow {
+        .haf-dropdown__arrow {
             width: 10px; height: 10px;
             border-right: 2px solid #735c00;
             border-bottom: 2px solid #735c00;
@@ -127,7 +127,7 @@
             margin-top: -5px;
             transition: transform 0.3s;
         }
-        .srdc-dropdown__items {
+        .haf-dropdown__items {
             position: absolute;
             top: 100%; left: 0; width: 100%;
             margin-top: 10px;
@@ -139,7 +139,7 @@
             z-index: 50;
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
         }
-        .srdc-dropdown__item {
+        .haf-dropdown__item {
             padding: 12px 20px;
             cursor: pointer;
             font-family: 'Manrope', sans-serif;
@@ -148,23 +148,23 @@
             border-radius: 8px;
             transition: background 0.2s, color 0.2s;
         }
-        .srdc-dropdown__item:hover {
+        .haf-dropdown__item:hover {
             background: rgba(115, 92, 0, 0.05);
             color: #735c00;
         }
         input#role-dropdown-check { display: none; }
-        input#role-dropdown-check:checked ~ .srdc-dropdown__items {
+        input#role-dropdown-check:checked ~ .haf-dropdown__items {
             opacity: 1;
             visibility: visible;
             transform: translateY(0);
         }
-        input#role-dropdown-check:checked ~ .srdc-dropdown__face .srdc-dropdown__arrow {
+        input#role-dropdown-check:checked ~ .haf-dropdown__face .haf-dropdown__arrow {
             transform: rotate(-135deg);
             margin-top: 2px;
         }
     </style>
     <svg style="position: absolute; width: 0; height: 0;" aria-hidden="true" focusable="false">
-        <filter id="srdc-goo">
+        <filter id="haf-goo">
             <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
             <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
             <feBlend in="SourceGraphic" in2="goo" />
@@ -179,14 +179,14 @@
         <!-- ═══ LEFT: Hero Image ═══ -->
         <div class="hidden md:flex w-1/2 relative bg-surface-container-low">
             <img
-                alt="Traditional Indian Wedding Attire — Shree Ram Dulha Collections"
+                alt="Home Art Furniture"
                 class="absolute inset-0 w-full h-full object-cover"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnbw7padM4qnEMO9OFUXKd76dbXMXYIXsfpYDKStPg07pAl3ZtLFV8MEMsxeS_yR2ZZVgyV_ZrIhe7rxh9doYUxSqtoz9bCfbuKCDTwpev1csOgVGaGlvayU_6JMtiaYLaUIwos1AwvF48tCAq3Uo6B-0ZkpZaaI1gKkXSdWyNTyLgFTuzuET6kUnxG6NHxEIIsWYiU9ApKpWHJVDirfUd-zaErMG6qwMGd0cpvulA-ISuVgK0FnEpbsg-0-0HKX3K8uMH2bh63KtY"
             >
             <div class="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent"></div>
             <div class="absolute inset-0 bg-gradient-to-r from-primary/60 to-transparent"></div>
             <div class="relative z-10 flex flex-col justify-end p-16 text-on-primary">
-                <h1 class="font-display-md text-display-md text-on-primary mb-4">Shree Ram Dulha Collections</h1>
+                <h1 class="font-display-md text-display-md text-on-primary mb-4">Home Art Furniture</h1>
                 <p class="font-headline-md text-headline-md text-secondary-fixed opacity-90">
                     {% if is_first_setup %}Begin Your Journey{% else %}Expand Your Team{% endif %}
                 </p>
@@ -199,7 +199,7 @@
 
                 <!-- Mobile brand anchor -->
                 <div class="md:hidden text-center mb-10">
-                    <h1 class="font-display-md text-headline-lg text-primary mb-2">Shree Ram Dulha Collections</h1>
+                    <h1 class="font-display-md text-headline-lg text-primary mb-2">Home Art Furniture</h1>
                     <p class="font-body-lg text-body-lg text-on-surface-variant">Create your account</p>
                 </div>
 
@@ -266,18 +266,18 @@
                     <!-- Role -->
                     <div>
                         <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-3">Role</p>
-                        <div class="srdc-dropdown">
+                        <div class="haf-dropdown">
                             <input type="checkbox" id="role-dropdown-check">
                             <input type="hidden" name="role" id="id_role" value="{% if is_first_setup or form_data.role == 'owner' %}owner{% else %}staff{% endif %}">
-                            <label class="srdc-dropdown__face" for="role-dropdown-check">
-                                <div class="srdc-dropdown__text">
+                            <label class="haf-dropdown__face" for="role-dropdown-check">
+                                <div class="haf-dropdown__text">
                                     {% if is_first_setup or form_data.role == 'owner' %}Owner (Admin Access){% else %}Staff (Standard Access){% endif %}
                                 </div>
-                                <div class="srdc-dropdown__arrow"></div>
+                                <div class="haf-dropdown__arrow"></div>
                             </label>
-                            <ul class="srdc-dropdown__items">
-                                <li class="srdc-dropdown__item" data-value="owner">Owner (Admin Access)</li>
-                                <li class="srdc-dropdown__item" data-value="staff">Staff (Standard Access)</li>
+                            <ul class="haf-dropdown__items">
+                                <li class="haf-dropdown__item" data-value="owner">Owner (Admin Access)</li>
+                                <li class="haf-dropdown__item" data-value="staff">Staff (Standard Access)</li>
                             </ul>
                         </div>
                         <p class="font-label-sm text-[11px] text-on-surface-variant mt-2 italic">
@@ -383,11 +383,11 @@
 
     // Custom dropdown logic
     function initCustomDropdowns() {
-        const dropdowns = document.querySelectorAll('.srdc-dropdown');
+        const dropdowns = document.querySelectorAll('.haf-dropdown');
         dropdowns.forEach(dropdown => {
-            const items = dropdown.querySelectorAll('.srdc-dropdown__item');
+            const items = dropdown.querySelectorAll('.haf-dropdown__item');
             const hiddenInput = dropdown.querySelector('input[type="hidden"]');
-            const faceText = dropdown.querySelector('.srdc-dropdown__text');
+            const faceText = dropdown.querySelector('.haf-dropdown__text');
             const checkbox = dropdown.querySelector('input[type="checkbox"]');
             
             items.forEach(item => {

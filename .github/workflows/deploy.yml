@@ -20,7 +20,7 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /home/ubuntu/SRDC
+            cd /home/ubuntu/HomeArtFurniture
             # Force pull latest changes from GitHub (resetting local changes/untracked files if necessary)
             git fetch origin main
             git reset --hard origin/main

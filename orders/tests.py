@@ -58,7 +58,7 @@ class OrderServiceTests(TestCase):
         self.assertEqual(order.final_amount, Decimal('900.00'))
         self.assertEqual(order.advance_paid, Decimal('200.00'))
         self.assertEqual(order.grand_total, Decimal('700.00'))
-        self.assertRegex(order.order_number, r'^SRD-\d{8}-\d{3}$')
+        self.assertRegex(order.order_number, r'^HAF-\d{8}-\d{3}$')
 
     def test_discount_and_advance_cannot_exceed_order_value(self):
         from django.core.exceptions import ValidationError
@@ -109,7 +109,7 @@ class OrderViewTests(TestCase):
         self.client.force_login(self.user)
         salesperson = Salesperson.objects.create(full_name='Meera Shah', employee_code='SP-002')
         order = Order.objects.create(
-            order_number='SRD-20260503-010',
+            order_number='HAF-20260503-010',
             customer=self.customer,
             salesperson=salesperson,
             booking_date='2026-05-03',
@@ -126,7 +126,7 @@ class OrderViewTests(TestCase):
     def test_order_detail_rejects_payment_above_balance(self):
         self.client.force_login(self.user)
         order = Order.objects.create(
-            order_number='SRD-20260503-001',
+            order_number='HAF-20260503-001',
             customer=self.customer,
             booking_date='2026-05-03',
             delivery_date='2026-05-10',
@@ -142,14 +142,14 @@ class OrderViewTests(TestCase):
     def test_order_list_filters_by_exact_delivery_and_return_dates(self):
         self.client.force_login(self.user)
         matching = Order.objects.create(
-            order_number='SRD-20260503-001',
+            order_number='HAF-20260503-001',
             customer=self.customer,
             booking_date='2026-05-03',
             delivery_date='2026-05-10',
             return_date='2026-05-12',
         )
         Order.objects.create(
-            order_number='SRD-20260503-002',
+            order_number='HAF-20260503-002',
             customer=self.customer,
             booking_date='2026-05-03',
             delivery_date='2026-05-11',
@@ -162,19 +162,19 @@ class OrderViewTests(TestCase):
         })
 
         self.assertContains(response, matching.order_number)
-        self.assertNotContains(response, 'SRD-20260503-002')
+        self.assertNotContains(response, 'HAF-20260503-002')
 
     def test_order_list_print_uses_same_filters(self):
         self.client.force_login(self.user)
         matching = Order.objects.create(
-            order_number='SRD-20260503-003',
+            order_number='HAF-20260503-003',
             customer=self.customer,
             booking_date='2026-05-03',
             delivery_date='2026-05-10',
             grand_total=Decimal('1200.00'),
         )
         Order.objects.create(
-            order_number='SRD-20260503-004',
+            order_number='HAF-20260503-004',
             customer=self.customer,
             booking_date='2026-05-03',
             delivery_date='2026-05-11',
@@ -187,12 +187,12 @@ class OrderViewTests(TestCase):
         self.assertContains(response, 'Filtered Orders & Bills List')
         self.assertContains(response, matching.order_number)
         self.assertContains(response, 'Rs 1200.00')
-        self.assertNotContains(response, 'SRD-20260503-004')
+        self.assertNotContains(response, 'HAF-20260503-004')
 
     def test_api_update_order_shortcut_status_success(self):
         self.client.force_login(self.user)
         order = Order.objects.create(
-            order_number='SRD-20260503-100',
+            order_number='HAF-20260503-100',
             customer=self.customer,
             booking_date='2026-05-03',
             delivery_date='2026-05-10',
@@ -211,7 +211,7 @@ class OrderViewTests(TestCase):
     def test_api_update_order_shortcut_payment_success(self):
         self.client.force_login(self.user)
         order = Order.objects.create(
-            order_number='SRD-20260503-101',
+            order_number='HAF-20260503-101',
             customer=self.customer,
             booking_date='2026-05-03',
             delivery_date='2026-05-10',
@@ -235,7 +235,7 @@ class OrderViewTests(TestCase):
     def test_api_update_order_shortcut_validation_error(self):
         self.client.force_login(self.user)
         order = Order.objects.create(
-            order_number='SRD-20260503-102',
+            order_number='HAF-20260503-102',
             customer=self.customer,
             booking_date='2026-05-03',
             delivery_date='2026-05-10',
@@ -344,7 +344,7 @@ class OrderViewTests(TestCase):
         )
         
         order = Order.objects.create(
-            order_number='SRD-test-edit',
+            order_number='HAF-test-edit',
             customer=self.customer,
             booking_date='2026-05-03',
             delivery_date='2026-05-10',
