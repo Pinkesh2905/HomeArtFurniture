@@ -1,0 +1,416 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Dashboard | SRDC Admin{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+    .score-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(var(--glass-blur));
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+        padding: 20px 24px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .score-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--card-hover-shadow);
+    }
+    .score-card__label {
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+    }
+    .score-card__value {
+        font-family: 'Outfit', sans-serif;
+        font-size: 28px;
+        font-weight: 900;
+        color: var(--text-primary);
+        line-height: 1.1;
+        letter-spacing: -0.03em;
+    }
+    .score-card__sub {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--text-amber-700 dark:text-secondary);
+        margin-top: 4px;
+    }
+    .chart-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(var(--glass-blur));
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        padding: 28px;
+    }
+    .chart-card__title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 20px;
+    }
+    .bottom-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(var(--glass-blur));
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        padding: 24px;
+    }
+    .bottom-card__title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 20px;
+    }
+    .movement-label { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px; margin-top: 16px; }
+    .movement-label:first-child { margin-top: 0; }
+    .movement-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 13px; }
+    .movement-row span:last-child { font-weight: 700; }
+    .cust-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(122,31,24,0.1); font-size: 13px; }
+    .cust-row:last-child { border-bottom: none; }
+    .cust-row .amount { font-weight: 700; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="px-4 py-6 sm:p-8 max-w-[1440px] mx-auto w-full">
+
+    <!-- ═══ HEADER ═══ -->
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-8 gap-4">
+        <div>
+            <h2 class="font-h1 text-xl sm:text-2xl font-black text-theme-primary leading-tight">Dashboard</h2>
+            <p class="text-xs text-theme-secondary mt-1">Business overview</p>
+        </div>
+        <div class="flex items-center gap-3 flex-wrap">
+            <!-- Filter Tabs -->
+            <div class="flex bg-theme-input p-1 rounded-[12px] border border-theme-input h-[38px] backdrop-blur-md">
+                <a href="?filter=today" class="px-4 h-full flex items-center text-xs font-bold rounded-[8px] transition-all {% if time_filter == 'today' %}bg-amber-700 dark:bg-secondary text-white !important{% else %}text-theme-secondary hover:text-theme-primary{% endif %}">Today</a>
+                <a href="?filter=week" class="px-4 h-full flex items-center text-xs font-bold rounded-[8px] transition-all {% if time_filter == 'week' %}bg-amber-700 dark:bg-secondary text-white !important{% else %}text-theme-secondary hover:text-theme-primary{% endif %}">7 Days</a>
+                <a href="?filter=month" class="px-4 h-full flex items-center text-xs font-bold rounded-[8px] transition-all {% if time_filter == 'month' %}bg-amber-700 dark:bg-secondary text-white !important{% else %}text-theme-secondary hover:text-theme-primary{% endif %}">30 Days</a>
+                <a href="?filter=all" class="px-4 h-full flex items-center text-xs font-bold rounded-[8px] transition-all {% if time_filter == 'all' %}bg-amber-700 dark:bg-secondary text-white !important{% else %}text-theme-secondary hover:text-theme-primary{% endif %}">All Time</a>
+            </div>
+            <a href="{% url 'measurement_profile' %}" class="btn-premium btn-premium--gold !py-0 h-[38px] px-5 !rounded-[10px] flex items-center justify-center">
+                <span class="btn-premium__label flex items-center gap-2 text-xs font-bold">
+                    <span class="material-symbols-outlined text-base">add</span> New Order
+                </span>
+            </a>
+        </div>
+    </div>
+
+    <!-- ═══ SCORECARD ROW 1 ═══ -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div class="score-card">
+            <div class="score-card__label">Total Orders</div>
+            <div class="score-card__value">{{ total_orders }}</div>
+            <div class="score-card__sub">Bills created</div>
+        </div>
+        <div class="score-card">
+            <div class="score-card__label">Total Revenue</div>
+            <div class="score-card__value">{{ total_revenue_fmt }}</div>
+            <div class="score-card__sub">Net billing</div>
+        </div>
+        <div class="score-card">
+            <div class="score-card__label">Avg Order Value</div>
+            <div class="score-card__value">{{ avg_order_value_fmt }}</div>
+            <div class="score-card__sub">Per bill</div>
+        </div>
+        <div class="score-card">
+            <div class="score-card__label">Top Product</div>
+            <div class="score-card__value text-[20px]">{{ top_product_name }}</div>
+            <div class="score-card__sub">{{ top_product_units }} units</div>
+        </div>
+    </div>
+
+    <!-- ═══ SCORECARD ROW 2 ═══ -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="score-card">
+            <div class="score-card__label">New Customers</div>
+            <div class="score-card__value">{{ new_customers }}</div>
+            <div class="score-card__sub">{{ repeat_customers }} repeat</div>
+        </div>
+        <div class="score-card">
+            <div class="score-card__label">Top Rev Product</div>
+            <div class="score-card__value text-[20px]">{{ top_rev_product_name }}</div>
+            <div class="score-card__sub">{{ top_rev_product_amt }}</div>
+        </div>
+        <div class="score-card">
+            <div class="score-card__label">Advance Received</div>
+            <div class="score-card__value">{{ total_advance_fmt }}</div>
+                <div class="score-card__sub flex gap-8 mt-4">
+                    <div class="cursor-pointer hover:bg-theme-input/20 p-2 -m-2 rounded-lg transition-all group" onclick="showAdvanceDetails('cash')">
+                        <span class="text-[10px] uppercase tracking-widest text-theme-secondary block mb-1 group-hover:text-emerald-500 transition-colors">Cash</span>
+                        <span class="text-emerald-500 dark:text-emerald-400 font-black text-base">{{ cash_adv_fmt }}</span>
+                    </div>
+                    <div class="cursor-pointer hover:bg-theme-input/20 p-2 -m-2 rounded-lg transition-all group" onclick="showAdvanceDetails('online')">
+                        <span class="text-[10px] uppercase tracking-widest text-theme-secondary block mb-1 group-hover:text-blue-500 transition-colors">Online</span>
+                        <span class="text-blue-500 dark:text-blue-400 font-black text-base">{{ online_adv_fmt }}</span>
+                    </div>
+                </div>
+        </div>
+        <div class="score-card cursor-pointer hover:bg-theme-input/10 transition-all group" onclick="showAdvanceDetails('pending')">
+            <div class="score-card__label group-hover:text-red-500 transition-colors">Pending Payments</div>
+            <div class="score-card__value text-red-500 dark:text-red-400">{{ total_pending_fmt }}</div>
+            <div class="score-card__sub group-hover:text-theme-primary">Avg {{ avg_pending_fmt }}</div>
+        </div>
+    </div>
+
+    <!-- ═══ CHARTS ROW ═══ -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Revenue Trend -->
+        <div class="chart-card">
+            <div class="chart-card__title">Revenue trend</div>
+            <div style="height: 260px;">
+                <canvas id="revenueTrendChart"></canvas>
+            </div>
+        </div>
+        <!-- Product Performance -->
+        <div class="chart-card">
+            <div class="chart-card__title">Product performance</div>
+            <div style="height: 260px;">
+                <canvas id="productPerfChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ BOTTOM ROW ═══ -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- Top Customers -->
+        <div class="bottom-card">
+            <div class="bottom-card__title">Top customers</div>
+            {% for cust in top_customers %}
+            <div class="cust-row">
+                <span class="name text-theme-secondary">{{ forloop.counter }}.&nbsp; {{ cust.name }}</span>
+                <span class="amount text-theme-primary">{{ cust.amount }}</span>
+            </div>
+            {% empty %}
+            <p class="text-sm text-theme-muted italic text-center py-4">No data yet</p>
+            {% endfor %}
+        </div>
+
+        <!-- Product Movement -->
+        <div class="bottom-card">
+            <div class="bottom-card__title">Product movement</div>
+            <div class="movement-label">Fast Moving</div>
+            {% for p in fast_moving %}
+            <div class="movement-row">
+                <span class="text-theme-secondary">{{ p.description }}</span>
+                <span class="text-emerald-400">{{ p.qty }} units</span>
+            </div>
+            {% empty %}
+            <p class="text-xs text-theme-muted italic">No data</p>
+            {% endfor %}
+            <div class="movement-label">Slow Moving</div>
+            {% for p in slow_moving %}
+            <div class="movement-row">
+                <span class="text-theme-secondary">{{ p.description }}</span>
+                <span class="text-red-400">{{ p.qty }} units</span>
+            </div>
+            {% empty %}
+            <p class="text-xs text-theme-muted italic">No data</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Advance Details Modal -->
+<div id="advanceModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300">
+    <div class="bg-theme-glass backdrop-blur-2xl rounded-[24px] shadow-2xl w-full max-w-lg transform scale-95 opacity-0 transition-all duration-300 overflow-hidden border border-theme-input" id="advanceModalCard">
+        <div class="bg-theme-input p-6 border-b border-theme-input flex justify-between items-center">
+            <div>
+                <h3 class="font-serif text-xl font-bold text-theme-primary" id="advanceModalTitle">Payment Details</h3>
+                <p class="text-[10px] text-theme-secondary font-black uppercase tracking-[0.2em] mt-1" id="advanceModalSubtitle">Bill-wise breakdown</p>
+            </div>
+            <button onclick="closeAdvanceModal()" class="text-theme-muted hover:text-theme-primary p-2 rounded-full hover:bg-theme-input/50 transition-all">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="p-6 max-h-[60vh] overflow-y-auto custom-scrollbar bg-theme-input/20">
+            <div id="advanceModalContent" class="space-y-3">
+                <!-- Content injected here -->
+            </div>
+        </div>
+        <div class="p-4 bg-theme-input border-t border-theme-input flex justify-end">
+            <button onclick="closeAdvanceModal()" class="px-6 py-2.5 rounded-xl bg-theme-input text-theme-secondary font-black text-[10px] uppercase tracking-widest border border-theme-input hover:text-theme-primary transition-all">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let revenueTrendChart, productPerfChart;
+
+    // ─── Advance Details Logic ───
+    const cashOrders = {{ cash_orders_json|safe }};
+    const onlineOrders = {{ online_orders_json|safe }};
+    const pendingOrders = {{ pending_orders_json|safe }};
+
+    window.showAdvanceDetails = function(type) {
+        const modal = document.getElementById('advanceModal');
+        const card = document.getElementById('advanceModalCard');
+        const title = document.getElementById('advanceModalTitle');
+        const content = document.getElementById('advanceModalContent');
+        
+        let data, displayTitle;
+        if (type === 'cash') {
+            data = cashOrders;
+            displayTitle = 'Cash Advance Payments';
+        } else if (type === 'online') {
+            data = onlineOrders;
+            displayTitle = 'Online Advance Payments';
+        } else {
+            data = pendingOrders;
+            displayTitle = 'Pending Balances';
+        }
+        
+        title.textContent = displayTitle;
+        
+        if (data.length === 0) {
+            content.innerHTML = '<p class="text-center text-theme-muted py-8 italic">No entries found for this period.</p>';
+        } else {
+            let html = '';
+            data.forEach(item => {
+                html += `
+                    <div class="flex items-center justify-between p-4 bg-theme-input/40 rounded-xl border border-theme-input/50 hover:border-theme-primary/30 transition-all">
+                        <div>
+                            <p class="text-[10px] font-black text-theme-secondary uppercase tracking-widest">${item.id}</p>
+                            <p class="font-bold text-theme-primary mt-0.5">${item.name}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-black text-theme-primary text-base">₹${item.amount.toLocaleString('en-IN')}</p>
+                        </div>
+                    </div>
+                `;
+            });
+            content.innerHTML = html;
+        }
+
+        modal.classList.remove('pointer-events-none');
+        modal.classList.add('opacity-100');
+        card.classList.remove('scale-95', 'opacity-0');
+        card.classList.add('scale-100', 'opacity-100');
+    };
+
+    window.closeAdvanceModal = function() {
+        const modal = document.getElementById('advanceModal');
+        const card = document.getElementById('advanceModalCard');
+        modal.classList.add('pointer-events-none');
+        modal.classList.remove('opacity-100');
+        card.classList.add('scale-95', 'opacity-0');
+        card.classList.remove('scale-100', 'opacity-100');
+    };
+
+    // Close on backdrop click
+    document.getElementById('advanceModal').onclick = function(e) {
+        if (e.target === this) window.closeAdvanceModal();
+    };
+
+    function getChartColors() {
+        const isDark = document.body.classList.contains('dark-mode');
+        return {
+            text: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(26,26,46,0.5)',
+            grid: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+            tooltipBg: isDark ? 'rgba(10,5,5,0.9)' : 'rgba(255,255,255,0.9)',
+            tooltipText: isDark ? '#fff' : '#1a1a2e',
+            tooltipBorder: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
+        };
+    }
+
+    function initCharts() {
+        const colors = getChartColors();
+        Chart.defaults.color = colors.text;
+        Chart.defaults.borderColor = colors.grid;
+        Chart.defaults.font.family = "'Inter', sans-serif";
+
+        // ─── Revenue Trend ───
+        const trendLabels = {{ trend_labels_json|safe }};
+        const trendData = {{ trend_data_json|safe }};
+        const trendCtx = document.getElementById('revenueTrendChart').getContext('2d');
+        const trendGrad = trendCtx.createLinearGradient(0, 0, 0, 260);
+        trendGrad.addColorStop(0, 'rgba(79, 140, 255, 0.25)');
+        trendGrad.addColorStop(1, 'rgba(79, 140, 255, 0)');
+
+        if (revenueTrendChart) revenueTrendChart.destroy();
+        revenueTrendChart = new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: trendLabels,
+                datasets: [{
+                    data: trendData,
+                    borderColor: '#4f8cff',
+                    backgroundColor: trendGrad,
+                    borderWidth: 2.5,
+                    fill: true,
+                    tension: 0.35,
+                    pointRadius: 0,
+                    pointHitRadius: 20,
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: colors.tooltipText,
+                    pointHoverBorderColor: '#4f8cff',
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false },
+                    tooltip: {
+                        backgroundColor: colors.tooltipBg, titleColor: colors.tooltipText, bodyColor: colors.tooltipText,
+                        borderColor: colors.tooltipBorder, borderWidth: 1, cornerRadius: 8, padding: 12,
+                        callbacks: { label: ctx => '₹' + ctx.parsed.y.toLocaleString('en-IN') }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { maxTicksLimit: 7, font: { size: 10 } } },
+                    y: { grid: { color: colors.grid }, ticks: {
+                        font: { size: 10 },
+                        callback: v => v >= 1000 ? '₹' + (v/1000) + 'K' : '₹' + v
+                    }}
+                }
+            }
+        });
+
+        // ─── Product Performance ───
+        const prodLabels = {{ prod_labels_json|safe }};
+        const prodQtys = {{ prod_qtys_json|safe }};
+        if (productPerfChart) productPerfChart.destroy();
+        productPerfChart = new Chart(document.getElementById('productPerfChart'), {
+            type: 'bar',
+            data: {
+                labels: prodLabels,
+                datasets: [{
+                    data: prodQtys,
+                    backgroundColor: '#4f8cff',
+                    borderRadius: 6, barPercentage: 0.6,
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false },
+                    tooltip: { backgroundColor: colors.tooltipBg, titleColor: colors.tooltipText, bodyColor: colors.tooltipText, borderColor: colors.tooltipBorder, borderWidth: 1, cornerRadius: 8, padding: 12 }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 10 }, maxRotation: 45, minRotation: 25 } },
+                    y: { grid: { color: colors.grid }, ticks: { font: { size: 10 }, stepSize: 1 }, beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    initCharts();
+
+    // Listen for theme changes to update charts
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.attributeName === 'class') {
+                initCharts();
+            }
+        });
+    });
+    observer.observe(document.body, { attributes: true });
+});
+</script>
+{% endblock %}
