@@ -2,7 +2,7 @@
 set -e
 
 # Configuration: allow overriding via environment variables or prompt interactively
-REPO_URL="${REPO_URL:-https://github.com/pinkesh029/HomeArtFurniture.git}"
+REPO_URL="${REPO_URL:-https://github.com/Pinkesh2905/HomeArtFurniture.git}"
 
 if [ -z "$SERVER_DOMAIN" ]; then
     read -p "Enter server domain or public IP (e.g. homeartfurniture.store or 1.2.3.4): " SERVER_DOMAIN
