@@ -17,7 +17,7 @@
             <a href="{% url 'measurement_profile' %}?customer_id={{ customer.id }}" class="btn-premium btn-premium--gold w-full sm:w-auto">
                 <span class="btn-premium__label flex items-center gap-2">
                     <span class="material-symbols-outlined text-[20px]">straighten</span>
-                    New Order / Measure
+                    New Order / Dimensions
                 </span>
             </a>
         </div>
@@ -46,14 +46,14 @@
                 </div>
             </div>
 
-            <!-- Saved Measurements -->
+            <!-- Saved Dimensions -->
             <div class="glass-panel p-6">
-                <h3 class="font-serif text-lg font-semibold text-theme-primary mb-4">Saved Measurements</h3>
+                <h3 class="font-serif text-lg font-semibold text-theme-primary mb-4">Saved Dimensions</h3>
                 <div class="space-y-3">
                     {% for m in measurements %}
                     <div class="p-3 bg-theme-input border border-theme-input rounded-[12px] hover:bg-theme-input/80 transition-colors">
                         <div class="flex justify-between items-center mb-1">
-                            <span class="font-bold text-sm text-theme-primary capitalize">{{ m.garment_category }}</span>
+                            <span class="font-bold text-sm text-theme-primary capitalize">{{ m.furniture_type }}</span>
                             <span class="text-xs text-theme-muted">{{ m.updated_at|date:"M d, Y" }}</span>
                         </div>
                         <p class="text-xs text-theme-secondary truncate">
@@ -63,7 +63,7 @@
                         </p>
                     </div>
                     {% empty %}
-                    <p class="text-sm text-theme-muted italic">No measurements saved yet.</p>
+                    <p class="text-sm text-theme-muted italic">No dimensions saved yet.</p>
                     {% endfor %}
                 </div>
             </div>

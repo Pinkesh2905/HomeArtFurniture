@@ -7,8 +7,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 
-from measurements.models import Measurement, get_all_garment_categories
-from salesperson.models import Salesperson
+from measurements.models import FurnitureDimension, get_all_furniture_types
 from .models import Order, OrderItem, OrderStatus, OrderType, PaymentMethod
 
 
@@ -28,14 +27,14 @@ def money(value, default='0'):
 
 
 def parse_items(post_data, customer):
-    categories = post_data.getlist('item_garment_category[]')
+    categories = post_data.getlist('item_furniture_type[]')
     descriptions = post_data.getlist('item_description[]')
     qtys = post_data.getlist('item_qty[]')
     rates = post_data.getlist('item_rate[]')
-    measurement_ids = post_data.getlist('item_measurement_id[]')
+    dimension_ids = post_data.getlist('item_FurnitureDimension_id[]')
     items = []
-    # Track measurement IDs already assigned in this order to prevent sharing
-    used_measurement_ids = set()
+    # Track dimension IDs already assigned in this order to prevent sharing
+    used_dimension_ids = set()
 
     for index, description in enumerate(descriptions):
         description = (description or '').strip()
@@ -53,42 +52,42 @@ def parse_items(post_data, customer):
         if rate < 0:
             raise ValidationError('Item rate cannot be negative.')
 
-        garment_category = categories[index] if index < len(categories) else ''
-        all_categories = dict(get_all_garment_categories()).keys()
-        if garment_category and garment_category not in all_categories:
+        furniture_type = categories[index] if index < len(categories) else ''
+        all_categories = dict(get_all_furniture_types()).keys()
+        if furniture_type and furniture_type not in all_categories:
             raise ValidationError('Invalid garment category selected.')
 
-        measurement_id = measurement_ids[index] if index < len(measurement_ids) else ''
-        measurement = None
-        if measurement_id:
+        dimension_id = dimension_ids[index] if index < len(dimension_ids) else ''
+        dimension = None
+        if dimension_id:
             try:
-                measurement = Measurement.objects.filter(id=measurement_id, customer=customer).first()
+                dimension = FurnitureDimension.objects.filter(id=dimension_id, customer=customer).first()
             except ValueError:
                 pass
         
-        if not measurement and garment_category:
-            measurement = Measurement.objects.filter(
+        if not dimension and furniture_type:
+            dimension = FurnitureDimension.objects.filter(
                 customer=customer,
-                garment_category=garment_category,
+                furniture_type=furniture_type,
             ).order_by('-updated_at').first()
 
-        # If this measurement was already assigned to a previous item in this
+        # If this dimension was already assigned to a previous item in this
         # order, clone it so each item gets its own distinct record.
-        if measurement and measurement.id in used_measurement_ids:
-            measurement = Measurement.objects.create(
+        if dimension and dimension.id in used_dimension_ids:
+            dimension = FurnitureDimension.objects.create(
                 customer=customer,
-                garment_category=measurement.garment_category,
-                values=dict(measurement.values) if measurement.values else {},
-                notes=measurement.notes,
-                is_sample_product=measurement.is_sample_product,
+                furniture_type=dimension.furniture_type,
+                values=dict(dimension.values) if dimension.values else {},
+                notes=dimension.notes,
+                is_standard_catalog=dimension.is_standard_catalog,
             )
 
-        if measurement:
-            used_measurement_ids.add(measurement.id)
+        if dimension:
+            used_dimension_ids.add(dimension.id)
 
         items.append({
-            'garment_category': garment_category or None,
-            'measurement': measurement,
+            'furniture_type': furniture_type or None,
+            'dimension': dimension,
             'description': description,
             'quantity': quantity,
             'rate': rate,
@@ -110,36 +109,15 @@ def order_date(value, default):
     return parsed
 
 
-def salesperson_from_post(post_data):
-    salesperson_id = post_data.get('salesperson')
-    if not salesperson_id:
-        return None
-    try:
-        return Salesperson.objects.get(id=salesperson_id, is_active=True)
-    except (Salesperson.DoesNotExist, ValueError):
-        raise ValidationError('Invalid salesperson selected.')
-
-
 @transaction.atomic
 def create_order_from_post(post_data, customer):
     items = parse_items(post_data, customer)
-    salesperson = salesperson_from_post(post_data)
     subtotal = sum((item['total_amount'] for item in items), Decimal('0.00')).quantize(MONEY)
     
     discount = money(post_data.get('discount'))
-    is_buy_back = post_data.get('is_buy_back') == 'on'
-    deposit_amount = Decimal('0.00')
-    is_deposit_paid = False
-
-    if is_buy_back:
-        discount = Decimal('0.00')
-        deposit_amount = (subtotal / Decimal('2')).quantize(MONEY)
-        is_deposit_paid = post_data.get('is_deposit_paid') == 'on'
-        final_amount = (subtotal - deposit_amount).quantize(MONEY)
-    else:
-        if discount > subtotal:
-            raise ValidationError('Discount cannot be greater than subtotal.')
-        final_amount = (subtotal - discount).quantize(MONEY)
+    if discount > subtotal:
+        raise ValidationError('Discount cannot be greater than subtotal.')
+    final_amount = (subtotal - discount).quantize(MONEY)
     advance_paid = money(post_data.get('advance_paid'))
     if advance_paid > final_amount:
         raise ValidationError('Advance paid cannot be greater than the final amount.')
@@ -148,19 +126,11 @@ def create_order_from_post(post_data, customer):
         raise ValidationError('Invalid payment method.')
 
     today = timezone.localdate()
-    delivery_date = order_date(post_data.get('delivery_date'), today + timedelta(days=7))
-    if delivery_date < today:
-        raise ValidationError('Delivery date cannot be in the past.')
-    requested_order_type = post_data.get('order_type') or OrderType.STITCHING
+    order_date_val = order_date(post_data.get('date'), today)
+    requested_order_type = post_data.get('order_type') or OrderType.CUSTOM_BUILD
     if requested_order_type not in OrderType.values:
         raise ValidationError('Invalid order type.')
     order_type = requested_order_type
-    return_date_str = post_data.get('return_date')
-    return_date = None
-    if return_date_str:
-        return_date = order_date(return_date_str, delivery_date)
-        if return_date < delivery_date:
-            raise ValidationError('Return date cannot be before delivery date.')
     balance_due = (final_amount - advance_paid).quantize(MONEY)
     is_red_flagged = post_data.get('is_red_flagged') == 'on'
     is_urgent = is_red_flagged and (post_data.get('is_urgent') == 'on')
@@ -168,20 +138,14 @@ def create_order_from_post(post_data, customer):
     order = Order.objects.create(
         order_number=f"TMP-{uuid4().hex[:12]}",
         customer=customer,
-        salesperson=salesperson,
         order_type=order_type,
         subtotal=subtotal,
         discount_amount=discount,
-        deposit_amount=deposit_amount,
-        is_buy_back=is_buy_back,
-        is_deposit_paid=is_deposit_paid,
         final_amount=final_amount,
         advance_paid=advance_paid,
         payment_method=payment_method,
         grand_total=balance_due,
-        booking_date=today,
-        delivery_date=delivery_date,
-        return_date=return_date,
+        date=order_date_val,
         notes=(post_data.get('notes') or '').strip(),
         is_red_flagged=is_red_flagged,
         is_urgent=is_urgent,
@@ -223,11 +187,7 @@ def update_order_from_post(order, post_data):
             raise ValidationError('Discount cannot be greater than subtotal.')
         
         order.discount_amount = discount.quantize(MONEY)
-        
-        if order.is_buy_back:
-            order.final_amount = (order.subtotal - order.deposit_amount - order.discount_amount).quantize(MONEY)
-        else:
-            order.final_amount = (order.subtotal - order.discount_amount).quantize(MONEY)
+        order.final_amount = (order.subtotal - order.discount_amount).quantize(MONEY)
             
         order.grand_total = (order.final_amount - order.advance_paid).quantize(MONEY)
         changed.extend(['discount_amount', 'final_amount', 'grand_total'])
@@ -241,11 +201,7 @@ def update_order_from_post(order, post_data):
             raise ValidationError('Discount cannot be greater than the balance due.')
             
         order.discount_amount = (order.discount_amount + discount).quantize(MONEY)
-        
-        if order.is_buy_back:
-            order.final_amount = (order.subtotal - order.deposit_amount - order.discount_amount).quantize(MONEY)
-        else:
-            order.final_amount = (order.subtotal - order.discount_amount).quantize(MONEY)
+        order.final_amount = (order.subtotal - order.discount_amount).quantize(MONEY)
             
         order.grand_total = (order.final_amount - order.advance_paid).quantize(MONEY)
         changed.extend(['discount_amount', 'final_amount', 'grand_total'])
@@ -319,16 +275,6 @@ def update_order_info_from_post(order, post_data):
             order.notes = new_notes
             order_changed.append('notes')
             
-    salesperson_id = post_data.get('salesperson')
-    if salesperson_id:
-        try:
-            sp = Salesperson.objects.get(id=salesperson_id, is_active=True)
-            if order.salesperson != sp:
-                order.salesperson = sp
-                order_changed.append('salesperson')
-        except Salesperson.DoesNotExist:
-            raise ValidationError('Invalid salesperson selected.')
-            
     if order_changed:
         order.save(update_fields=order_changed + ['updated_at'])
         
@@ -380,55 +326,51 @@ def update_order_item_from_post(item, post_data):
         subtotal = sum(i.total_amount for i in order.items.all())
         order.subtotal = subtotal
         
-        if order.is_buy_back:
-            order.deposit_amount = (subtotal / Decimal('2')).quantize(MONEY)
-            order.final_amount = (subtotal - order.deposit_amount - order.discount_amount).quantize(MONEY)
-        else:
-            order.final_amount = (subtotal - order.discount_amount).quantize(MONEY)
+        order.final_amount = (subtotal - order.discount_amount).quantize(MONEY)
             
         order.grand_total = (order.final_amount - order.advance_paid).quantize(MONEY)
-        order.save(update_fields=['subtotal', 'deposit_amount', 'final_amount', 'grand_total', 'updated_at'])
+        order.save(update_fields=['subtotal', 'final_amount', 'grand_total', 'updated_at'])
 
-    # Update associated Measurement
-    if item.measurement:
-        measurement = item.measurement
+    # Update associated FurnitureDimension
+    if item.dimension:
+        dimension = item.dimension
         
-        # Check if this measurement is shared by other OrderItems.
+        # Check if this dimension is shared by other OrderItems.
         # If so, clone it first so edits don't affect the other items.
-        shared_count = OrderItem.objects.filter(measurement=measurement).exclude(id=item.id).count()
+        shared_count = OrderItem.objects.filter(dimension=dimension).exclude(id=item.id).count()
         if shared_count > 0:
-            # Clone the measurement into a new independent record
-            measurement = Measurement.objects.create(
-                customer=measurement.customer,
-                garment_category=measurement.garment_category,
-                values=dict(measurement.values) if measurement.values else {},
-                notes=measurement.notes,
-                is_sample_product=measurement.is_sample_product,
+            # Clone the dimension into a new independent record
+            dimension = FurnitureDimension.objects.create(
+                customer=dimension.customer,
+                furniture_type=dimension.furniture_type,
+                values=dict(dimension.values) if dimension.values else {},
+                notes=dimension.notes,
+                is_standard_catalog=dimension.is_standard_catalog,
             )
-            item.measurement = measurement
-            item.save(update_fields=['measurement'])
+            item.dimension = dimension
+            item.save(update_fields=['dimension'])
         
         m_changed = False
         
-        m_notes = post_data.get('measurement_notes')
+        m_notes = post_data.get('FurnitureDimension_notes')
         if m_notes is not None:
             m_notes = m_notes.strip()
-            if m_notes != measurement.notes:
-                measurement.notes = m_notes
+            if m_notes != dimension.notes:
+                dimension.notes = m_notes
                 m_changed = True
                 
         # Update JSON values
-        from measurements.models import get_all_garment_parameters
-        all_params = get_all_garment_parameters()
-        params = all_params.get(item.garment_category, [])
+        from measurements.models import get_all_furniture_parameters
+        all_params = get_all_furniture_parameters()
+        params = all_params.get(item.furniture_type, [])
         
         values_updated = False
-        is_sample = post_data.get('is_sample_product') == 'on'
-        if is_sample != measurement.is_sample_product:
-            measurement.is_sample_product = is_sample
+        is_sample = post_data.get('is_standard_catalog') == 'on'
+        if is_sample != dimension.is_standard_catalog:
+            dimension.is_standard_catalog = is_sample
             m_changed = True
             if is_sample:
-                measurement.values = {}
+                dimension.values = {}
                 values_updated = False # Don't process individual params if clearing
 
         if not is_sample:
@@ -436,14 +378,14 @@ def update_order_item_from_post(item, post_data):
                 val = post_data.get(f'measure_{param}')
                 if val is not None:
                     val = val.strip()
-                    if measurement.values.get(param) != val:
-                        measurement.values[param] = val
+                    if dimension.values.get(param) != val:
+                        dimension.values[param] = val
                         values_updated = True
                     
         if values_updated:
             m_changed = True
             
         if m_changed:
-            measurement.save(update_fields=['notes', 'values', 'is_sample_product', 'updated_at'])
+            dimension.save(update_fields=['notes', 'values', 'is_standard_catalog', 'updated_at'])
             
     return item

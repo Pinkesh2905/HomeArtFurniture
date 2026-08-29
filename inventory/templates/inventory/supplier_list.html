@@ -1,0 +1,160 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Suppliers | Home Art Furniture Admin{% endblock %}
+
+{% block content %}
+<style>
+    /* Location and Info text styling */
+    .location-text {
+        color: #475569 !important;
+    }
+    body.dark-mode .location-text {
+        color: rgba(255, 255, 255, 0.8) !important;
+    }
+
+    /* Items count badge styling */
+    .items-badge {
+        background-color: rgba(0, 0, 0, 0.05) !important;
+        color: #334155 !important;
+    }
+    body.dark-mode .items-badge {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        color: rgba(255, 255, 255, 0.8) !important;
+    }
+
+    /* Action button styling */
+    .btn-action-edit {
+        background-color: rgba(100, 116, 139, 0.1) !important;
+        color: #64748b !important;
+        border: 1px solid rgba(100, 116, 139, 0.15) !important;
+    }
+    body.dark-mode .btn-action-edit {
+        background-color: rgba(255, 255, 255, 0.08) !important;
+        color: rgba(255, 255, 255, 0.8) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    .btn-action-edit:hover {
+        background-color: rgba(100, 116, 139, 0.2) !important;
+        color: #475569 !important;
+    }
+    body.dark-mode .btn-action-edit:hover {
+        background-color: rgba(255, 255, 255, 0.15) !important;
+        color: #ffffff !important;
+    }
+    .btn-action-edit span {
+        color: inherit !important;
+    }
+</style>
+<div class="p-4 sm:p-8 max-w-[1440px] mx-auto w-full">
+    <!-- Header -->
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-8 gap-4">
+        <div>
+            <div class="flex items-center gap-2 text-slate-500 dark:text-white/40 text-[10px] sm:text-xs mb-1.5 uppercase tracking-widest font-bold">
+                <a href="{% url 'material_list' %}" class="hover:text-secondary transition-colors">Inventory</a>
+                <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+                <span class="text-secondary">Suppliers</span>
+            </div>
+            <h2 class="font-h2 text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-white mb-1 sm:mb-2 drop-shadow-md">Material Suppliers</h2>
+            <p class="text-slate-600 dark:text-white/60 text-sm sm:text-base font-body-md">Manage vendors for raw materials and hardware.</p>
+        </div>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <a href="{% url 'material_list' %}" class="btn-premium flex-1 sm:flex-none text-center">
+                <span class="btn-premium__label">Back to Inventory</span>
+            </a>
+            <a href="{% url 'supplier_create' %}" class="btn-premium btn-premium--gold flex-1 sm:flex-none text-center">
+                <span class="btn-premium__label">NEW SUPPLIER</span>
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="mb-6 space-y-2">
+        {% for message in messages %}
+        <div class="p-4 rounded-xl text-sm font-medium border {% if message.tags == 'error' %}bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20 text-red-700 dark:text-red-400{% else %}bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Filters -->
+    <form method="GET" action="{% url 'supplier_list' %}" class="glass-panel p-4 sm:p-6 mb-6 relative z-20">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_auto] gap-4 items-end">
+            <!-- Search -->
+            <div>
+                <label class="block text-xs font-bold text-theme-secondary uppercase tracking-widest mb-2 px-1">Search Directory</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-white/40">search</span>
+                    <input name="q" value="{{ q|default:'' }}" class="w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-[12px] text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:text-white/20 focus:outline-none focus:border-secondary/50 transition-all" placeholder="Supplier name, contact person, phone, city" type="search">
+                </div>
+            </div>
+            
+            <div class="flex gap-2">
+                <button type="submit" class="flex-1 sm:flex-none px-6 py-2 btn-premium text-sm">Search</button>
+                {% if q %}
+                <a href="{% url 'supplier_list' %}" class="flex items-center justify-center px-4 text-sm font-semibold text-slate-700 dark:text-white/80 hover:text-white border border-slate-300 dark:border-white/10 rounded-[12px] bg-slate-100 dark:bg-white/5 hover:bg-white/10" title="Clear filters">
+                    <span class="material-symbols-outlined text-[18px]">close</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+
+    <!-- Table -->
+    <div class="glass-panel rounded-[20px] overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-theme-border bg-slate-100/50 dark:bg-white/[0.02]">
+                        <th class="py-4 px-5 text-[10px] sm:text-xs font-bold text-slate-500 dark:text-white/40 uppercase tracking-widest whitespace-nowrap">Supplier</th>
+                        <th class="py-4 px-5 text-[10px] sm:text-xs font-bold text-slate-500 dark:text-white/40 uppercase tracking-widest whitespace-nowrap">Contact</th>
+                        <th class="py-4 px-5 text-[10px] sm:text-xs font-bold text-slate-500 dark:text-white/40 uppercase tracking-widest whitespace-nowrap">Location</th>
+                        <th class="py-4 px-5 text-[10px] sm:text-xs font-bold text-slate-500 dark:text-white/40 uppercase tracking-widest whitespace-nowrap">GST No.</th>
+                        <th class="py-4 px-5 text-[10px] sm:text-xs font-bold text-slate-500 dark:text-white/40 uppercase tracking-widest whitespace-nowrap">Items</th>
+                        <th class="py-4 px-5 text-[10px] sm:text-xs font-bold text-slate-500 dark:text-white/40 uppercase tracking-widest whitespace-nowrap text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-theme-border">
+                    {% for supplier in suppliers %}
+                    <tr class="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
+                        <td class="py-4 px-5">
+                            <a href="{% url 'supplier_edit' supplier.pk %}" class="font-bold text-slate-900 dark:text-white hover:text-secondary transition-colors block">{{ supplier.name }}</a>
+                        </td>
+                        <td class="py-4 px-5">
+                            <div class="text-sm font-semibold text-slate-800 dark:text-white/90">{{ supplier.contact_person|default:'-' }}</div>
+                            <div class="text-xs text-slate-500 dark:text-white/50 mt-0.5">{{ supplier.phone }}</div>
+                        </td>
+                        <td class="py-4 px-5">
+                            <span class="text-sm location-text">{{ supplier.city|default:'-' }}</span>
+                        </td>
+                        <td class="py-4 px-5">
+                            <span class="text-xs font-mono text-slate-500 dark:text-white/50">{{ supplier.gst_number|default:'-' }}</span>
+                        </td>
+                        <td class="py-4 px-5">
+                            <span class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold rounded-full items-badge">
+                                {{ supplier.materials.count }}
+                            </span>
+                        </td>
+                        <td class="py-4 px-5 text-right whitespace-nowrap">
+                            <a href="{% url 'supplier_edit' supplier.pk %}" class="w-8 h-8 inline-flex items-center justify-center rounded-lg btn-action-edit transition-colors" title="Edit Supplier">
+                                <span class="material-symbols-outlined text-[18px]">edit</span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="py-12 text-center text-slate-500 dark:text-white/40">
+                            <span class="material-symbols-outlined text-4xl mb-3 opacity-50 block">local_shipping</span>
+                            <p class="text-sm">No suppliers found.</p>
+                            {% if q %}
+                            <a href="{% url 'supplier_list' %}" class="text-secondary hover:underline mt-2 inline-block text-xs">Clear search</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

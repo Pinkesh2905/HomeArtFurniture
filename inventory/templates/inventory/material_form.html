@@ -1,0 +1,324 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{% if editing %}Edit {{ material.name }}{% else %}New Material{% endif %} | Home Art Furniture Admin{% endblock %}
+
+{% block content %}
+<style>
+    /* Danger Zone Styling */
+    .danger-zone-card {
+        background-color: rgba(239, 68, 68, 0.04) !important;
+        border: 1px solid rgba(239, 68, 68, 0.2) !important;
+    }
+    body.dark-mode .danger-zone-card {
+        background-color: rgba(239, 68, 68, 0.08) !important;
+        border: 1px solid rgba(239, 68, 68, 0.25) !important;
+    }
+
+    .danger-zone-title {
+        color: #dc2626 !important;
+    }
+    body.dark-mode .danger-zone-title {
+        color: #f87171 !important;
+    }
+
+    .danger-zone-text {
+        color: #7f1d1d !important;
+    }
+    body.dark-mode .danger-zone-text {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    .btn-danger-action {
+        background-color: rgba(239, 68, 68, 0.1) !important;
+        color: #b91c1c !important;
+        border: 1px solid rgba(239, 68, 68, 0.2) !important;
+        transition: all 0.2s;
+    }
+    .btn-danger-action:hover {
+        background-color: rgba(239, 68, 68, 0.15) !important;
+        color: #991b1b !important;
+    }
+    body.dark-mode .btn-danger-action {
+        background-color: rgba(239, 68, 68, 0.15) !important;
+        color: #f87171 !important;
+        border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    }
+    body.dark-mode .btn-danger-action:hover {
+        background-color: rgba(239, 68, 68, 0.25) !important;
+        color: #fca5a5 !important;
+    }
+
+    /* Form Input & Textarea Premium Styling */
+    .form-input-custom {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 14px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        outline: none;
+        background-color: #ffffff !important;
+        border: 1px solid rgba(0, 0, 0, 0.15) !important;
+        color: #0f172a !important;
+    }
+    body.dark-mode .form-input-custom {
+        background-color: rgba(5, 13, 35, 0.6) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: #ffffff !important;
+    }
+    .form-input-custom:focus {
+        border-color: #d4af37 !important;
+        box-shadow: 0 0 12px rgba(212, 175, 55, 0.2) !important;
+    }
+    body.dark-mode .form-input-custom:focus {
+        border-color: #f2ca50 !important;
+        box-shadow: 0 0 16px rgba(242, 202, 80, 0.25) !important;
+    }
+    .form-input-custom::placeholder {
+        color: #94a3b8 !important;
+    }
+    body.dark-mode .form-input-custom::placeholder {
+        color: rgba(255, 255, 255, 0.3) !important;
+    }
+
+    /* Form Labels Custom styling */
+    .form-label-custom {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 8px;
+        padding-left: 4px;
+        color: #475569 !important;
+    }
+    body.dark-mode .form-label-custom {
+        color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    /* Form Section Title custom styling */
+    .form-section-title {
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+        color: #0f172a !important;
+    }
+    body.dark-mode .form-section-title {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        color: #ffffff !important;
+    }
+</style>
+<div class="p-4 sm:p-8 max-w-[1200px] mx-auto w-full">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <div class="flex items-center gap-2 text-slate-500 dark:text-white/40 text-[10px] sm:text-xs mb-1.5 uppercase tracking-widest font-bold">
+                <a href="{% url 'material_list' %}" class="hover:text-secondary transition-colors">Inventory</a>
+                <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+                {% if editing %}
+                <a href="{% url 'material_detail' material.pk %}" class="hover:text-secondary transition-colors">{{ material.sku }}</a>
+                <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+                <span class="text-secondary">Edit</span>
+                {% else %}
+                <span class="text-secondary">New Material</span>
+                {% endif %}
+            </div>
+            <h2 class="font-h2 text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-white drop-shadow-md">
+                {% if editing %}Edit Material{% else %}Add New Material{% endif %}
+            </h2>
+        </div>
+        <a href="{% if editing %}{% url 'material_detail' material.pk %}{% else %}{% url 'material_list' %}{% endif %}" class="btn-premium flex items-center justify-center gap-2 text-sm">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+            Cancel
+        </a>
+    </div>
+
+    {% if messages %}
+    <div class="mb-6 space-y-2">
+        {% for message in messages %}
+        <div class="p-4 rounded-xl text-sm font-medium border {% if message.tags == 'error' %}bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20 text-red-700 dark:text-red-400{% else %}bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="POST" action="">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <!-- Left Column: Basic Details & Notes -->
+            <div class="lg:col-span-7 space-y-6">
+                <!-- Basic Details -->
+                <div class="glass-panel p-6 sm:p-8 rounded-[24px] relative z-20">
+                    <h3 class="form-section-title pb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-secondary text-[20px]">info</span>
+                        Basic Details
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="form-label-custom">Material Name *</label>
+                            <input type="text" name="name" value="{{ material.name|default:'' }}" required class="form-input-custom" placeholder="e.g., Teak Wood, Red Velvet Fabric">
+                        </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="form-label-custom">Category *</label>
+                                <div class="haf-dropdown">
+                                    <input type="checkbox" id="category-dropdown">
+                                    <input type="hidden" name="category" value="{{ material.category|default:'wood' }}">
+                                    <label class="haf-dropdown__face !h-[46px] rounded-xl" for="category-dropdown">
+                                        <div class="haf-dropdown__text text-slate-900 dark:text-white font-bold text-xs sm:text-sm">
+                                            {% if material.category %}
+                                                {% for value, label in categories %}
+                                                    {% if material.category == value %}{{ label }}{% endif %}
+                                                {% endfor %}
+                                            {% else %}
+                                                Wood / Timber
+                                            {% endif %}
+                                        </div>
+                                        <div class="haf-dropdown__arrow border-theme-secondary"></div>
+                                    </label>
+                                    <ul class="haf-dropdown__items">
+                                        {% for value, label in categories %}
+                                        <li class="haf-dropdown__item" data-value="{{ value }}">{{ label }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="form-label-custom">Unit of Measure *</label>
+                                <div class="haf-dropdown">
+                                    <input type="checkbox" id="unit-dropdown">
+                                    <input type="hidden" name="unit" value="{{ material.unit|default:'pcs' }}">
+                                    <label class="haf-dropdown__face !h-[46px] rounded-xl" for="unit-dropdown">
+                                        <div class="haf-dropdown__text text-slate-900 dark:text-white font-bold text-xs sm:text-sm">
+                                            {% if material.unit %}
+                                                {% for value, label in units %}
+                                                    {% if material.unit == value %}{{ label }}{% endif %}
+                                                {% endfor %}
+                                            {% else %}
+                                                Pieces
+                                            {% endif %}
+                                        </div>
+                                        <div class="haf-dropdown__arrow border-theme-secondary"></div>
+                                    </label>
+                                    <ul class="haf-dropdown__items">
+                                        {% for value, label in units %}
+                                        <li class="haf-dropdown__item" data-value="{{ value }}">{{ label }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notes & Location -->
+                <div class="glass-panel p-6 sm:p-8 rounded-[24px] relative z-10">
+                    <h3 class="form-section-title pb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-secondary text-[20px]">location_on</span>
+                        Notes & Location
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="form-label-custom flex justify-between items-center">
+                                Warehouse Location
+                                <span class="text-[9px] text-slate-400 font-normal lowercase normal-case">Shelf/Zone</span>
+                            </label>
+                            <input type="text" name="location" value="{{ material.location|default:'' }}" class="form-input-custom" placeholder="e.g., A1-Shelf-3">
+                        </div>
+
+                        <div>
+                            <label class="form-label-custom">Internal Notes</label>
+                            <textarea name="notes" rows="4" class="form-input-custom resize-none" placeholder="Add any details about this material...">{{ material.notes|default:'' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Inventory & Cost -->
+            <div class="lg:col-span-5 space-y-6">
+                <div class="glass-panel p-6 sm:p-8 rounded-[24px] relative z-20">
+                    <h3 class="form-section-title pb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-secondary text-[20px]">inventory_2</span>
+                        Inventory & Cost
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="form-label-custom">Min Stock Alert</label>
+                                <input type="number" step="any" min="0" name="min_stock" value="{{ material.min_stock|default:'0.00' }}" class="form-input-custom">
+                            </div>
+                            
+                            <div>
+                                <label class="form-label-custom">Cost per Unit (₹)</label>
+                                <input type="number" step="0.01" min="0" name="cost_per_unit" value="{{ material.cost_per_unit|default:'0.00' }}" class="form-input-custom">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="form-label-custom">Preferred Supplier</label>
+                            <div class="haf-dropdown">
+                                <input type="checkbox" id="supplier-dropdown">
+                                <input type="hidden" name="supplier" value="{{ material.supplier.pk|default:'' }}">
+                                <label class="haf-dropdown__face !h-[46px] rounded-xl" for="supplier-dropdown">
+                                    <div class="haf-dropdown__text text-slate-900 dark:text-white font-bold text-xs sm:text-sm">
+                                        {% if material.supplier %}
+                                            {{ material.supplier.name }}
+                                        {% else %}
+                                            -- Select Supplier (Optional) --
+                                        {% endif %}
+                                    </div>
+                                    <div class="haf-dropdown__arrow border-theme-secondary"></div>
+                                </label>
+                                <ul class="haf-dropdown__items">
+                                    <li class="haf-dropdown__item text-slate-500" data-value="">-- Select Supplier (Optional) --</li>
+                                    {% for supplier in suppliers %}
+                                    <li class="haf-dropdown__item" data-value="{{ supplier.pk }}">{{ supplier.name }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Bar -->
+        <div class="mt-8 pt-6 border-t border-theme-border flex flex-col sm:flex-row gap-4 items-center justify-between">
+            <div>
+                {% if not editing %}
+                <p class="text-[11px] text-slate-500 dark:text-white/40">Note: You can record initial stock quantities after creating the material.</p>
+                {% endif %}
+            </div>
+            <div class="w-full sm:w-auto flex gap-3">
+                <button type="submit" class="w-full sm:w-auto btn-premium btn-premium--gold px-8 py-3 text-sm flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">save</span>
+                    {% if editing %}Save Changes{% else %}Create Material{% endif %}
+                </button>
+            </div>
+        </div>
+    </form>
+
+    {% if editing %}
+    <!-- Danger Zone -->
+    <div class="mt-12 glass-panel p-6 rounded-[24px] danger-zone-card">
+        <h3 class="text-sm font-bold danger-zone-title mb-2 flex items-center gap-2">
+            <span class="material-symbols-outlined">warning</span>
+            Danger Zone
+        </h3>
+        <p class="text-xs danger-zone-text mb-4">Archiving this material will hide it from the active inventory list. Transaction history will be preserved.</p>
+        
+        <form method="POST" action="{% url 'material_delete' material.pk %}" onsubmit="return confirm('Are you sure you want to archive this material?');">
+            {% csrf_token %}
+            <button type="submit" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider btn-danger-action">
+                Archive Material
+            </button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

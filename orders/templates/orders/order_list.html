@@ -21,7 +21,7 @@
 
     <!-- Filters -->
     <form method="GET" action="{% url 'order_list' %}" class="glass-panel p-4 sm:p-6 mb-6 relative z-20">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[minmax(240px,1.7fr)_minmax(132px,1fr)_minmax(150px,1fr)_minmax(150px,1fr)_minmax(132px,1fr)_minmax(280px,1.5fr)] gap-4 items-end">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[minmax(240px,1.7fr)_minmax(132px,1fr)_minmax(150px,1fr)_minmax(132px,1fr)_minmax(280px,1.5fr)] gap-4 items-end">
             <div>
                 <label class="block text-xs font-bold text-theme-secondary uppercase tracking-widest mb-2 px-1">Search Directory</label>
                 <div class="relative">
@@ -57,29 +57,11 @@
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-theme-secondary uppercase tracking-widest mb-2 px-1">Delivery Date</label>
+                <label class="block text-xs font-bold text-theme-secondary uppercase tracking-widest mb-2 px-1">Date</label>
                 <div class="haf-datepicker">
-                    <input type="hidden" name="delivery_date" value="{% if delivery_date %}{{ delivery_date|date:'Y-m-d' }}{% endif %}">
+                    <input type="hidden" name="date" value="{% if delivery_date %}{{ delivery_date|date:'Y-m-d' }}{% endif %}">
                     <div class="haf-datepicker__face">
                         <input type="text" class="haf-datepicker__text text-xs sm:text-sm" placeholder="dd/mm/yyyy" value="{% if delivery_date %}{{ delivery_date|date:'d/m/Y' }}{% endif %}">
-                        <span class="material-symbols-outlined text-amber-700 dark:text-secondary text-[20px]">calendar_today</span>
-                    </div>
-                    <div class="haf-datepicker__popup">
-                        <div class="haf-calendar">
-                            <div class="haf-calendar__header"><div class="haf-calendar__header-info"><h3>---</h3><h2>Select Date</h2></div></div>
-                            <div class="haf-calendar__nav"><button type="button" class="prev-month"><span class="material-symbols-outlined">chevron_left</span></button><div class="haf-calendar__nav-title">Month Year</div><button type="button" class="next-month"><span class="material-symbols-outlined">chevron_right</span></button></div>
-                            <div class="haf-calendar__body"><div class="haf-calendar__days"><div class="haf-calendar__day-name">S</div><div class="haf-calendar__day-name">M</div><div class="haf-calendar__day-name">T</div><div class="haf-calendar__day-name">W</div><div class="haf-calendar__day-name">T</div><div class="haf-calendar__day-name">F</div><div class="haf-calendar__day-name">S</div></div><div class="haf-calendar__numbers"></div></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-xs font-bold text-theme-secondary uppercase tracking-widest mb-2 px-1">Return Date</label>
-                <div class="haf-datepicker">
-                    <input type="hidden" name="return_date" value="{% if return_date %}{{ return_date|date:'Y-m-d' }}{% endif %}">
-                    <div class="haf-datepicker__face">
-                        <input type="text" class="haf-datepicker__text text-xs sm:text-sm" placeholder="dd/mm/yyyy" value="{% if return_date %}{{ return_date|date:'d/m/Y' }}{% endif %}">
                         <span class="material-symbols-outlined text-amber-700 dark:text-secondary text-[20px]">calendar_today</span>
                     </div>
                     <div class="haf-datepicker__popup">
@@ -115,7 +97,7 @@
                 <a href="{% url 'order_list_print' %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}" target="_blank" class="flex items-center justify-center px-4 text-sm font-semibold text-slate-700 dark:text-white/80 hover:text-white border border-slate-300 dark:border-white/10 rounded-[12px] bg-slate-100 dark:bg-white/5 hover:bg-white/10" title="Print filtered list">
                     <span class="material-symbols-outlined text-[18px]">print</span>
                 </a>
-                {% if q or current_status or delivery_date or return_date or red_flag %}
+                {% if q or current_status or delivery_date or red_flag %}
                 <a href="{% url 'order_list' %}" class="flex items-center justify-center px-4 text-sm font-semibold text-slate-600 dark:text-white/60 hover:text-white border border-slate-300 dark:border-white/10 rounded-[12px]">Clear</a>
                 {% endif %}
             </div>
@@ -131,8 +113,7 @@
                         <tr class="bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white">
                             <th class="px-3 py-3 font-serif font-semibold text-sm uppercase tracking-wider">Order ID</th>
                             <th class="px-3 py-3 font-serif font-semibold text-sm uppercase tracking-wider">Customer</th>
-                            <th class="px-3 py-3 font-serif font-semibold text-sm uppercase tracking-wider text-center text-amber-700 dark:text-amber-400">Delivery Date</th>
-                            <th class="px-3 py-3 font-serif font-semibold text-sm uppercase tracking-wider text-center text-amber-700 dark:text-secondary">Return Date</th>
+                            <th class="px-3 py-3 font-serif font-semibold text-sm uppercase tracking-wider text-center text-amber-700 dark:text-amber-400">Date</th>
                             <th class="px-3 py-3 font-serif font-semibold text-sm uppercase tracking-wider">Amount</th>
                             <th class="px-3 py-3 font-serif font-semibold text-sm uppercase tracking-wider">Quick Pay</th>
                             <th class="px-3 py-3 font-serif font-semibold text-sm uppercase tracking-wider">Status</th>
@@ -162,8 +143,7 @@
                                     <span class="font-bold text-slate-900 dark:text-white text-sm">{{ order.customer.full_name }}</span>
                                 </div>
                             </td>
-                            <td class="px-3 py-3 text-amber-700 dark:text-amber-400 text-sm whitespace-nowrap text-center font-bold">{{ order.delivery_date|date:"M d, Y" }}</td>
-                            <td class="px-3 py-3 text-amber-700 dark:text-secondary text-sm whitespace-nowrap text-center font-bold">{{ order.return_date|date:"M d, Y" }}</td>
+                            <td class="px-3 py-3 text-amber-700 dark:text-amber-400 text-sm whitespace-nowrap text-center font-bold">{{ order.date|date:"M d, Y" }}</td>
                             <td id="order-amount-{{ order.id }}" class="px-3 py-3 font-bold text-slate-900 dark:text-white text-sm whitespace-nowrap">₹{{ order.grand_total }}</td>
                             
                             <!-- Quick Pay Column -->
@@ -210,13 +190,11 @@
                                             id="status-badge-btn-{{ order.id }}">
                                         <span id="status-badge-{{ order.id }}" class="inline-flex px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider cursor-pointer
                                             {% if order.status == 'delivered' %}bg-emerald-500/20 text-emerald-400 border border-emerald-500/30
-                                            {% elif order.status == 'ready' %}bg-blue-500/20 text-blue-400 border border-blue-500/30
                                             {% elif order.status == 'cutting' %}bg-orange-500/20 text-orange-400 border border-orange-500/30
                                             {% elif order.status == 'pending' %}bg-amber-500/20 text-amber-400 border border-amber-500/30
                                             {% elif order.status == 'in_progress' %}bg-zinc-500/15 text-zinc-700 dark:text-zinc-300 border border-zinc-500/30
                                             {% elif order.status == 'processing' %}bg-indigo-500/20 text-indigo-400 border border-indigo-500/30
                                             {% elif order.status == 'cancelled' %}bg-rose-500/20 text-rose-400 border border-rose-500/30
-                                            {% elif order.status == 'returned' %}bg-purple-500/20 text-purple-400 border border-purple-500/30
                                             {% else %}bg-zinc-500/15 text-zinc-700 dark:text-zinc-300 border border-zinc-500/30{% endif %}">
                                             {{ order.get_status_display }}
                                         </span>
@@ -291,13 +269,11 @@
                                 id="status-badge-btn-mobile-{{ order.id }}">
                             <span id="status-badge-mobile-{{ order.id }}" class="shrink-0 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider
                                 {% if order.status == 'delivered' %}bg-emerald-500/20 text-emerald-400 border border-emerald-500/30
-                                {% elif order.status == 'ready' %}bg-blue-500/20 text-blue-400 border border-blue-500/30
                                 {% elif order.status == 'cutting' %}bg-orange-500/20 text-orange-400 border border-orange-500/30
                                 {% elif order.status == 'pending' %}bg-amber-500/20 text-amber-400 border border-amber-500/30
                                 {% elif order.status == 'in_progress' %}bg-zinc-500/15 text-zinc-700 dark:text-zinc-300 border border-zinc-500/30
                                 {% elif order.status == 'processing' %}bg-indigo-500/20 text-indigo-400 border border-indigo-500/30
                                 {% elif order.status == 'cancelled' %}bg-rose-500/20 text-rose-400 border border-rose-500/30
-                                {% elif order.status == 'returned' %}bg-purple-500/20 text-purple-400 border border-purple-500/30
                                 {% else %}bg-zinc-500/15 text-zinc-700 dark:text-zinc-300 border border-zinc-500/30{% endif %}">
                                 {{ order.get_status_display }}
                             </span>
@@ -324,12 +300,8 @@
                     <div class="space-y-1">
                         <div class="flex items-center gap-4 text-[11px] font-medium">
                             <div class="flex items-center gap-1 text-amber-700 dark:text-secondary">
-                                <span class="material-symbols-outlined text-[14px]">local_shipping</span>
-                                Deliv: {{ order.delivery_date|date:"M d, Y" }}
-                            </div>
-                            <div class="flex items-center gap-1 text-amber-700 dark:text-secondary">
-                                <span class="material-symbols-outlined text-[14px]">event_repeat</span>
-                                Ret: {{ order.return_date|date:"M d, Y" }}
+                                <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                                Date: {{ order.date|date:"M d, Y" }}
                             </div>
                         </div>
                         <div class="flex items-center justify-between w-full mt-1.5 gap-2">
@@ -532,7 +504,9 @@ function toggleStatusDropdown(event, orderId) {
     event.stopPropagation();
     
     const menu = document.getElementById(`status-dropdown-menu-${orderId}`);
-    const isOpening = menu && menu.classList.contains('hidden');
+    if (!menu) return;
+    
+    const isOpening = menu.classList.contains('hidden');
     
     // Close other dropdowns
     document.querySelectorAll('[id^="status-dropdown-menu-"]').forEach(m => {
@@ -545,9 +519,39 @@ function toggleStatusDropdown(event, orderId) {
         cb.checked = false;
     });
     
-    if (menu) {
-        menu.classList.toggle('hidden');
-        setActiveRowStacking(event.currentTarget, isOpening);
+    if (isOpening) {
+        menu.classList.remove('hidden');
+        
+        // Append to body to bypass table container overflow clipping
+        if (menu.parentNode !== document.body) {
+            document.body.appendChild(menu);
+        }
+        
+        const btn = document.getElementById(`status-badge-btn-${orderId}`);
+        const rect = btn.getBoundingClientRect();
+        
+        // Determine position (open upwards or downwards)
+        const dropdownHeight = menu.offsetHeight || 260;
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        
+        menu.style.position = 'fixed';
+        menu.style.left = `${rect.left}px`;
+        menu.style.width = '176px'; // w-44 equivalent
+        menu.style.zIndex = '9999';
+        
+        if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
+            // Open upwards
+            menu.style.top = `${rect.top - dropdownHeight - 8}px`;
+        } else {
+            // Open downwards
+            menu.style.top = `${rect.bottom + 8}px`;
+        }
+        
+        setActiveRowStacking(event.currentTarget, true);
+    } else {
+        menu.classList.add('hidden');
+        setActiveRowStacking(event.currentTarget, false);
     }
 }
 
@@ -567,12 +571,38 @@ function toggleStatusDropdownMobile(event, orderId) {
     }
 }
 
+// Close dropdowns on scroll to prevent floating detached menus
+window.addEventListener('scroll', function() {
+    document.querySelectorAll('[id^="status-dropdown-menu-"]').forEach(menu => {
+        menu.classList.add('hidden');
+    });
+    document.querySelectorAll('[id^="status-dropdown-menu-mobile-"]').forEach(menu => {
+        menu.classList.add('hidden');
+    });
+    document.querySelectorAll('table tbody tr').forEach(r => {
+        r.classList.remove('relative', 'z-50');
+    });
+}, true); // Capture phase to catch scroll events on scrollable containers
+
+// Close dropdowns on window resize
+window.addEventListener('resize', function() {
+    document.querySelectorAll('[id^="status-dropdown-menu-"]').forEach(menu => {
+        menu.classList.add('hidden');
+    });
+    document.querySelectorAll('[id^="status-dropdown-menu-mobile-"]').forEach(menu => {
+        menu.classList.add('hidden');
+    });
+});
+
 // Close all open status and payment method menus when clicking outside
 document.addEventListener('click', function(event) {
     let closedAny = false;
     
-    // Close custom status dropdowns
-    if (!event.target.closest('.status-dropdown-container') && !event.target.closest('.status-dropdown-container-mobile')) {
+    const clickedInContainer = event.target.closest('.status-dropdown-container') || event.target.closest('.status-dropdown-container-mobile');
+    const clickedInMenu = event.target.closest('.custom-dropdown-menu') || event.target.closest('[id^="status-dropdown-menu-mobile-"]');
+    
+    // Close custom status dropdowns if clicked outside
+    if (!clickedInContainer && !clickedInMenu) {
         document.querySelectorAll('[id^="status-dropdown-menu-"]').forEach(menu => {
             if (!menu.classList.contains('hidden')) {
                 menu.classList.add('hidden');
@@ -580,7 +610,10 @@ document.addEventListener('click', function(event) {
             }
         });
         document.querySelectorAll('[id^="status-dropdown-menu-mobile-"]').forEach(menu => {
-            menu.classList.add('hidden');
+            if (!menu.classList.contains('hidden')) {
+                menu.classList.add('hidden');
+                closedAny = true;
+            }
         });
     }
     
@@ -612,13 +645,11 @@ function updateStatusBadgeUI(orderId, status, display) {
     
     const statusClasses = {
         'delivered': ['bg-emerald-500/20', 'text-emerald-400', 'border', 'border-emerald-500/30'],
-        'ready': ['bg-blue-500/20', 'text-blue-400', 'border', 'border-blue-500/30'],
         'cutting': ['bg-orange-500/20', 'text-orange-400', 'border', 'border-orange-500/30'],
         'pending': ['bg-amber-500/20', 'text-amber-400', 'border', 'border-amber-500/30'],
         'in_progress': ['bg-zinc-500/15', 'text-zinc-700', 'dark:text-zinc-300', 'border', 'border-zinc-500/30'],
         'processing': ['bg-indigo-500/20', 'text-indigo-400', 'border', 'border-indigo-500/30'],
-        'cancelled': ['bg-rose-500/20', 'text-rose-400', 'border', 'border-rose-500/30'],
-        'returned': ['bg-purple-500/20', 'text-purple-400', 'border', 'border-purple-500/30']
+        'cancelled': ['bg-rose-500/20', 'text-rose-400', 'border', 'border-rose-500/30']
     };
     
     const defaultClasses = ['bg-zinc-500/15', 'text-zinc-700', 'dark:text-zinc-300', 'border', 'border-zinc-500/30'];
@@ -682,6 +713,9 @@ function selectStatusShortcut(orderId, newStatus) {
         if (data.success) {
             updateStatusBadgeUI(orderId, data.status, data.status_display);
             showNotification('Status updated successfully!', 'success');
+            // Close the menus explicitly on successful selection
+            document.querySelectorAll('[id^="status-dropdown-menu-"]').forEach(menu => menu.classList.add('hidden'));
+            document.querySelectorAll('[id^="status-dropdown-menu-mobile-"]').forEach(menu => menu.classList.add('hidden'));
         } else {
             showNotification(data.errors.join('; '), 'error');
         }

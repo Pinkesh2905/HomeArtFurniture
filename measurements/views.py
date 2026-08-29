@@ -1,8 +1,14 @@
 from django.contrib import messages
-from django.shortcuts import render, redirect
-from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from measurements.models import Measurement, CustomGarmentCategory, CustomGarmentParameter, get_all_garment_categories, get_all_garment_parameters
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
+from measurements.models import (
+    FurnitureDimension,
+    CustomFurnitureType,
+    CustomFurnitureParameter,
+    get_all_furniture_types,
+    get_all_furniture_parameters
+)
 from customers.models import Customer
 from customers.utils import normalize_phone
 import urllib.parse
@@ -32,7 +38,6 @@ def measurement_profile(request):
             return redirect('measurement_profile')
         
         customer_id = request.POST.get('customer_id')
-        created = False
         if customer_id:
             customer = get_object_or_404(Customer, id=customer_id)
             customer.phone = customer_phone
@@ -41,7 +46,6 @@ def measurement_profile(request):
                 customer.city = customer_city
             customer.save()
         else:
-            # Look up customer by BOTH phone and name to reuse
             customer = Customer.objects.filter(phone=customer_phone, full_name=customer_name).first()
             if not customer:
                 customer = Customer.objects.create(
@@ -49,25 +53,24 @@ def measurement_profile(request):
                     full_name=customer_name,
                     city=customer_city
                 )
-                created = True
             else:
                 if customer_city:
                     customer.city = customer_city
                     customer.save(update_fields=['city'])
 
-        # 2. Extract selected garments to bill
+        # 2. Extract selected items to bill
         selected_to_bill = request.POST.getlist('bill_garment') # list of block IDs like "1", "2"
         garments_to_bill = []
 
-        # 3. Process all garment blocks submitted
+        # 3. Process all furniture blocks submitted
         block_ids = request.POST.getlist('garment_block_id')
         for block_id in block_ids:
-            garment_type = request.POST.get(f'garment_type_{block_id}')
-            if not garment_type:
+            furniture_type = request.POST.get(f'garment_type_{block_id}')
+            if not furniture_type:
                 continue
                 
-            all_params = get_all_garment_parameters()
-            parameters = all_params.get(garment_type, [])
+            all_params = get_all_furniture_parameters()
+            parameters = all_params.get(furniture_type, [])
             measure_values = {}
             import re
             for param in parameters:
@@ -76,44 +79,43 @@ def measurement_profile(request):
                 if val:
                     measure_values[param] = val
                     
-            # Save or Update Measurement
+            # Save or Update Dimension
             m_id = request.POST.get(f'measurement_id_{block_id}')
-            is_sample = request.POST.get(f'is_sample_{block_id}') == 'on'
+            is_standard = request.POST.get(f'is_sample_{block_id}') == 'on'
             
             defaults = {
-                'values': measure_values if not is_sample else {},
+                'values': measure_values if not is_standard else {},
                 'notes': (request.POST.get(f'notes_{block_id}') or '').strip(),
-                'is_sample_product': is_sample,
-                'garment_category': garment_type,
+                'is_standard_catalog': is_standard,
+                'furniture_type': furniture_type,
             }
             
-            measurement = None
-            if measure_values or is_sample:
+            dimension = None
+            if measure_values or is_standard:
                 if m_id:
-                    measurement = Measurement.objects.filter(id=m_id, customer=customer).first()
-                    if measurement:
+                    dimension = FurnitureDimension.objects.filter(id=m_id, customer=customer).first()
+                    if dimension:
                         for k, v in defaults.items():
-                            setattr(measurement, k, v)
-                        measurement.save()
+                            setattr(dimension, k, v)
+                        dimension.save()
                 
-                if not measurement:
-                    measurement = Measurement.objects.create(
+                if not dimension:
+                    dimension = FurnitureDimension.objects.create(
                         customer=customer,
                         **defaults
                     )
                 
             # If this block was selected for billing, add its ID
-            if block_id in selected_to_bill and measurement:
-                garments_to_bill.append(str(measurement.id))
+            if block_id in selected_to_bill and dimension:
+                garments_to_bill.append(str(dimension.id))
 
         # 4. Redirect to Billing or stay on profile
         if 'save_garment' in request.POST:
-            messages.success(request, 'Measurements saved successfully.')
+            messages.success(request, 'Dimensions saved successfully.')
             url = reverse('measurement_profile') + f"?customer_id={customer.id}"
             return redirect(url)
 
         # Redirect to Billing
-        # We pass customer_id and selected measurement IDs in the query string
         measurements_qs = ",".join(garments_to_bill)
         url = reverse('order_create') + f"?customer_id={customer.id}&measurements={urllib.parse.quote(measurements_qs)}"
         return redirect(url)
@@ -135,35 +137,35 @@ def measurement_profile(request):
 
     initial_customer_data = None
     if initial_customer:
-        measurements = Measurement.objects.filter(customer=initial_customer)
-        measurement_data = {}
-        measurement_list = []
-        for m in measurements:
-            measurement_data[m.garment_category] = {
+        dimensions = FurnitureDimension.objects.filter(customer=initial_customer)
+        dimension_data = {}
+        dimension_list = []
+        for m in dimensions:
+            dimension_data[m.furniture_type] = {
                 'id': m.id,
                 'values': m.values,
                 'notes': m.notes,
-                'is_sample_product': m.is_sample_product
+                'is_sample_product': m.is_standard_catalog # Keep as is_sample_product in JS payload for minimal frontend change
             }
-            measurement_list.append({
+            dimension_list.append({
                 'id': m.id,
-                'category': m.garment_category,
+                'category': m.furniture_type,
                 'values': m.values,
                 'notes': m.notes,
-                'is_sample_product': m.is_sample_product
+                'is_sample_product': m.is_standard_catalog
             })
         initial_customer_data = {
             'id': initial_customer.id,
             'full_name': initial_customer.full_name,
             'phone': initial_customer.phone,
             'city': initial_customer.city or '',
-            'measurements': measurement_data,
-            'measurement_list': measurement_list
+            'measurements': dimension_data,
+            'measurement_list': dimension_list
         }
 
     context = {
-        'garment_categories': get_all_garment_categories(),
-        'garment_parameters': get_all_garment_parameters(),
+        'garment_categories': get_all_furniture_types(),
+        'garment_parameters': get_all_furniture_parameters(),
         'initial_phone': initial_phone,
         'initial_customer': initial_customer_data,
     }
@@ -176,7 +178,7 @@ def add_custom_category(request):
             data = json.loads(request.body)
             name = data.get('name', '').strip()
             if name:
-                cat, created = CustomGarmentCategory.objects.get_or_create(name=name)
+                cat, created = CustomFurnitureType.objects.get_or_create(name=name)
                 slug = name.lower().replace(' ', '_')
                 return JsonResponse({'success': True, 'slug': slug, 'name': name})
         except Exception as e:
@@ -191,7 +193,7 @@ def add_custom_parameter(request):
             category_name = data.get('category_name', '').strip()
             name = data.get('name', '').strip()
             if category_name and name:
-                param, created = CustomGarmentParameter.objects.get_or_create(category_name=category_name, name=name)
+                param, created = CustomFurnitureParameter.objects.get_or_create(category_name=category_name, name=name)
                 return JsonResponse({'success': True, 'category_name': category_name, 'name': name})
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})

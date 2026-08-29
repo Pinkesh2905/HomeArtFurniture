@@ -1,17 +1,16 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.urls import reverse
-from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.utils.dateparse import parse_date
-from measurements.models import get_all_garment_categories
+from measurements.models import get_all_furniture_types
 from customers.models import Customer
-from salesperson.models import Salesperson
-from .models import Order, OrderItem, OrderStatus, OrderType
+from .models import Order, OrderItem, OrderStatus, OrderType, PaymentMethod
 from .services import create_order_from_post, update_order_from_post, update_order_info_from_post, update_order_item_from_post
 
 @login_required
@@ -23,45 +22,48 @@ def order_create(request):
             order = create_order_from_post(request.POST, customer)
         except ValidationError as exc:
             messages.error(request, '; '.join(exc.messages))
-            garments = ','.join(request.POST.getlist('item_garment_category[]'))
-            measurements = ','.join(request.POST.getlist('item_measurement_id[]'))
-            return redirect(f"{reverse('order_create')}?customer_id={customer.id}&garments={garments}&measurements={measurements}")
+            garments = ','.join(request.POST.getlist('item_furniture_type[]'))
+            FurnitureDimensions = ','.join(request.POST.getlist('item_FurnitureDimension_id[]'))
+            return redirect(f"{reverse('order_create')}?customer_id={customer.id}&garments={garments}&FurnitureDimensions={FurnitureDimensions}")
         return redirect(reverse('order_print', args=[order.id]))
 
     customer_id = request.GET.get('customer_id')
     garments_qs = request.GET.get('garments', '')
-    measurements_qs = request.GET.get('measurements', '')
+    FurnitureDimensions_qs = request.GET.get('FurnitureDimensions') or request.GET.get('measurements') or request.GET.get('dimensions') or ''
     
     if not customer_id:
-        # If accessed directly, redirect back to measurements profile
+        # If accessed directly, redirect back to FurnitureDimensions profile
         return redirect(reverse('measurement_profile'))
         
     customer = get_object_or_404(Customer, id=customer_id)
-    order_type = request.GET.get('order_type') or OrderType.STITCHING
+    order_type = request.GET.get('order_type') or OrderType.CUSTOM_BUILD
     
     # Generate temporary order number for display (will be finalized on save)
     today = timezone.localdate().strftime('%Y%m%d')
-    mock_order_id = f"HAF-{today}-auto"
+    last_order = Order.objects.order_by('-id').first()
+    next_id = last_order.id + 1 if last_order else 1
+    mock_order_id = f"HAF-{today}-{next_id:03d}"
 
-    from measurements.models import Measurement
+    from measurements.models import FurnitureDimension
     # Build initial list of items
     selected_items = []
-    all_cats = dict(get_all_garment_categories())
+    all_cats = dict(get_all_furniture_types())
 
-    if measurements_qs:
-        measurement_ids = [x.strip() for x in measurements_qs.split(',') if x.strip()]
-        for m_id in measurement_ids:
+    if FurnitureDimensions_qs:
+        FurnitureDimension_ids = [x.strip() for x in FurnitureDimensions_qs.split(',') if x.strip()]
+        for m_id in FurnitureDimension_ids:
             try:
-                m = Measurement.objects.get(id=m_id, customer=customer)
-                label = all_cats.get(m.garment_category, m.garment_category.title())
+                m = FurnitureDimension.objects.get(id=m_id, customer=customer)
+                label = all_cats.get(m.furniture_type, m.furniture_type.title())
                 selected_items.append({
-                    'type': m.garment_category,
+                    'type': m.furniture_type,
                     'label': label,
                     'qty': 1,
                     'rate': '',
-                    'measurement_id': m.id
+                    'FurnitureDimension_id': m.id,
+                    'measurement_id': m.id,
                 })
-            except (Measurement.DoesNotExist, ValueError):
+            except (FurnitureDimension.DoesNotExist, ValueError):
                 continue
     else:
         garment_types = garments_qs.split(',') if garments_qs else []
@@ -73,7 +75,7 @@ def order_create(request):
                 'label': label,
                 'qty': 1,
                 'rate': '',
-                'measurement_id': ''
+                'FurnitureDimension_id': ''
             })
 
     context = {
@@ -82,7 +84,6 @@ def order_create(request):
         'selected_items': selected_items,
         'order_types': OrderType.choices,
         'current_order_type': order_type,
-        'salespeople': Salesperson.objects.filter(is_active=True),
     }
     return render(request, 'orders/order_form.html', context)
 
@@ -114,41 +115,41 @@ def order_print(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     items = order.items.all()
     
-    # Get measurements for each item in the order
-    measurements = []
-    from measurements.models import get_all_garment_parameters, get_all_garment_categories
-    all_params = get_all_garment_parameters()
-    all_cats = dict(get_all_garment_categories())
+    # Get FurnitureDimensions for each item in the order
+    FurnitureDimensions = []
+    from measurements.models import get_all_furniture_parameters, get_all_furniture_types
+    all_params = get_all_furniture_parameters()
+    all_cats = dict(get_all_furniture_types())
 
     for item in items:
-        m = item.measurement
+        m = item.dimension
         if m:
-            params = all_params.get(m.garment_category, [])
+            params = all_params.get(m.furniture_type, [])
             ordered_values = []
             for p in params:
                 ordered_values.append({'label': p, 'value': m.values.get(p, '-')})
             
-            measurements.append({
-                'category_display': all_cats.get(m.garment_category, m.garment_category.title()),
+            FurnitureDimensions.append({
+                'category_display': all_cats.get(m.furniture_type, m.furniture_type.title()),
                 'data': ordered_values,
                 'notes': m.notes,
-                'is_sample_product': m.is_sample_product
+                'is_standard_catalog': m.is_standard_catalog
             })
-        elif item.garment_category:
+        elif item.furniture_type:
             # Fallback for legacy items
-            from measurements.models import Measurement
-            m = Measurement.objects.filter(customer=order.customer, garment_category=item.garment_category).order_by('-updated_at').first()
+            from measurements.models import FurnitureDimension
+            m = FurnitureDimension.objects.filter(customer=order.customer, furniture_type=item.furniture_type).order_by('-updated_at').first()
             if m:
-                params = all_params.get(item.garment_category, [])
+                params = all_params.get(item.furniture_type, [])
                 ordered_values = []
                 for p in params:
                     ordered_values.append({'label': p, 'value': m.values.get(p, '-')})
                 
-                measurements.append({
-                    'category_display': all_cats.get(item.garment_category, item.garment_category.title()),
+                FurnitureDimensions.append({
+                    'category_display': all_cats.get(item.furniture_type, item.furniture_type.title()),
                     'data': ordered_values,
                     'notes': m.notes,
-                    'is_sample_product': m.is_sample_product
+                    'is_standard_catalog': m.is_standard_catalog
                 })
                 
     amount_in_words = num2words(order.final_amount)
@@ -159,16 +160,19 @@ def order_print(request, order_id):
     num_fillers = max(0, max_total_rows - num_items)
     filler_rows = range(num_fillers)
 
-    # Chunk measurements into groups of max 3 items
-    measurement_groups = [measurements[i:i+3] for i in range(0, len(measurements), 3)]
+    # Chunk FurnitureDimensions into groups of max 3 items
+    FurnitureDimension_groups = [FurnitureDimensions[i:i+3] for i in range(0, len(FurnitureDimensions), 3)]
+
+    original_only = request.GET.get('original_only') == 'true'
 
     context = {
         'order': order,
         'items': items,
-        'measurements': measurements,
-        'measurement_groups': measurement_groups,
+        'FurnitureDimensions': FurnitureDimensions,
+        'FurnitureDimension_groups': FurnitureDimension_groups,
         'filler_rows': filler_rows,
         'amount_in_words': amount_in_words,
+        'original_only': original_only,
     }
     return render(request, 'orders/order_print.html', context)
 
@@ -191,32 +195,26 @@ def filtered_orders_from_request(request):
     if red_flag == '1':
         orders = orders.filter(is_red_flagged=True)
 
-    delivery_date_str = request.GET.get('delivery_date') or request.GET.get('delivery_from')
-    return_date_str = request.GET.get('return_date') or request.GET.get('return_from')
-    
-    delivery_date = parse_date(delivery_date_str) if delivery_date_str else None
-    return_date = parse_date(return_date_str) if return_date_str else None
+    date_str = request.GET.get('date') or request.GET.get('delivery_date') or request.GET.get('delivery_from')
+    order_date_val = parse_date(date_str) if date_str else None
 
-    if delivery_date:
-        orders = orders.filter(delivery_date=delivery_date)
-    if return_date:
-        orders = orders.filter(return_date=return_date)
+    if order_date_val:
+        orders = orders.filter(date=order_date_val)
 
     due = request.GET.get('due')
     today = timezone.localdate()
     if due == 'balance':
         orders = orders.filter(grand_total__gt=0)
     elif due == 'today':
-        orders = orders.filter(delivery_date=today).exclude(status__in=[OrderStatus.DELIVERED, OrderStatus.CANCELLED])
+        orders = orders.filter(date=today).exclude(status__in=[OrderStatus.DELIVERED, OrderStatus.CANCELLED])
     elif due == 'overdue':
-        orders = orders.filter(delivery_date__lt=today).exclude(status__in=[OrderStatus.DELIVERED, OrderStatus.CANCELLED])
+        orders = orders.filter(date__lt=today).exclude(status__in=[OrderStatus.DELIVERED, OrderStatus.CANCELLED])
 
     return orders, {
         'current_status': status,
         'statuses': OrderStatus.choices,
         'q': q,
-        'delivery_date': delivery_date,
-        'return_date': return_date,
+        'delivery_date': order_date_val,
         'due': due,
         'red_flag': red_flag,
     }
@@ -261,14 +259,39 @@ def order_detail(request, order_id):
         
     items = order.items.all()
     
-    from measurements.models import get_all_garment_parameters
+    import urllib.parse
+    # Generate WhatsApp Message
+    msg = f"Hello {order.customer.full_name},\n\n"
+    msg += f"Thank you for your order ({order.order_number}) at Home Art Furniture!\n\n"
+    msg += f"*Order Summary:*\n"
+    msg += f"Total Bill: ₹{order.final_amount}\n"
+    if order.advance_paid > 0:
+        msg += f"Advance Paid: ₹{order.advance_paid}\n"
+    if order.balance_due > 0:
+        msg += f"Pending Balance: ₹{order.balance_due}\n"
+        
+    public_invoice_url = request.build_absolute_uri(reverse('public_invoice', args=[order.access_token]))
+    msg += f"\nClick here to view or download your detailed bill:\n{public_invoice_url}"
+    
+    encoded_msg = urllib.parse.quote(msg)
+    
+    phone = order.customer.phone
+    # Strip spaces or special chars
+    phone = ''.join(filter(str.isdigit, phone))
+    # Add country code if missing (assuming India default as per project context)
+    if len(phone) == 10:
+        phone = '91' + phone
+        
+    whatsapp_link = f"https://wa.me/{phone}?text={encoded_msg}"
+    
+    from measurements.models import get_all_furniture_parameters
     context = {
         'order': order,
         'items': items,
         'statuses': OrderStatus.choices,
         'balance_due': order.balance_due,
-        'salespeople': Salesperson.objects.filter(is_active=True),
-        'garment_parameters': get_all_garment_parameters(),
+        'garment_parameters': get_all_furniture_parameters(),
+        'whatsapp_link': whatsapp_link,
     }
     return render(request, 'orders/order_detail.html', context)
 
@@ -292,18 +315,18 @@ def delivery_schedule(request):
     filter_status = request.GET.get('status', '')
     q = (request.GET.get('q') or '').strip()
 
-    orders = Order.objects.select_related('customer').prefetch_related('items').order_by('delivery_date', 'customer__full_name')
+    orders = Order.objects.select_related('customer').prefetch_related('items').order_by('date', 'customer__full_name')
 
     # Default: if no filters at all, show next 30 days + overdue
     if not any([filter_date_str, filter_from_str, filter_to_str, filter_status, q]):
         orders = orders.exclude(status__in=[OrderStatus.DELIVERED, OrderStatus.CANCELLED])
     else:
         if filter_date:
-            orders = orders.filter(delivery_date=filter_date)
+            orders = orders.filter(date=filter_date)
         if filter_from:
-            orders = orders.filter(delivery_date__gte=filter_from)
+            orders = orders.filter(date__gte=filter_from)
         if filter_to:
-            orders = orders.filter(delivery_date__lte=filter_to)
+            orders = orders.filter(date__lte=filter_to)
         if filter_status:
             orders = orders.filter(status=filter_status)
         if q:
@@ -313,11 +336,11 @@ def delivery_schedule(request):
                 | Q(customer__phone__icontains=q)
             )
 
-    # Group orders by delivery_date
+    # Group orders by date
     from collections import defaultdict
     grouped = defaultdict(list)
     for order in orders:
-        grouped[order.delivery_date].append(order)
+        grouped[order.date].append(order)
 
     # Sort groups: overdue first, then ascending
     def sort_key(d):
@@ -327,8 +350,8 @@ def delivery_schedule(request):
 
     # Summary stats
     total_orders = orders.count()
-    overdue_count = orders.filter(delivery_date__lt=today).exclude(status__in=[OrderStatus.DELIVERED, OrderStatus.CANCELLED]).count()
-    due_today_count = orders.filter(delivery_date=today).exclude(status__in=[OrderStatus.DELIVERED, OrderStatus.CANCELLED]).count()
+    overdue_count = orders.filter(date__lt=today).exclude(status__in=[OrderStatus.DELIVERED, OrderStatus.CANCELLED]).count()
+    due_today_count = orders.filter(date=today).exclude(status__in=[OrderStatus.DELIVERED, OrderStatus.CANCELLED]).count()
     total_balance = sum(o.balance_due for o in orders)
 
     context = {
@@ -422,3 +445,142 @@ def api_update_order_shortcut(request, order_id):
         'payment_method': order.payment_method,
         'payment_method_display': order.get_payment_method_display(),
     })
+
+
+@login_required
+def payment_report(request):
+    from datetime import datetime, timedelta
+    
+    start_date_str = request.GET.get('start_date')
+    end_date_str = request.GET.get('end_date')
+    
+    today = timezone.localdate()
+    if not start_date_str:
+        start_date = today - timedelta(days=30)
+    else:
+        start_date = parse_date(start_date_str) or (today - timedelta(days=30))
+        
+    if not end_date_str:
+        end_date = today
+    else:
+        end_date = parse_date(end_date_str) or today
+        
+    # Query orders in this date range
+    orders = Order.objects.filter(date__range=[start_date, end_date]).select_related('customer')
+    
+    # Categorize
+    cash_orders = orders.filter(payment_method=PaymentMethod.CASH).order_by('-date')
+    upi_orders = orders.filter(payment_method=PaymentMethod.UPI).order_by('-date')
+    
+    # Metrics
+    total_cash_advance = sum(o.advance_paid for o in cash_orders)
+    total_upi_advance = sum(o.advance_paid for o in upi_orders)
+    total_advance = total_cash_advance + total_upi_advance
+    
+    total_cash_pending = sum(o.grand_total for o in cash_orders)
+    total_upi_pending = sum(o.grand_total for o in upi_orders)
+    total_pending = total_cash_pending + total_upi_pending
+    
+    context = {
+        'cash_orders': cash_orders,
+        'upi_orders': upi_orders,
+        'start_date': start_date,
+        'end_date': end_date,
+        'total_cash_advance': total_cash_advance,
+        'total_upi_advance': total_upi_advance,
+        'total_advance': total_advance,
+        'total_cash_pending': total_cash_pending,
+        'total_upi_pending': total_upi_pending,
+        'total_pending': total_pending,
+        'cash_count': cash_orders.count(),
+        'upi_count': upi_orders.count(),
+    }
+    return render(request, 'orders/payment_report.html', context)
+
+
+@login_required
+def payment_report_print(request):
+    from datetime import datetime, timedelta
+    
+    start_date_str = request.GET.get('start_date')
+    end_date_str = request.GET.get('end_date')
+    
+    today = timezone.localdate()
+    if not start_date_str:
+        start_date = today - timedelta(days=30)
+    else:
+        start_date = parse_date(start_date_str) or (today - timedelta(days=30))
+        
+    if not end_date_str:
+        end_date = today
+    else:
+        end_date = parse_date(end_date_str) or today
+        
+    # Query orders in this date range
+    orders = Order.objects.filter(date__range=[start_date, end_date]).select_related('customer')
+    
+    # Categorize
+    cash_orders = orders.filter(payment_method=PaymentMethod.CASH).order_by('-date')
+    upi_orders = orders.filter(payment_method=PaymentMethod.UPI).order_by('-date')
+    
+    # Metrics
+    total_cash_advance = sum(o.advance_paid for o in cash_orders)
+    total_upi_advance = sum(o.advance_paid for o in upi_orders)
+    total_advance = total_cash_advance + total_upi_advance
+    
+    total_cash_pending = sum(o.grand_total for o in cash_orders)
+    total_upi_pending = sum(o.grand_total for o in upi_orders)
+    total_pending = total_cash_pending + total_upi_pending
+    
+    generated_at = timezone.localtime()
+    
+    context = {
+        'cash_orders': cash_orders,
+        'upi_orders': upi_orders,
+        'start_date': start_date,
+        'end_date': end_date,
+        'total_cash_advance': total_cash_advance,
+        'total_upi_advance': total_upi_advance,
+        'total_advance': total_advance,
+        'total_cash_pending': total_cash_pending,
+        'total_upi_pending': total_upi_pending,
+        'total_pending': total_pending,
+        'cash_count': cash_orders.count(),
+        'upi_count': upi_orders.count(),
+        'generated_at': generated_at,
+    }
+    return render(request, 'orders/payment_report_print.html', context)
+
+def public_order_invoice(request, token):
+    order = get_object_or_404(Order, access_token=token)
+    items = order.items.all()
+    
+    FurnitureDimensions = []
+    from measurements.models import get_all_furniture_parameters, get_all_furniture_types
+    all_params = get_all_furniture_parameters()
+    all_cats = dict(get_all_furniture_types())
+
+    for item in items:
+        m = item.dimension
+        if m:
+            params = all_params.get(m.furniture_type, [])
+            ordered_values = []
+            for p in params:
+                ordered_values.append({'label': p, 'value': m.values.get(p, '-')})
+            
+            FurnitureDimensions.append({
+                'category_display': all_cats.get(m.furniture_type, m.furniture_type.title()),
+                'data': ordered_values,
+                'notes': m.notes,
+                'is_standard_catalog': m.is_standard_catalog
+            })
+                
+    amount_in_words = num2words(order.final_amount)
+    
+    context = {
+        'order': order,
+        'items': items,
+        'FurnitureDimensions': FurnitureDimensions,
+        'amount_in_words': amount_in_words,
+    }
+    return render(request, 'orders/public_invoice.html', context)

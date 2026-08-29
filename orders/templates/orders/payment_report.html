@@ -1,0 +1,365 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Payments Report | Home Art Furniture Admin{% endblock %}
+
+{% block extra_head %}
+{% endblock %}
+
+{% block content %}
+<style>
+    .pay-metric-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .pay-metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.4);
+    }
+    .pay-segmented button { transition: all 0.25s ease; }
+
+    /* Table cell screen colors — using custom classes so print can override cleanly */
+    .pay-cell-date { color: rgba(255,255,255,0.5); }
+    .pay-cell-amount { color: #34d399; }
+    .pay-cell-name { color: #ffffff; }
+    .pay-cell-phone { color: rgba(255,255,255,0.3); font-size: 10px; }
+</style>
+
+<div class="pay-page-wrap p-4 sm:p-8 max-w-[1440px] mx-auto w-full">
+
+    <!-- ═══ Screen-Only Header ═══ -->
+    <div class="pay-screen-header flex flex-col lg:flex-row lg:items-end justify-between mb-10 gap-4">
+        <div>
+            <div class="flex items-center gap-2 text-white/40 text-[10px] sm:text-xs mb-1.5 uppercase tracking-widest">
+                <a href="{% url 'order_list' %}" class="hover:text-secondary transition-colors font-bold">Orders</a>
+                <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+                <span class="text-secondary font-bold">Payments</span>
+            </div>
+            <h2 class="font-serif text-2xl sm:text-3xl font-semibold text-white drop-shadow-md">Payments & Collection Report</h2>
+            <p class="text-white/50 text-xs sm:text-sm mt-1">Track and manage cash vs. UPI / QR collections and pending balances.</p>
+        </div>
+        <a href="{% url 'payment_report_print' %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}" target="_blank" class="btn-premium btn-premium--gold lg:w-auto text-center flex items-center justify-center gap-2 shrink-0">
+            <span class="material-symbols-outlined text-base">print</span>
+            PRINT REPORT
+        </a>
+    </div>
+
+
+    <!-- ═══ Screen-Only Summary Cards ═══ -->
+    <div class="pay-screen-cards grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10">
+        <!-- Cash Card -->
+        <div class="pay-metric-card rounded-2xl p-5 border border-emerald-500/20 bg-emerald-500/5 relative overflow-hidden group">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-white/50 text-[10px] sm:text-xs font-bold uppercase tracking-widest">Cash Collection</p>
+                <div class="w-9 h-9 rounded-xl bg-emerald-500/15 flex items-center justify-center border border-emerald-500/20">
+                    <span class="material-symbols-outlined text-emerald-400 text-[18px]">payments</span>
+                </div>
+            </div>
+            <p class="text-2xl sm:text-3xl font-black text-white tracking-tight">₹{{ total_cash_advance|floatformat:2 }}</p>
+            <div class="mt-4">
+                <div class="flex justify-between text-[10px] font-semibold text-white/40 mb-1">
+                    <span id="cash-pct-text">0% Collected</span>
+                    <span>Pending: ₹{{ total_cash_pending|floatformat:2 }}</span>
+                </div>
+                <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                    <div id="cash-pct-bar" class="h-full bg-emerald-400 rounded-full transition-all duration-1000" style="width: 0%;"></div>
+                </div>
+            </div>
+            <div class="flex justify-between items-center mt-4 pt-3 border-t border-white/5 text-[11px] text-white/50">
+                <span class="flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px]">receipt_long</span>
+                    {{ cash_count }} Order{{ cash_count|pluralize }}
+                </span>
+                <span class="text-[9px] uppercase tracking-wider font-bold bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">Cash</span>
+            </div>
+        </div>
+
+        <!-- UPI Card -->
+        <div class="pay-metric-card rounded-2xl p-5 border border-violet-500/20 bg-violet-500/5 relative overflow-hidden group">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-white/50 text-[10px] sm:text-xs font-bold uppercase tracking-widest">UPI / QR Collection</p>
+                <div class="w-9 h-9 rounded-xl bg-violet-500/15 flex items-center justify-center border border-violet-500/20">
+                    <span class="material-symbols-outlined text-violet-400 text-[18px]">qr_code_2</span>
+                </div>
+            </div>
+            <p class="text-2xl sm:text-3xl font-black text-white tracking-tight">₹{{ total_upi_advance|floatformat:2 }}</p>
+            <div class="mt-4">
+                <div class="flex justify-between text-[10px] font-semibold text-white/40 mb-1">
+                    <span id="upi-pct-text">0% Collected</span>
+                    <span>Pending: ₹{{ total_upi_pending|floatformat:2 }}</span>
+                </div>
+                <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                    <div id="upi-pct-bar" class="h-full bg-violet-400 rounded-full transition-all duration-1000" style="width: 0%;"></div>
+                </div>
+            </div>
+            <div class="flex justify-between items-center mt-4 pt-3 border-t border-white/5 text-[11px] text-white/50">
+                <span class="flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px]">receipt_long</span>
+                    {{ upi_count }} Order{{ upi_count|pluralize }}
+                </span>
+                <span class="text-[9px] uppercase tracking-wider font-bold bg-violet-500/15 text-violet-400 px-2 py-0.5 rounded border border-violet-500/20">UPI / QR</span>
+            </div>
+        </div>
+
+        <!-- Total Card -->
+        <div class="pay-metric-card rounded-2xl p-5 border border-amber-500/20 bg-amber-500/5 relative overflow-hidden group">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-white/50 text-[10px] sm:text-xs font-bold uppercase tracking-widest">Total Collected</p>
+                <div class="w-9 h-9 rounded-xl bg-amber-500/15 flex items-center justify-center border border-amber-500/20">
+                    <span class="material-symbols-outlined text-amber-400 text-[18px]">account_balance_wallet</span>
+                </div>
+            </div>
+            <p class="text-2xl sm:text-3xl font-black text-white tracking-tight">₹{{ total_advance|floatformat:2 }}</p>
+            <div class="mt-4">
+                <div class="flex justify-between text-[10px] font-semibold text-white/40 mb-1">
+                    <span id="total-pct-text">0% Collected</span>
+                    <span>Pending: ₹{{ total_pending|floatformat:2 }}</span>
+                </div>
+                <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                    <div id="total-pct-bar" class="h-full bg-amber-400 rounded-full transition-all duration-1000" style="width: 0%;"></div>
+                </div>
+            </div>
+            <div class="flex justify-between items-center mt-4 pt-3 border-t border-white/5 text-[11px] text-white/50">
+                <span class="flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px]">monitoring</span>
+                    Combined Overview
+                </span>
+                <span class="text-[9px] uppercase tracking-wider font-bold bg-amber-500/15 text-amber-400 px-2 py-0.5 rounded border border-amber-500/20">Summary</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ Date Filters ═══ -->
+    <form method="GET" action="{% url 'payment_report' %}" class="pay-filters-form rounded-2xl p-4 sm:p-5 mb-10 bg-white/5 border border-white/10">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+            <div>
+                <label class="block text-[10px] font-bold text-white/50 uppercase tracking-widest mb-2 px-1">Start Date</label>
+                <div class="haf-datepicker">
+                    <input type="hidden" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
+                    <div class="haf-datepicker__face">
+                        <input type="text" class="haf-datepicker__text text-xs sm:text-sm" placeholder="dd/mm/yyyy" value="{{ start_date|date:'d/m/Y' }}">
+                        <span class="material-symbols-outlined text-secondary text-[20px]">calendar_today</span>
+                    </div>
+                    <div class="haf-datepicker__popup">
+                        <div class="haf-calendar">
+                            <div class="haf-calendar__header"><div class="haf-calendar__header-info"><h3>---</h3><h2>Select Date</h2></div></div>
+                            <div class="haf-calendar__nav"><button type="button" class="prev-month"><span class="material-symbols-outlined">chevron_left</span></button><div class="haf-calendar__nav-title">Month Year</div><button type="button" class="next-month"><span class="material-symbols-outlined">chevron_right</span></button></div>
+                            <div class="haf-calendar__body"><div class="haf-calendar__days"><div class="haf-calendar__day-name">S</div><div class="haf-calendar__day-name">M</div><div class="haf-calendar__day-name">T</div><div class="haf-calendar__day-name">W</div><div class="haf-calendar__day-name">T</div><div class="haf-calendar__day-name">F</div><div class="haf-calendar__day-name">S</div></div><div class="haf-calendar__numbers"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-white/50 uppercase tracking-widest mb-2 px-1">End Date</label>
+                <div class="haf-datepicker">
+                    <input type="hidden" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+                    <div class="haf-datepicker__face">
+                        <input type="text" class="haf-datepicker__text text-xs sm:text-sm" placeholder="dd/mm/yyyy" value="{{ end_date|date:'d/m/Y' }}">
+                        <span class="material-symbols-outlined text-secondary text-[20px]">calendar_today</span>
+                    </div>
+                    <div class="haf-datepicker__popup">
+                        <div class="haf-calendar">
+                            <div class="haf-calendar__header"><div class="haf-calendar__header-info"><h3>---</h3><h2>Select Date</h2></div></div>
+                            <div class="haf-calendar__nav"><button type="button" class="prev-month"><span class="material-symbols-outlined">chevron_left</span></button><div class="haf-calendar__nav-title">Month Year</div><button type="button" class="next-month"><span class="material-symbols-outlined">chevron_right</span></button></div>
+                            <div class="haf-calendar__body"><div class="haf-calendar__days"><div class="haf-calendar__day-name">S</div><div class="haf-calendar__day-name">M</div><div class="haf-calendar__day-name">T</div><div class="haf-calendar__day-name">W</div><div class="haf-calendar__day-name">T</div><div class="haf-calendar__day-name">F</div><div class="haf-calendar__day-name">S</div></div><div class="haf-calendar__numbers"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button type="submit" class="flex-1 btn-premium text-sm !py-3">Filter</button>
+                <a href="{% url 'payment_report' %}" class="flex items-center justify-center px-4 py-2 border border-white/10 rounded-[12px] text-white/60 hover:bg-white/5 transition-all text-xs font-semibold">Reset</a>
+            </div>
+        </div>
+    </form>
+
+    <!-- ═══ Segmented Pill Switcher (Screen-Only) ═══ -->
+    <div class="pay-segmented flex p-1 bg-white/5 border border-white/10 rounded-2xl mb-8 max-w-sm gap-1 select-none">
+        <button id="tab-cash-btn" onclick="switchTab('cash')" class="flex-1 py-2.5 px-4 font-bold text-xs rounded-xl flex items-center justify-center gap-2 bg-secondary text-white shadow-lg">
+            <span class="material-symbols-outlined text-[16px]">payments</span>
+            Cash ({{ cash_orders|length }})
+        </button>
+        <button id="tab-upi-btn" onclick="switchTab('upi')" class="flex-1 py-2.5 px-4 font-bold text-xs rounded-xl flex items-center justify-center gap-2 text-white/40 hover:text-white/70">
+            <span class="material-symbols-outlined text-[16px]">qr_code_2</span>
+            UPI / QR ({{ upi_orders|length }})
+        </button>
+    </div>
+
+    <!-- ═══ Cash Payments Table ═══ -->
+    <div id="tab-cash-content" class="pay-tab-content mb-6">
+        <div class="pay-table-wrap rounded-2xl overflow-hidden border border-white/10 bg-white/[0.03]">
+            <div class="overflow-x-auto">
+                <table class="pay-table w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-white/10">
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/60">Date</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/60">Order ID</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/60">Customer</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/60 text-right">Advance Paid</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/60 text-right">Pending Balance</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/60 text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        {% for order in cash_orders %}
+                        <tr class="hover:bg-white/[0.03] transition-colors">
+                            <td class="px-5 py-3.5 text-xs whitespace-nowrap pay-cell-date">{{ order.date|date:"d M Y" }}</td>
+                            <td class="px-5 py-3.5 text-xs whitespace-nowrap">
+                                <a href="{% url 'order_detail' order.id %}" class="font-mono font-bold text-secondary hover:underline">{{ order.order_number }}</a>
+                            </td>
+                            <td class="px-5 py-3.5 text-xs">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="pay-avatar w-7 h-7 rounded-full bg-secondary/20 text-secondary border border-secondary/30 flex items-center justify-center text-[10px] font-bold shrink-0">
+                                        {{ order.customer.full_name|slice:":1"|upper }}
+                                    </div>
+                                    <div>
+                                        <div class="font-semibold pay-cell-name">{{ order.customer.full_name }}</div>
+                                        <div class="pay-cell-phone">{{ order.customer.phone }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-5 py-3.5 text-right text-xs font-bold whitespace-nowrap pay-cell-amount">₹{{ order.advance_paid }}</td>
+                            <td class="px-5 py-3.5 text-right text-xs font-bold whitespace-nowrap">
+                                {% if order.grand_total > 0 %}
+                                <span class="pay-balance-badge pay-cell-amount">₹{{ order.grand_total }}</span>
+                                {% else %}
+                                <span class="pay-balance-badge inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 uppercase tracking-wide">Paid</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-5 py-3.5 text-center whitespace-nowrap">
+                                <span class="pay-status-badge px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider
+                                    {% if order.status == 'delivered' %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/20
+                                    {% elif order.status == 'cutting' %}bg-orange-500/15 text-orange-400 border border-orange-500/20
+                                    {% elif order.status == 'pending' %}bg-amber-500/15 text-amber-400 border border-amber-500/20
+                                    {% elif order.status == 'in_progress' %}bg-sky-500/15 text-sky-400 border border-sky-500/20
+                                    {% elif order.status == 'processing' %}bg-indigo-500/15 text-indigo-400 border border-indigo-500/20
+                                    {% elif order.status == 'cancelled' %}bg-rose-500/15 text-rose-400 border border-rose-500/20
+                                    {% else %}bg-white/10 text-white/50 border border-white/10{% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="px-5 py-10 text-center text-white/30 italic text-sm">No cash payment orders found in this date range.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ UPI / QR Payments Table ═══ -->
+    <div id="tab-upi-content" class="pay-tab-content hidden mb-6">
+        <div class="pay-table-wrap rounded-2xl overflow-hidden border border-white/10 bg-white/[0.03]">
+            <div class="overflow-x-auto">
+                <table class="pay-table w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-white/10">
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/60">Date</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/60">Order ID</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/60">Customer</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/60 text-right">Advance Paid</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/60 text-right">Pending Balance</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/60 text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        {% for order in upi_orders %}
+                        <tr class="hover:bg-white/[0.03] transition-colors">
+                            <td class="px-5 py-3.5 text-xs whitespace-nowrap pay-cell-date">{{ order.date|date:"d M Y" }}</td>
+                            <td class="px-5 py-3.5 text-xs whitespace-nowrap">
+                                <a href="{% url 'order_detail' order.id %}" class="font-mono font-bold text-secondary hover:underline">{{ order.order_number }}</a>
+                            </td>
+                            <td class="px-5 py-3.5 text-xs">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="pay-avatar w-7 h-7 rounded-full bg-secondary/20 text-secondary border border-secondary/30 flex items-center justify-center text-[10px] font-bold shrink-0">
+                                        {{ order.customer.full_name|slice:":1"|upper }}
+                                    </div>
+                                    <div>
+                                        <div class="font-semibold pay-cell-name">{{ order.customer.full_name }}</div>
+                                        <div class="pay-cell-phone">{{ order.customer.phone }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-5 py-3.5 text-right text-xs font-bold whitespace-nowrap pay-cell-amount">₹{{ order.advance_paid }}</td>
+                            <td class="px-5 py-3.5 text-right text-xs font-bold whitespace-nowrap">
+                                {% if order.grand_total > 0 %}
+                                <span class="pay-balance-badge pay-cell-amount">₹{{ order.grand_total }}</span>
+                                {% else %}
+                                <span class="pay-balance-badge inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 uppercase tracking-wide">Paid</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-5 py-3.5 text-center whitespace-nowrap">
+                                <span class="pay-status-badge px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider
+                                    {% if order.status == 'delivered' %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/20
+                                    {% elif order.status == 'cutting' %}bg-orange-500/15 text-orange-400 border border-orange-500/20
+                                    {% elif order.status == 'pending' %}bg-amber-500/15 text-amber-400 border border-amber-500/20
+                                    {% elif order.status == 'in_progress' %}bg-sky-500/15 text-sky-400 border border-sky-500/20
+                                    {% elif order.status == 'processing' %}bg-indigo-500/15 text-indigo-400 border border-indigo-500/20
+                                    {% elif order.status == 'cancelled' %}bg-rose-500/15 text-rose-400 border border-rose-500/20
+                                    {% else %}bg-white/10 text-white/50 border border-white/10{% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="px-5 py-10 text-center text-white/30 italic text-sm">No UPI / QR payment orders found in this date range.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% block extra_scripts %}
+<script>
+    function switchTab(mode) {
+        const cashBtn = document.getElementById('tab-cash-btn');
+        const upiBtn = document.getElementById('tab-upi-btn');
+        const cashContent = document.getElementById('tab-cash-content');
+        const upiContent = document.getElementById('tab-upi-content');
+        const activeClass = "flex-1 py-2.5 px-4 font-bold text-xs rounded-xl flex items-center justify-center gap-2 bg-secondary text-white shadow-lg";
+        const inactiveClass = "flex-1 py-2.5 px-4 font-bold text-xs rounded-xl flex items-center justify-center gap-2 text-white/40 hover:text-white/70";
+
+        if (mode === 'cash') {
+            cashBtn.className = activeClass;
+            upiBtn.className = inactiveClass;
+            cashContent.classList.remove('hidden');
+            upiContent.classList.add('hidden');
+        } else {
+            upiBtn.className = activeClass;
+            cashBtn.className = inactiveClass;
+            upiContent.classList.remove('hidden');
+            cashContent.classList.add('hidden');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const cashAdv = parseFloat("{{ total_cash_advance }}") || 0;
+        const cashPend = parseFloat("{{ total_cash_pending }}") || 0;
+        const upiAdv = parseFloat("{{ total_upi_advance }}") || 0;
+        const upiPend = parseFloat("{{ total_upi_pending }}") || 0;
+        const totalAdv = parseFloat("{{ total_advance }}") || 0;
+        const totalPend = parseFloat("{{ total_pending }}") || 0;
+
+        const setBar = (adv, pend, barId, pctId) => {
+            const sum = adv + pend;
+            const pct = sum > 0 ? Math.round((adv / sum) * 100) : 0;
+            const bar = document.getElementById(barId);
+            const txt = document.getElementById(pctId);
+            if (bar) bar.style.width = pct + '%';
+            if (txt) txt.textContent = pct + '% Collected';
+        };
+
+        setBar(cashAdv, cashPend, 'cash-pct-bar', 'cash-pct-text');
+        setBar(upiAdv, upiPend, 'upi-pct-bar', 'upi-pct-text');
+        setBar(totalAdv, totalPend, 'total-pct-bar', 'total-pct-text');
+    });
+</script>
+{% endblock %}
+
+{% endblock %}

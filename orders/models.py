@@ -1,19 +1,17 @@
+import uuid
 from django.db import models
 from django.utils import timezone
 from customers.models import Customer
-from measurements.models import GarmentCategory, Measurement
-from salesperson.models import Salesperson
+from measurements.models import FurnitureType, FurnitureDimension
 
 class OrderType(models.TextChoices):
-    STITCHING = 'stitching', 'Fresh Stitching'
+    CUSTOM_BUILD = 'custom_build', 'Custom Build'
     RENTAL = 'rental', 'Rental'
 
 class OrderStatus(models.TextChoices):
     PENDING = 'pending', 'Pending'
     IN_PROGRESS = 'in_progress', 'In Progress'
-    READY = 'ready', 'Ready for Pickup'
     DELIVERED = 'delivered', 'Delivered'
-    RETURNED = 'returned', 'Returned (Rental)'
     CANCELLED = 'cancelled', 'Cancelled'
 
 class PaymentMethod(models.TextChoices):
@@ -24,36 +22,27 @@ class PaymentMethod(models.TextChoices):
 
 class Order(models.Model):
     order_number = models.CharField(max_length=30, unique=True, editable=False, blank=True, default='')
+    access_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='orders')
-    salesperson = models.ForeignKey(Salesperson, on_delete=models.SET_NULL, null=True, blank=True, related_name='orders')
-    order_type = models.CharField(max_length=20, choices=OrderType.choices, default=OrderType.STITCHING)
+    order_type = models.CharField(max_length=20, choices=OrderType.choices, default=OrderType.CUSTOM_BUILD)
     status = models.CharField(max_length=20, choices=OrderStatus.choices, default=OrderStatus.PENDING)
     
-    booking_date = models.DateField()
-    delivery_date = models.DateField()
-    return_date = models.DateField(null=True, blank=True)  # For rentals
+    date = models.DateField(default=timezone.localdate)
     notes = models.TextField(blank=True)
 
     is_red_flagged = models.BooleanField(
         default=False,
         verbose_name="Red Flag (Outsource Required)",
-        help_text="Mark if the garment/catalog is unavailable in-store and must be ordered from a 3rd party."
+        help_text="Mark if the item/catalog is unavailable in-store and must be ordered from a 3rd party."
     )
     is_urgent = models.BooleanField(
         default=False,
         verbose_name="Urgent",
         help_text="Mark if this outsourced order requires urgent processing."
     )
-    is_buy_back = models.BooleanField(
-        default=False,
-        verbose_name="Buy Back",
-        help_text="Check if this order is a buy back."
-    )
     # Billing Totals
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    deposit_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    is_deposit_paid = models.BooleanField(default=False)
     final_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     advance_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     payment_method = models.CharField(max_length=20, choices=PaymentMethod.choices, default=PaymentMethod.CASH)
@@ -75,7 +64,7 @@ class Order(models.Model):
             raise ValueError('Order must be saved before assigning an order number.')
         if self.order_number and not self.order_number.startswith('TMP-'):
             return
-        date_value = self.booking_date or timezone.localdate()
+        date_value = self.date or timezone.localdate()
         self.order_number = f"HAF-{date_value:%Y%m%d}-{self.pk:03d}"
         self.save(update_fields=['order_number'])
 
@@ -84,8 +73,8 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
-    garment_category = models.CharField(max_length=50, null=True, blank=True)
-    measurement = models.ForeignKey(Measurement, on_delete=models.SET_NULL, null=True, blank=True)
+    furniture_type = models.CharField(max_length=50, null=True, blank=True)
+    dimension = models.ForeignKey(FurnitureDimension, on_delete=models.SET_NULL, null=True, blank=True)
     description = models.CharField(max_length=255)
     quantity = models.PositiveIntegerField(default=1)
     rate = models.DecimalField(max_digits=10, decimal_places=2)

@@ -1,0 +1,325 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Inventory | Home Art Furniture Admin{% endblock %}
+
+{% block content %}
+<style>
+    .out-of-stock-row {
+        background-color: rgba(239, 68, 68, 0.04) !important;
+    }
+    body.dark-mode .out-of-stock-row {
+        background-color: rgba(239, 68, 68, 0.08) !important;
+    }
+    .low-stock-row {
+        background-color: rgba(245, 158, 11, 0.04) !important;
+    }
+    body.dark-mode .low-stock-row {
+        background-color: rgba(245, 158, 11, 0.08) !important;
+    }
+
+    /* SKU Badge Styling */
+    .sku-badge {
+        font-family: monospace;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 8px;
+        border-radius: 6px;
+        background-color: rgba(0, 0, 0, 0.06) !important;
+        color: #334155 !important;
+        display: inline-block;
+    }
+    body.dark-mode .sku-badge {
+        background-color: rgba(255, 255, 255, 0.08) !important;
+        color: rgba(255, 255, 255, 0.8) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+
+    /* Action Buttons Styling */
+    .btn-action-update {
+        background-color: rgba(16, 185, 129, 0.1) !important;
+        color: #10b981 !important;
+        border: 1px solid rgba(16, 185, 129, 0.2) !important;
+    }
+    .btn-action-update:hover {
+        background-color: rgba(16, 185, 129, 0.2) !important;
+        color: #059669 !important;
+    }
+    body.dark-mode .btn-action-update {
+        background-color: rgba(16, 185, 129, 0.15) !important;
+        color: #34d399 !important;
+        border: 1px solid rgba(52, 211, 153, 0.25) !important;
+    }
+    body.dark-mode .btn-action-update:hover {
+        background-color: rgba(16, 185, 129, 0.25) !important;
+        color: #6ee7b7 !important;
+    }
+
+    .btn-action-edit {
+        background-color: rgba(100, 116, 139, 0.1) !important;
+        color: #64748b !important;
+        border: 1px solid rgba(100, 116, 139, 0.2) !important;
+    }
+    .btn-action-edit:hover {
+        background-color: rgba(100, 116, 139, 0.2) !important;
+        color: #475569 !important;
+    }
+    body.dark-mode .btn-action-edit {
+        background-color: rgba(255, 255, 255, 0.08) !important;
+        color: rgba(255, 255, 255, 0.8) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    body.dark-mode .btn-action-edit:hover {
+        background-color: rgba(255, 255, 255, 0.15) !important;
+        color: #ffffff !important;
+    }
+
+    /* Force Action Icon Color inside Buttons */
+    .btn-action-update span,
+    .btn-action-edit span {
+        color: inherit !important;
+    }
+
+    /* Unit Cost and Value Styling */
+    .cost-text {
+        color: #475569 !important;
+    }
+    body.dark-mode .cost-text {
+        color: rgba(255, 255, 255, 0.8) !important;
+    }
+
+    .value-text {
+        color: #0f172a !important;
+    }
+    body.dark-mode .value-text {
+        color: #ffffff !important;
+    }
+</style>
+<div class="p-4 sm:p-8 max-w-[1440px] mx-auto w-full">
+    <!-- Header -->
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-8 gap-4">
+        <div>
+            <div class="flex items-center gap-2 text-slate-500 dark:text-white/40 text-[10px] sm:text-xs mb-1.5 uppercase tracking-widest font-bold">
+                <span class="text-secondary">Inventory</span>
+                <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+                <span>Materials</span>
+            </div>
+            <h2 class="font-h2 text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-white mb-1 sm:mb-2 drop-shadow-md">Raw Materials</h2>
+            <p class="text-slate-600 dark:text-white/60 text-sm sm:text-base font-body-md">Manage inventory levels for all manufacturing materials.</p>
+        </div>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <a href="{% url 'supplier_list' %}" class="btn-premium flex-1 sm:flex-none text-center">
+                <span class="btn-premium__label">Suppliers</span>
+            </a>
+            <a href="{% url 'material_create' %}" class="btn-premium btn-premium--gold flex-1 sm:flex-none text-center">
+                <span class="btn-premium__label">NEW MATERIAL</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary Metrics -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+        <!-- Total Materials -->
+        <div class="glass-panel p-5 rounded-2xl">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-xs font-bold text-slate-500 dark:text-white/50 uppercase tracking-widest">Total Materials</h3>
+                <span class="material-symbols-outlined text-slate-400 dark:text-white/30 text-[20px]">category</span>
+            </div>
+            <p class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">{{ total_count }}</p>
+        </div>
+        
+        <!-- Low Stock Alerts -->
+        <div class="glass-panel p-5 rounded-2xl">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-xs font-bold {% if low_stock_count > 0 or out_of_stock_count > 0 %}text-red-600 dark:text-red-400{% else %}text-emerald-600 dark:text-emerald-400{% endif %} uppercase tracking-widest">Stock Alerts</h3>
+                <span class="material-symbols-outlined {% if low_stock_count > 0 or out_of_stock_count > 0 %}text-red-500 dark:text-red-400{% else %}text-emerald-500 dark:text-emerald-400{% endif %} text-[20px]">warning</span>
+            </div>
+            <div class="flex items-end gap-2">
+                <p class="text-2xl sm:text-3xl font-black {% if low_stock_count > 0 or out_of_stock_count > 0 %}text-red-700 dark:text-red-300{% else %}text-emerald-600 dark:text-emerald-400{% endif %}">{{ low_stock_count|add:out_of_stock_count }}</p>
+                <p class="text-xs {% if low_stock_count > 0 or out_of_stock_count > 0 %}text-red-600/70 dark:text-red-400/70{% else %}text-emerald-600/70 dark:text-emerald-400/70{% endif %} mb-1">items need attention</p>
+            </div>
+        </div>
+
+        <!-- Total Value -->
+        <div class="glass-panel p-5 rounded-2xl">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-xs font-bold text-amber-700 dark:text-secondary uppercase tracking-widest">Inventory Value</h3>
+                <span class="material-symbols-outlined text-amber-600 dark:text-secondary/70 text-[20px]">account_balance_wallet</span>
+            </div>
+            <p class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">₹{{ total_value|floatformat:2 }}</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <form method="GET" action="{% url 'material_list' %}" class="glass-panel p-4 sm:p-6 mb-6 relative z-20">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-[2fr_1.5fr_1.5fr_1fr] gap-4 items-end">
+            <!-- Search -->
+            <div>
+                <label class="block text-xs font-bold text-theme-secondary uppercase tracking-widest mb-2 px-1">Search</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-white/40">search</span>
+                    <input name="q" value="{{ q|default:'' }}" class="w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-[12px] text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:text-white/20 focus:outline-none focus:border-secondary/50 transition-all" placeholder="Name, SKU, Supplier" type="search">
+                </div>
+            </div>
+            
+            <!-- Category -->
+            <div>
+                <label class="block text-xs font-bold text-theme-secondary uppercase tracking-widest mb-2 px-1">Category</label>
+                <div class="haf-dropdown">
+                    <input type="checkbox" id="category-dropdown">
+                    <input type="hidden" name="category" value="{{ category|default:'' }}">
+                    <label class="haf-dropdown__face rounded-[12px]" for="category-dropdown">
+                        <div class="haf-dropdown__text text-slate-900 dark:text-white font-bold text-xs sm:text-sm">
+                            {% if category %}
+                                {% for value,label in categories %}
+                                    {% if category == value %}{{ label }}{% endif %}
+                                {% endfor %}
+                            {% else %}
+                                All Categories
+                            {% endif %}
+                        </div>
+                        <span class="material-symbols-outlined text-slate-500 dark:text-white/40">expand_more</span>
+                    </label>
+                    <ul class="haf-dropdown__items max-h-[300px] overflow-y-auto">
+                        <li class="haf-dropdown__item" data-value="">All Categories</li>
+                        {% for value,label in categories %}
+                        <li class="haf-dropdown__item" data-value="{{ value }}">{{ label }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Stock Status -->
+            <div>
+                <label class="block text-xs font-bold text-theme-secondary uppercase tracking-widest mb-2 px-1">Stock Status</label>
+                <div class="haf-dropdown">
+                    <input type="checkbox" id="stock-dropdown">
+                    <input type="hidden" name="stock" value="{{ stock_filter|default:'' }}">
+                    <label class="haf-dropdown__face rounded-[12px]" for="stock-dropdown">
+                        <div class="haf-dropdown__text text-slate-900 dark:text-white font-bold text-xs sm:text-sm">
+                            {% if stock_filter == 'low' %}Low Stock{% elif stock_filter == 'out' %}Out of Stock{% else %}All Items{% endif %}
+                        </div>
+                        <span class="material-symbols-outlined text-slate-500 dark:text-white/40">expand_more</span>
+                    </label>
+                    <ul class="haf-dropdown__items">
+                        <li class="haf-dropdown__item" data-value="">All Items</li>
+                        <li class="haf-dropdown__item" data-value="low">Low Stock</li>
+                        <li class="haf-dropdown__item" data-value="out">Out of Stock</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit" class="flex-1 btn-premium text-sm">Apply</button>
+                <a href="{% url 'inventory_print' %}" target="_blank" class="flex items-center justify-center px-4 text-sm font-semibold text-slate-700 dark:text-white/80 hover:text-white border border-slate-300 dark:border-white/10 rounded-[12px] bg-slate-100 dark:bg-white/5 hover:bg-white/10" title="Print Inventory Report">
+                    <span class="material-symbols-outlined text-[18px]">print</span>
+                </a>
+                {% if q or category or stock_filter %}
+                <a href="{% url 'material_list' %}" class="flex items-center justify-center px-4 text-sm font-semibold text-slate-700 dark:text-white/80 hover:text-white border border-slate-300 dark:border-white/10 rounded-[12px] bg-slate-100 dark:bg-white/5 hover:bg-white/10" title="Clear filters">
+                    <span class="material-symbols-outlined text-[18px]">close</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+
+    <!-- Table -->
+    <div class="glass-panel rounded-[20px] overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-theme-border bg-slate-100/50 dark:bg-white/[0.02]">
+                        <th class="py-4 px-5 text-[10px] sm:text-xs font-bold text-slate-500 dark:text-white/40 uppercase tracking-widest whitespace-nowrap">SKU</th>
+                        <th class="py-4 px-5 text-[10px] sm:text-xs font-bold text-slate-500 dark:text-white/40 uppercase tracking-widest whitespace-nowrap">Item</th>
+                        <th class="py-4 px-5 text-[10px] sm:text-xs font-bold text-slate-500 dark:text-white/40 uppercase tracking-widest whitespace-nowrap">Supplier</th>
+                        <th class="py-4 px-5 text-[10px] sm:text-xs font-bold text-slate-500 dark:text-white/40 uppercase tracking-widest whitespace-nowrap">Stock Level</th>
+                        <th class="py-4 px-5 text-[10px] sm:text-xs font-bold text-slate-500 dark:text-white/40 uppercase tracking-widest whitespace-nowrap text-right">Unit Cost</th>
+                        <th class="py-4 px-5 text-[10px] sm:text-xs font-bold text-slate-500 dark:text-white/40 uppercase tracking-widest whitespace-nowrap text-right">Value</th>
+                        <th class="py-4 px-5 text-[10px] sm:text-xs font-bold text-slate-500 dark:text-white/40 uppercase tracking-widest whitespace-nowrap text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-theme-border">
+                    {% for item in materials %}
+                    <tr class="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors {% if item.is_out_of_stock %}out-of-stock-row{% elif item.is_low_stock %}low-stock-row{% endif %}">
+                        <td class="py-4 px-5 whitespace-nowrap">
+                            <span class="sku-badge">{{ item.sku }}</span>
+                        </td>
+                        <td class="py-4 px-5">
+                            <a href="{% url 'material_detail' item.pk %}" class="font-bold text-slate-900 dark:text-white hover:text-secondary transition-colors block">{{ item.name }}</a>
+                            <span class="text-[11px] text-slate-500 dark:text-white/50">{{ item.get_category_display }}</span>
+                        </td>
+                        <td class="py-4 px-5">
+                            {% if item.supplier %}
+                            <a href="{% url 'supplier_edit' item.supplier.pk %}" class="text-sm font-semibold text-slate-700 dark:text-white/80 hover:text-secondary truncate block max-w-[150px]">{{ item.supplier.name }}</a>
+                            {% else %}
+                            <span class="text-slate-400 dark:text-white/30 text-xs">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 px-5 min-w-[160px]">
+                            <div class="flex items-center justify-between mb-1">
+                                <div class="flex items-baseline">
+                                    <span class="text-sm font-black {% if item.is_out_of_stock %}text-red-500{% elif item.is_low_stock %}text-amber-500{% else %}text-emerald-500{% endif %}">
+                                        {{ item.current_stock|floatformat:2 }}
+                                    </span>
+                                    {% if item.min_stock > 0 %}
+                                    <span class="text-[10px] text-slate-500 dark:text-white/40 ml-1">
+                                        / {{ item.min_stock|floatformat:2 }}
+                                    </span>
+                                    {% endif %}
+                                    <span class="text-[10px] text-slate-500 dark:text-white/40 ml-1 font-medium">
+                                        {{ item.get_unit_display }}
+                                    </span>
+                                </div>
+                                {% if item.is_out_of_stock %}
+                                <span class="text-[9px] uppercase tracking-wider bg-red-500/10 text-red-500 px-1.5 py-0.5 rounded border border-red-500/20 font-black">Empty</span>
+                                {% elif item.is_low_stock %}
+                                <span class="text-[9px] uppercase tracking-wider bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded border border-amber-500/20 font-black">Low</span>
+                                {% endif %}
+                            </div>
+                            <!-- Capacity progress bar relative to min_stock -->
+                            <div class="w-full h-1.5 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden flex">
+                                {% if item.is_out_of_stock %}
+                                    <!-- 0% filled for out of stock -->
+                                {% elif item.min_stock > 0 %}
+                                    {% widthratio item.current_stock item.min_stock 100 as pct %}
+                                    <div class="h-full {% if item.is_low_stock %}bg-amber-500{% else %}bg-emerald-500{% endif %} rounded-full" style="width: min({{ pct }}%, 100%);"></div>
+                                {% else %}
+                                    {% if item.current_stock > 0 %}
+                                        <div class="h-full bg-emerald-500 rounded-full" style="width: 100%;"></div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="py-4 px-5 text-right whitespace-nowrap">
+                            <span class="text-sm font-semibold cost-text">₹{{ item.cost_per_unit|floatformat:2 }}</span>
+                        </td>
+                        <td class="py-4 px-5 text-right whitespace-nowrap">
+                            <span class="text-sm font-bold value-text">₹{{ item.stock_value|floatformat:2 }}</span>
+                        </td>
+                        <td class="py-4 px-5 text-right whitespace-nowrap">
+                            <div class="flex items-center justify-end gap-2">
+                                <a href="{% url 'stock_transaction' item.pk %}" class="w-8 h-8 rounded-lg flex items-center justify-center btn-action-update transition-colors" title="Update Stock">
+                                    <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+                                </a>
+                                <a href="{% url 'material_edit' item.pk %}" class="w-8 h-8 rounded-lg flex items-center justify-center btn-action-edit transition-colors" title="Edit Material">
+                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="py-12 text-center text-slate-500 dark:text-white/40">
+                            <span class="material-symbols-outlined text-4xl mb-3 opacity-50 block">inventory_2</span>
+                            <p class="text-sm">No materials found.</p>
+                            {% if q or category or stock_filter %}
+                            <a href="{% url 'material_list' %}" class="text-secondary hover:underline mt-2 inline-block text-xs">Clear all filters</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,145 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Staff Login | Home Art Furniture</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Outfit:wght@100..900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+        }
+        :root {
+            --page-bg: #f8fafc;
+            --accent: #b45309;
+            --accent-dark: #92400e;
+            --primary: #0f172a;
+        }
+        body {
+            background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.8) 0%, rgba(241, 245, 249, 0.95) 100%), #f1f5f9;
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+        }
+        .brand-font {
+            font-family: "Outfit", sans-serif;
+        }
+        .serif-font {
+            font-family: "Playfair Display", serif;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4 min-h-screen">
+    <div class="w-full max-w-md">
+        <!-- Logo & Brand Header -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200/80 shadow-md mb-4">
+                <span class="material-symbols-outlined text-amber-700 text-3xl">chair</span>
+            </div>
+            <h1 class="brand-font text-3xl font-bold tracking-tight text-slate-900">Home Art Furniture</h1>
+            <p class="text-sm font-medium text-slate-500 mt-1">Store Management & Atelier Portal</p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="bg-white/80 backdrop-blur-xl border border-slate-200/80 rounded-3xl shadow-xl p-8 sm:p-10">
+            <div class="mb-6">
+                <h2 class="serif-font text-2xl font-bold text-slate-900">Staff Sign In</h2>
+                <p class="text-xs text-slate-500 mt-1">Authorized store personnel access only.</p>
+            </div>
+
+            <!-- Error Banner -->
+            {% if form.errors %}
+            <div class="mb-6 flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-3.5 text-red-800">
+                <span class="material-symbols-outlined text-red-500 text-xl shrink-0 mt-0.5">error</span>
+                <div class="text-xs">
+                    <p class="font-semibold">Authentication failed</p>
+                    <p class="text-red-700 mt-0.5">Invalid username or password. Please verify your credentials.</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <form method="POST" action="{% url 'login' %}" autocomplete="off" class="space-y-5">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next|default:'/' }}">
+
+                <!-- Username Field -->
+                <div>
+                    <label for="id_username" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Username</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <span class="material-symbols-outlined text-[20px]">person</span>
+                        </div>
+                        <input
+                            type="text"
+                            name="username"
+                            id="id_username"
+                            required
+                            autofocus
+                            value="{{ form.username.value|default:'' }}"
+                            placeholder="Enter username"
+                            class="w-full pl-11 pr-4 py-3 bg-slate-50/80 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600 transition"
+                        />
+                    </div>
+                </div>
+
+                <!-- Password Field -->
+                <div>
+                    <label for="id_password" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Password</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <span class="material-symbols-outlined text-[20px]">lock</span>
+                        </div>
+                        <input
+                            type="password"
+                            name="password"
+                            id="id_password"
+                            required
+                            placeholder="Enter password"
+                            class="w-full pl-11 pr-11 py-3 bg-slate-50/80 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600 transition"
+                        />
+                        <button
+                            type="button"
+                            onclick="togglePasswordVisibility()"
+                            class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition"
+                            title="Toggle password visibility"
+                        >
+                            <span class="material-symbols-outlined text-[20px]" id="eye-icon">visibility</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button
+                    type="submit"
+                    class="w-full mt-2 py-3.5 px-4 bg-amber-700 hover:bg-amber-800 active:bg-amber-900 text-white font-semibold text-sm rounded-xl shadow-lg shadow-amber-900/10 hover:shadow-amber-900/20 transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                    <span>Sign In</span>
+                    <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                </button>
+            </form>
+
+            <div class="mt-8 pt-6 border-t border-slate-100 text-center">
+                <p class="text-xs text-slate-400">
+                    Protected System &bull; Home Art Furniture internal use only
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePasswordVisibility() {
+            const pwdInput = document.getElementById('id_password');
+            const eyeIcon = document.getElementById('eye-icon');
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                eyeIcon.textContent = 'visibility_off';
+            } else {
+                pwdInput.type = 'password';
+                eyeIcon.textContent = 'visibility';
+            }
+        }
+    </script>
+</body>
+</html>

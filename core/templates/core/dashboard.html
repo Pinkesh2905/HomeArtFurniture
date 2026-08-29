@@ -36,7 +36,7 @@
     .score-card__sub {
         font-size: 12px;
         font-weight: 500;
-        color: var(--text-amber-700 dark:text-secondary);
+        color: var(--text-secondary);
         margin-top: 4px;
     }
     .chart-card {
@@ -67,13 +67,66 @@
         color: var(--text-primary);
         margin-bottom: 20px;
     }
-    .movement-label { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px; margin-top: 16px; }
+    .movement-label { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px; margin-top: 16px; color: var(--text-secondary); }
     .movement-label:first-child { margin-top: 0; }
     .movement-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 13px; }
     .movement-row span:last-child { font-weight: 700; }
-    .cust-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(122,31,24,0.1); font-size: 13px; }
+    .cust-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--glass-border); font-size: 13px; }
     .cust-row:last-child { border-bottom: none; }
     .cust-row .amount { font-weight: 700; }
+
+    /* Quick Actions */
+    .quick-action {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 18px 22px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(var(--glass-blur));
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+        text-decoration: none;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+    .quick-action::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(242, 202, 80, 0.06) 0%, transparent 60%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .quick-action:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 32px rgba(242, 202, 80, 0.12), var(--card-hover-shadow);
+        border-color: rgba(242, 202, 80, 0.25);
+    }
+    .quick-action:hover::before {
+        opacity: 1;
+    }
+    .quick-action__icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        flex-shrink: 0;
+    }
+    .quick-action__label {
+        font-family: 'Outfit', sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+    .quick-action__hint {
+        font-size: 11px;
+        color: var(--text-secondary);
+        margin-top: 2px;
+    }
 </style>
 {% endblock %}
 
@@ -100,6 +153,46 @@
                 </span>
             </a>
         </div>
+    </div>
+
+    <!-- ═══ QUICK ACTIONS ═══ -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <a href="{% url 'measurement_profile' %}" class="quick-action">
+            <div class="quick-action__icon bg-emerald-500/15 text-emerald-400">
+                <span class="material-symbols-outlined">add_shopping_cart</span>
+            </div>
+            <div>
+                <div class="quick-action__label">New Order</div>
+                <div class="quick-action__hint">Dimensions → Bill</div>
+            </div>
+        </a>
+        <a href="{% url 'delivery_schedule' %}" class="quick-action">
+            <div class="quick-action__icon bg-blue-500/15 text-blue-400">
+                <span class="material-symbols-outlined">local_shipping</span>
+            </div>
+            <div>
+                <div class="quick-action__label">Deliveries</div>
+                <div class="quick-action__hint">Today's schedule</div>
+            </div>
+        </a>
+        <a href="{% url 'material_list' %}?stock=low" class="quick-action">
+            <div class="quick-action__icon bg-amber-500/15 text-amber-400">
+                <span class="material-symbols-outlined">inventory</span>
+            </div>
+            <div>
+                <div class="quick-action__label">Stock Alerts</div>
+                <div class="quick-action__hint">Low & out of stock</div>
+            </div>
+        </a>
+        <a href="{% url 'order_list' %}?due=balance" class="quick-action">
+            <div class="quick-action__icon bg-red-500/15 text-red-400">
+                <span class="material-symbols-outlined">payments</span>
+            </div>
+            <div>
+                <div class="quick-action__label">Pending Payments</div>
+                <div class="quick-action__hint">Collect balance</div>
+            </div>
+        </a>
     </div>
 
     <!-- ═══ SCORECARD ROW 1 ═══ -->
@@ -178,7 +271,7 @@
     </div>
 
     <!-- ═══ BOTTOM ROW ═══ -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
         <!-- Top Customers -->
         <div class="bottom-card">
@@ -214,6 +307,39 @@
             {% empty %}
             <p class="text-xs text-theme-muted italic">No data</p>
             {% endfor %}
+        </div>
+
+        <!-- Inventory Alerts -->
+        <div class="bottom-card">
+            <div class="bottom-card__title flex justify-between items-center">
+                Inventory Alerts
+                <a href="{% url 'material_list' %}" class="text-[10px] text-theme-secondary hover:text-theme-primary lowercase tracking-widest font-black">View all</a>
+            </div>
+            
+            <div class="movement-label">Low Stock</div>
+            {% for item in low_stock_materials %}
+            <div class="movement-row">
+                <a href="{% url 'stock_transaction' material_id=item.pk %}" class="text-theme-secondary hover:underline truncate mr-2" title="Stock in {{ item.name }}">{{ item.name }}</a>
+                <a href="{% url 'stock_transaction' material_id=item.pk %}" class="text-amber-500 whitespace-nowrap hover:text-amber-400 flex items-center gap-1">{{ item.current_stock|floatformat:1 }} {{ item.get_unit_display }} <span class="material-symbols-outlined text-[14px]">add_circle</span></a>
+            </div>
+            {% empty %}
+            <p class="text-xs text-theme-muted italic">All items well stocked</p>
+            {% endfor %}
+            
+            <div class="movement-label">Out of Stock</div>
+            {% for item in out_of_stock_materials %}
+            <div class="movement-row">
+                <a href="{% url 'stock_transaction' material_id=item.pk %}" class="text-theme-secondary hover:underline truncate mr-2" title="Stock in {{ item.name }}">{{ item.name }}</a>
+                <a href="{% url 'stock_transaction' material_id=item.pk %}" class="text-red-500 font-bold whitespace-nowrap hover:text-red-400 flex items-center gap-1">Empty <span class="material-symbols-outlined text-[14px]">add_circle</span></a>
+            </div>
+            {% empty %}
+            <p class="text-xs text-theme-muted italic">No empty items</p>
+            {% endfor %}
+
+            <div class="mt-4 pt-3 border-t border-theme-border flex justify-between items-center">
+                <span class="text-xs text-theme-muted">Total Stock Value</span>
+                <span class="font-bold text-theme-primary">₹{{ total_stock_value|floatformat:2 }}</span>
+            </div>
         </div>
     </div>
 </div>

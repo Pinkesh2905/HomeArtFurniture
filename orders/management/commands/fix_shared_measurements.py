@@ -1,55 +1,55 @@
 """
 One-time management command to fix existing orders where multiple OrderItems
-share the same Measurement record. Each item should have its own distinct
-Measurement so that editing one doesn't affect the other.
+share the same FurnitureDimension record. Each item should have its own distinct
+FurnitureDimension so that editing one doesn't affect the other.
 """
 from django.core.management.base import BaseCommand
 from django.db.models import Count
 from orders.models import OrderItem
-from measurements.models import Measurement
+from measurements.models import FurnitureDimension
 
 
 class Command(BaseCommand):
-    help = 'Fix orders where multiple items share the same Measurement record by cloning.'
+    help = 'Fix orders where multiple items share the same FurnitureDimension record by cloning.'
 
     def handle(self, *args, **options):
-        # Find all Measurement IDs that are referenced by more than one OrderItem
+        # Find all FurnitureDimension IDs that are referenced by more than one OrderItem
         shared = (
             OrderItem.objects
-            .filter(measurement__isnull=False)
-            .values('measurement_id')
+            .filter(dimension__isnull=False)
+            .values('dimension_id')
             .annotate(cnt=Count('id'))
             .filter(cnt__gt=1)
         )
 
         total_cloned = 0
         for entry in shared:
-            m_id = entry['measurement_id']
-            items = list(OrderItem.objects.filter(measurement_id=m_id).select_related('measurement'))
+            d_id = entry['dimension_id']
+            items = list(OrderItem.objects.filter(dimension_id=d_id).select_related('dimension'))
             if len(items) <= 1:
                 continue
 
-            original = items[0].measurement
-            self.stdout.write(f"Measurement #{m_id} ({original.garment_category}) shared by {len(items)} items")
+            original = items[0].dimension
+            self.stdout.write(f"FurnitureDimension #{d_id} ({original.furniture_type}) shared by {len(items)} items")
 
             # Keep the first item linked to the original, clone for the rest
             for item in items[1:]:
-                clone = Measurement.objects.create(
+                clone = FurnitureDimension.objects.create(
                     customer=original.customer,
-                    garment_category=original.garment_category,
+                    furniture_type=original.furniture_type,
                     values=dict(original.values) if original.values else {},
                     notes=original.notes,
-                    is_sample_product=original.is_sample_product,
+                    is_standard_catalog=original.is_standard_catalog,
                 )
-                item.measurement = clone
-                item.save(update_fields=['measurement'])
+                item.dimension = clone
+                item.save(update_fields=['dimension'])
                 total_cloned += 1
                 self.stdout.write(
-                    f"  -> Cloned Measurement #{m_id} -> #{clone.id} for OrderItem #{item.id} "
+                    f"  -> Cloned FurnitureDimension #{d_id} -> #{clone.id} for OrderItem #{item.id} "
                     f"(Order #{item.order.order_number})"
                 )
 
         if total_cloned == 0:
-            self.stdout.write(self.style.SUCCESS("No shared measurements found. All orders are clean."))
+            self.stdout.write(self.style.SUCCESS("No shared dimensions found. All orders are clean."))
         else:
-            self.stdout.write(self.style.SUCCESS(f"Done. Cloned {total_cloned} measurement(s)."))
+            self.stdout.write(self.style.SUCCESS(f"Done. Cloned {total_cloned} dimension(s)."))

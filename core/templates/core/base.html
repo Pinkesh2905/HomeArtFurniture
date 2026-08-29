@@ -7,89 +7,91 @@
     <title>{% block title %}Home Art Furniture Admin{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Syne:wght@400..800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Outfit:wght@100..900&family=Syne:wght@400..800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
     <style>
         .material-symbols-outlined {
             font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24
         }
         /* ═══ THEME SYSTEM ═══ */
         :root {
-            --ink: #171717;
-            --ink-muted: #51483f;
-            --canvas: #f8f5f0;
-            --panel: rgba(255, 253, 250, 0.7);
-            --line: rgba(122, 31, 24, 0.1);
-            --accent: #8a6428;
-            --accent-dark: #7a1f18;
-            --primary: #d8b66d;
-            --secondary: #7a1f18;
-            --secondary-dark: #5f1712;
+            --ink: #0f172a;
+            --ink-muted: #475569;
+            --canvas: #f8fafc;
+            --panel: rgba(255, 255, 255, 0.7);
+            --line: rgba(30, 41, 59, 0.1);
+            --accent: #b45309;
+            --accent-dark: #92400e;
+            --primary: #1e293b;
+            --secondary: #b45309;
+            --secondary-dark: #92400e;
             /* Light Mode Tokens (Default) */
-            --glass-bg: rgba(255, 255, 255, 0.65);
-            --glass-bg-dark: rgba(255, 255, 255, 0.85);
-            --glass-border: rgba(0, 0, 0, 0.08);
-            --glass-border-dark: rgba(0, 0, 0, 0.05);
-            --glass-blur: 40px;
-            --page-bg: #f3ede6;
-            --text-primary: #1a1a2e;
-            --text-secondary: rgba(26,26,46,0.8);
-            --text-muted: rgba(26,26,46,0.55);
-            --text-on-glass: #1a1a2e;
-            --input-bg: rgba(0,0,0,0.04);
-            --input-border: rgba(0,0,0,0.12);
-            --input-text: #1a1a2e;
-            --input-placeholder: rgba(26,26,46,0.4);
-            --input-focus-border: rgba(122,31,24,0.4);
-            --input-focus-bg: rgba(255,255,255,0.8);
-            --sidebar-bg: rgba(30, 15, 15, 0.95);
-            --sidebar-text: #f8f5f0;
-            --topbar-bg: rgba(255,255,255,0.5);
-            --topbar-border: rgba(0,0,0,0.06);
-            --table-head-bg: #7a1f18;
-            --table-head-text: #fff;
-            --table-row-border: rgba(0,0,0,0.06);
-            --table-text: #1a1a2e;
-            --card-shadow: 0 4px 24px rgba(0,0,0,0.06);
-            --card-hover-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            --dropdown-bg: rgba(255,255,255,0.97);
-            --dropdown-text: #1a1a2e;
-            --dropdown-item-hover: rgba(0,0,0,0.05);
-            --datepicker-popup-bg: rgba(255,255,255,0.97);
-            --particle-color: rgba(216,182,109,0.12);
-            --thematic-overlay: rgba(243,237,230,0.7);
-            --badge-text: rgba(26,26,46,0.5);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-bg-dark: rgba(255, 255, 255, 0.9);
+            --glass-border: rgba(30, 41, 59, 0.08);
+            --glass-border-dark: rgba(30, 41, 59, 0.05);
+            --glass-blur: 30px;
+            --page-bg: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --text-on-glass: #0f172a;
+            --input-bg: rgba(30, 41, 59, 0.04);
+            --input-border: rgba(30, 41, 59, 0.12);
+            --input-text: #0f172a;
+            --input-placeholder: rgba(30, 41, 59, 0.4);
+            --input-focus-border: rgba(180, 83, 9, 0.4);
+            --input-focus-bg: rgba(255, 255, 255, 0.9);
+            --sidebar-bg: rgba(15, 23, 42, 0.95);
+            --sidebar-text: #f8fafc;
+            --topbar-bg: rgba(248, 250, 252, 0.75);
+            --topbar-border: rgba(30, 41, 59, 0.06);
+            --table-head-bg: #1e293b;
+            --table-head-text: #ffffff;
+            --table-row-border: rgba(30, 41, 59, 0.06);
+            --table-text: #0f172a;
+            --card-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+            --card-hover-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+            --dropdown-bg: rgba(255, 255, 255, 0.98);
+            --dropdown-text: #0f172a;
+            --dropdown-item-hover: rgba(30, 41, 59, 0.05);
+            --datepicker-popup-bg: rgba(255, 255, 255, 0.98);
+            --particle-color: rgba(180, 83, 9, 0.08);
+            --thematic-overlay: rgba(241, 245, 249, 0.85);
+            --badge-text: rgba(15, 23, 42, 0.55);
+            --bg-gradient: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.6) 0%, rgba(241, 245, 249, 0) 80%), #f1f5f9;
         }
         body.dark-mode {
-            --glass-bg: rgba(10, 5, 5, 0.6);
-            --glass-bg-dark: rgba(10, 5, 5, 0.95);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --glass-border-dark: rgba(255, 255, 255, 0.05);
-            --page-bg: #0f0808;
-            --text-primary: #ffffff;
-            --text-secondary: rgba(255,255,255,0.75);
-            --text-muted: rgba(255,255,255,0.5);
-            --text-on-glass: #ffffff;
-            --input-bg: rgba(0,0,0,0.2);
+            --glass-bg: rgba(15, 23, 42, 0.6);
+            --glass-bg-dark: rgba(15, 23, 42, 0.95);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-border-dark: rgba(255, 255, 255, 0.04);
+            --page-bg: #090d16;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --text-on-glass: #f8fafc;
+            --input-bg: rgba(255,255,255,0.05);
             --input-border: rgba(255,255,255,0.1);
-            --input-text: #ffffff;
-            --input-placeholder: rgba(255,255,255,0.5);
-            --input-focus-border: rgba(255,255,255,0.3);
-            --input-focus-bg: rgba(255,255,255,0.1);
-            --sidebar-bg: rgba(10, 5, 5, 0.95);
-            --sidebar-text: #f8f5f0;
-            --topbar-bg: rgba(10, 5, 5, 0.3);
-            --topbar-border: rgba(255,255,255,0.1);
-            --table-row-border: rgba(255,255,255,0.07);
-            --table-text: #ffffff;
-            --card-shadow: 0 8px 32px rgba(0,0,0,0.25);
-            --card-hover-shadow: 0 12px 40px rgba(0,0,0,0.35);
-            --dropdown-bg: rgba(20,10,10,0.98);
-            --dropdown-text: #ffffff;
-            --dropdown-item-hover: rgba(255,255,255,0.1);
-            --datepicker-popup-bg: rgba(20,10,10,0.98);
-            --particle-color: rgba(216,182,109,0.15);
-            --thematic-overlay: rgba(15,8,8,0.7);
-            --badge-text: rgba(255,255,255,0.4);
+            --input-text: #f8fafc;
+            --input-placeholder: rgba(255,255,255,0.4);
+            --input-focus-border: rgba(180, 83, 9, 0.6);
+            --input-focus-bg: rgba(255, 255, 255, 0.08);
+            --sidebar-bg: linear-gradient(180deg, rgba(226, 232, 240, 0.16) 0%, rgba(15, 23, 42, 0.98) 100%);
+            --sidebar-text: #f8fafc;
+            --topbar-bg: rgba(9, 13, 22, 0.4);
+            --topbar-border: rgba(255, 255, 255, 0.05);
+            --table-row-border: rgba(255, 255, 255, 0.05);
+            --table-text: #f8fafc;
+            --card-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            --card-hover-shadow: 0 12px 40px rgba(0,0,0,0.4);
+            --dropdown-bg: rgba(15, 23, 42, 0.98);
+            --dropdown-text: #f8fafc;
+            --dropdown-item-hover: rgba(255, 255, 255, 0.08);
+            --datepicker-popup-bg: rgba(15, 23, 42, 0.98);
+            --particle-color: rgba(180, 83, 9, 0.12);
+            --thematic-overlay: rgba(9, 13, 22, 0.85);
+            --badge-text: rgba(255, 255, 255, 0.45);
+            --bg-gradient: radial-gradient(circle at 50% 0%, rgba(226, 232, 240, 0.14) 0%, rgba(9, 13, 22, 0) 80%), radial-gradient(circle at 100% 100%, rgba(226, 232, 240, 0.05) 0%, rgba(9, 13, 22, 0) 60%), #090d16;
         }
         html {
             -webkit-font-smoothing: antialiased;
@@ -98,7 +100,7 @@
             background-color: var(--page-bg);
         }
         body {
-            background-color: var(--page-bg) !important;
+            background: var(--bg-gradient) !important;
             margin: 0;
             overflow-x: hidden;
             color: var(--text-primary);
@@ -108,20 +110,14 @@
             position: fixed;
             inset: 0;
             z-index: -2;
-            background-image: url("{% static 'core/img/HomeArtLogo.png' %}");
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            opacity: 0.35; /* Reduced opacity to compete less with content */
+            background: var(--bg-gradient) !important;
             pointer-events: none;
-            filter: blur(12px); /* Added Gaussian blur for better focus on data */
-            transform: scale(1.05); /* Slight scale to prevent blurred edges */
         }
         .thematic-bg::after {
             content: "";
             position: absolute;
             inset: 0;
-            background: radial-gradient(circle at center, var(--thematic-overlay) 0%, var(--thematic-overlay) 100%);
+            background: transparent !important;
         }
         
         /* Subtle Particles Animation */
@@ -145,7 +141,7 @@
 
         .ethnic-pattern {
             background-color: transparent;
-            background-image: url("data:image/svg+xml,%3Csvg width='72' height='72' viewBox='0 0 72 72' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M36 8l2 6 6 2-6 2-2 6-2-6-6-2 6-2 2-6z' fill='%23d8b66d' fill-opacity='0.05'/%3E%3C/svg%3E")
+            background-image: url("data:image/svg+xml,%3Csvg width='72' height='72' viewBox='0 0 72 72' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M36 8l2 6 6 2-6 2-2 6-2-6-6-2 6-2 2-6z' fill='%23d8b66d' fill-opacity='0.05'/%3E%3C/svg%3E");
         }
         .glass-panel {
             background: var(--glass-bg);
@@ -174,34 +170,56 @@
             letter-spacing: -0.045em;
         }
         .app-nav-link {
-            color: rgba(245,245,234,0.78);
-            border: 1px solid transparent;
+            color: rgba(245,245,234,0.78) !important;
+            border: 1px solid transparent !important;
             font-weight: 500;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Subtle shadow for better contrast */
+            padding: 10px 16px !important;
+            border-radius: 12px !important;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
         .app-nav-link .material-symbols-outlined {
             width: 24px; /* Fixed width for strict vertical alignment */
             display: flex;
             justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
         }
         .app-nav-link:hover {
-            background: rgba(255,255,255,0.06);
-            color: #fff;
+            background: rgba(255,255,255,0.05) !important;
+            color: #fff !important;
+            transform: translateX(4px);
+            border-color: rgba(255, 255, 255, 0.05) !important;
         }
         .app-nav-link.is-active {
-            color: #fff;
-            background: rgba(255,255,255,0.075);
+            color: #ffffff !important;
+            background: linear-gradient(90deg, rgba(242, 202, 80, 0.12) 0%, rgba(255, 255, 255, 0.02) 100%) !important;
+            border: 1px solid rgba(242, 202, 80, 0.2) !important;
+            box-shadow: 0 4px 15px rgba(242, 202, 80, 0.06), inset 0 0 8px rgba(242, 202, 80, 0.04) !important;
         }
         .app-nav-link.is-active::before {
             content: "";
-            width: 3px;
-            height: 28px;
+            width: 4px;
+            height: 18px;
             border-radius: 99px;
-            background: var(--accent);
+            background: linear-gradient(180deg, #f2ca50 0%, #b45309 100%) !important;
+            box-shadow: 0 0 10px rgba(242, 202, 80, 0.8) !important;
             position: absolute;
-            left: -16px;
+            left: 8px;
             top: 50%;
             transform: translateY(-50%);
+        }
+        .app-nav-link.is-active .material-symbols-outlined {
+            color: #f2ca50 !important;
+            margin-left: 8px;
+        }
+        /* Fixed select dropdown styles for dark mode contrast */
+        select option {
+            background-color: #0f172a !important;
+            color: #f8fafc !important;
         }
         .app-topbar {
             background: var(--topbar-bg);
@@ -230,8 +248,8 @@
         }
         .app-shell table thead tr,
         .app-shell .bg-secondary.text-white {
-            background: #7a1f18 !important;
-            color: #ffffff !important;
+            background: var(--table-head-bg) !important;
+            color: var(--table-head-text) !important;
         }
         .app-shell table th {
             font-family: "Outfit", sans-serif !important;
@@ -274,7 +292,7 @@
         .app-shell textarea:focus {
             border-color: var(--input-focus-border) !important;
             background-color: var(--input-focus-bg) !important;
-            box-shadow: 0 0 0 4px rgba(122,31,24,0.06) !important;
+            box-shadow: 0 0 0 4px rgba(180,83,9,0.08) !important;
         }
         .app-shell button,
         .app-shell a {
@@ -282,16 +300,16 @@
         }
         .app-shell a.bg-secondary,
         .app-shell button.bg-secondary {
-            background: #7a1f18 !important;
+            background: var(--secondary) !important;
             color: #fff !important;
-            box-shadow: 0 4px 12px rgba(122, 31, 24, 0.2) !important;
+            box-shadow: 0 4px 12px rgba(180, 83, 9, 0.25) !important;
         }
         .app-shell a.bg-secondary:hover,
         .app-shell button.bg-secondary:hover {
-            background: #2b2b25 !important;
+            background: var(--secondary-dark) !important;
         }
         .app-shell .text-secondary {
-            color: #d8b66d !important;
+            color: var(--accent) !important;
         }
         .app-shell .text-on-surface,
         .app-shell .text-slate-800,
@@ -454,11 +472,11 @@
             height: 42px;
         }
         .haf-datepicker__face:focus-within {
-            border-color: #7a1f18;
-            box-shadow: 0 0 0 3px rgba(122, 31, 24, 0.1);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.15);
         }
         .haf-datepicker__face:hover {
-            border-color: #7a1f18;
+            border-color: var(--accent);
         }
         .haf-datepicker__text {
             background: transparent !important;
@@ -781,7 +799,7 @@
     body.dark-mode .haf-dropdown__items,
     body.dark-mode .haf-datepicker__face,
     body.dark-mode .haf-datepicker__popup {
-        background: rgba(20, 10, 10, 0.98) !important;
+        background: rgba(30, 41, 59, 0.98) !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
         color: #ffffff !important;
     }
@@ -925,19 +943,19 @@
                       "on-primary-container": "#4c3412",
                       "on-tertiary-container": "#3f3a34",
                       "on-tertiary-fixed": "#1b1c1a",
-                      "secondary-container": "#b64a3c",
-                      "secondary": "#7a1f18",
-                      "primary-container": "#d8b66d",
-                      "on-primary": "#ffffff",
-                      "error": "#ba1a1a",
-                      "on-primary-fixed-variant": "#604418",
-                      "on-secondary-container": "#4d0905",
-                      "primary": "#8a6428",
-                      "surface": "#fffdfa",
-                      "background": "#f8f5f0",
-                      "surface-tint": "#8a6428",
-                      "tertiary-container": "#c5bfb3",
-                      "surface-variant": "#e9e2d8",
+                       "secondary-container": "#92400e",
+                       "secondary": "#b45309",
+                       "primary-container": "#cbd5e1",
+                       "on-primary": "#ffffff",
+                       "error": "#ba1a1a",
+                       "on-primary-fixed-variant": "#92400e",
+                       "on-secondary-container": "#fef3c7",
+                       "primary": "#1e293b",
+                       "surface": "#f8fafc",
+                       "background": "#f1f5f9",
+                       "surface-tint": "#b45309",
+                       "tertiary-container": "#cbd5e1",
+                       "surface-variant": "#f1f5f9",
                       "on-secondary": "#ffffff",
                       "on-surface-variant": "#51483f",
                       "surface-dim": "#ded7cc",
@@ -975,7 +993,7 @@
     </script>
     {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-transparent font-body-md text-on-background min-h-screen flex">
+<body class="dark-mode bg-transparent font-body-md text-on-background min-h-screen flex">
     <!-- Traditional Background Layer -->
     <div class="thematic-bg"></div>
     
@@ -987,16 +1005,92 @@
 
     <!-- SideNavBar -->
     <aside id="sidebar" class="app-sidebar fixed left-0 top-0 h-full w-72 z-50 flex flex-col pt-7 pb-8 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
-        <!-- Luxury Background Watermark -->
-        <div class="absolute inset-0 opacity-[0.15] pointer-events-none overflow-hidden z-0 blur">
-            <img src="{% static 'core/img/HomeArtLogo.png' %}" 
-                 class="w-full h-full object-cover" alt="">
-        </div>
-
-        <div class="px-8 mb-12 flex items-center gap-3 relative z-10">
-            <div>
-                <h1 class="app-brand text-lg font-bold text-white leading-tight">Home Art Furniture</h1>
-            </div>
+        <!-- Logo Header -->
+        <div class="px-8 pt-6 mb-8 flex justify-center relative z-10">
+            <a href="{% url 'dashboard' %}" class="flex flex-col items-center w-full hover:opacity-90 transition-opacity">
+                <!-- Inline SVG Logo (House Icon Luxury Emblem) -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 135" class="w-full h-auto" style="max-width: 175px;">
+                    <defs>
+                        <!-- Premium Metallic Gold/Amber Gradient -->
+                        <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#d97706" />    <!-- Deep Amber -->
+                            <stop offset="30%" stop-color="#fbbf24" />   <!-- Bright Gold -->
+                            <stop offset="70%" stop-color="#f59e0b" />    <!-- Warm Gold -->
+                            <stop offset="100%" stop-color="#b45309" />   <!-- Rich Bronze -->
+                        </linearGradient>
+                    </defs>
+                    
+                    <!-- House Overlay (White Roof + Gold interior components) -->
+                    <g>
+                        <!-- White Roof Peak -->
+                        <path d="M 60 44 L 100 10 L 140 44" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                        <!-- Gold 4-pane window under the roof peak -->
+                        <g>
+                            <rect x="94.5" y="17" width="4.5" height="4.5" fill="url(#goldGrad)"/>
+                            <rect x="101" y="17" width="4.5" height="4.5" fill="url(#goldGrad)"/>
+                            <rect x="94.5" y="23.5" width="4.5" height="4.5" fill="url(#goldGrad)"/>
+                            <rect x="101" y="23.5" width="4.5" height="4.5" fill="url(#goldGrad)"/>
+                        </g>
+                        <!-- Bedside table and lamp (Left) -->
+                        <g>
+                            <!-- Drawer -->
+                            <rect x="71" y="41" width="9" height="7" fill="url(#goldGrad)"/>
+                            <!-- Knobs -->
+                            <circle cx="75.5" cy="43.5" r="0.6" fill="#1e293b"/>
+                            <circle cx="75.5" cy="46.5" r="0.6" fill="#1e293b"/>
+                            <!-- Legs -->
+                            <path d="M 72.5 48 L 71.5 51 M 78.5 48 L 79.5 51" stroke="url(#goldGrad)" stroke-width="1.2" stroke-linecap="round"/>
+                            <!-- Lamp Stand -->
+                            <line x1="75.5" y1="41" x2="75.5" y2="36" stroke="url(#goldGrad)" stroke-width="1.2"/>
+                            <!-- Lamp Shade -->
+                            <path d="M 72 36 L 79 36 L 77.5 30 L 73.5 30 Z" fill="#ffffff"/>
+                        </g>
+                        <!-- Gold Sofa (Center) -->
+                        <g>
+                            <!-- Seat and Base -->
+                            <rect x="86" y="41.5" width="28" height="6.5" rx="2" fill="url(#goldGrad)"/>
+                            <!-- Backrest cushions -->
+                            <rect x="88" y="35" width="11.5" height="8.5" rx="2" fill="url(#goldGrad)"/>
+                            <rect x="100.5" y="35" width="11.5" height="8.5" rx="2" fill="url(#goldGrad)"/>
+                            <!-- Armrests -->
+                            <rect x="82.5" y="38" width="4.5" height="10" rx="1.5" fill="url(#goldGrad)"/>
+                            <rect x="113" y="38" width="4.5" height="10" rx="1.5" fill="url(#goldGrad)"/>
+                            <!-- Legs -->
+                            <path d="M 85.5 48 L 84 51 M 114.5 48 L 116 51" stroke="url(#goldGrad)" stroke-width="2" stroke-linecap="round"/>
+                        </g>
+                        <!-- Plant and Pot (Right) -->
+                        <g>
+                            <!-- Pot -->
+                            <path d="M 122.5 43 L 127.5 43 L 126 49.5 L 124 49.5 Z" fill="url(#goldGrad)"/>
+                            <!-- Stems -->
+                            <line x1="125" y1="43" x2="125" y2="33" stroke="#ffffff" stroke-width="1.2"/>
+                            <!-- Leaves -->
+                            <path d="M 125 40 Q 128.5 39 128.5 36 Q 125 37 125 40" fill="#ffffff"/>
+                            <path d="M 125 38 Q 121.5 37 121.5 34 Q 125 35 125 38" fill="#ffffff"/>
+                            <path d="M 125 34 Q 127 31 125 29 Q 123 31 125 34" fill="#ffffff"/>
+                        </g>
+                    </g>
+                    <!-- Brand Text Section -->
+                    <g>
+                        <!-- "Home Art" serif heading with Playfair Display -->
+                        <text x="100" y="83" font-family="'Playfair Display', serif" font-size="28" font-weight="700" text-anchor="middle">
+                            <tspan fill="#ffffff">Home </tspan>
+                            <tspan fill="url(#goldGrad)">Art</tspan>
+                        </text>
+                        <!-- "— FURNITURE —" sub-heading -->
+                        <g transform="translate(100, 102)">
+                            <!-- Left Accent line -->
+                            <line x1="-80" y1="-3.5" x2="-52" y2="-3.5" stroke="url(#goldGrad)" stroke-width="1.2"/>
+                            <!-- Text -->
+                            <text x="3" y="0" font-family="'Outfit', sans-serif" font-size="9" font-weight="800" fill="#ffffff" letter-spacing="5" text-anchor="middle">FURNITURE</text>
+                            <!-- Right Accent line -->
+                            <line x1="52" y1="-3.5" x2="80" y2="-3.5" stroke="url(#goldGrad)" stroke-width="1.2"/>
+                        </g>
+                        <!-- "COMFORT • QUALITY • STYLE" footer -->
+                        <text x="100" y="120" font-family="'Outfit', sans-serif" font-size="7" font-weight="700" fill="#ffffff" letter-spacing="2" text-anchor="middle">COMFORT  •  QUALITY  •  STYLE</text>
+                    </g>
+                </svg>
+            </a>
         </div>
         
         <nav class="flex-1 space-y-2 px-8">
@@ -1004,42 +1098,38 @@
                 <span class="material-symbols-outlined">dashboard</span>
                 <span class="text-sm">Home</span>
             </a>
-            <a class="app-nav-link relative flex items-center gap-4 py-3 px-0 rounded-lg {% if request.resolver_match.url_name == 'customer_list' or request.resolver_match.url_name == 'customer_detail' %}is-active{% endif %}" href="{% url 'customer_list' %}">
+            <a class="app-nav-link relative flex items-center gap-4 py-3 px-0 rounded-lg {% if request.resolver_match.url_name == 'customer_list' or request.resolver_match.url_name == 'customer_detail' or request.resolver_match.url_name == 'customer_create' %}is-active{% endif %}" href="{% url 'customer_list' %}">
                 <span class="material-symbols-outlined">group</span>
                 <span class="text-sm">Customers</span>
             </a>
             <a class="app-nav-link relative flex items-center gap-4 py-3 px-0 rounded-lg {% if request.resolver_match.url_name == 'measurement_profile' %}is-active{% endif %} z-10" href="{% url 'measurement_profile' %}">
                 <span class="material-symbols-outlined">straighten</span>
-                <span class="text-sm">Measure</span>
+                <span class="text-sm">Dimensions</span>
             </a>
-            <a class="app-nav-link relative flex items-center gap-4 py-3 px-0 rounded-lg {% if request.resolver_match.url_name == 'order_list' or request.resolver_match.url_name == 'order_detail' %}is-active{% endif %}" href="{% url 'order_list' %}">
+            <a class="app-nav-link relative flex items-center gap-4 py-3 px-0 rounded-lg {% if request.resolver_match.url_name == 'order_list' or request.resolver_match.url_name == 'order_detail' or request.resolver_match.url_name == 'order_create' %}is-active{% endif %}" href="{% url 'order_list' %}">
                 <span class="material-symbols-outlined">receipt_long</span>
                 <span class="text-sm">Orders</span>
             </a>
-            <a class="app-nav-link relative flex items-center gap-4 py-3 px-0 rounded-lg {% if request.resolver_match.url_name == 'salesperson_dashboard' %}is-active{% endif %}" href="{% url 'salesperson_dashboard' %}">
-                <span class="material-symbols-outlined">badge</span>
-                <span class="text-sm">Salespeople</span>
+            <a class="app-nav-link relative flex items-center gap-4 py-3 px-0 rounded-lg {% if request.resolver_match.url_name == 'delivery_schedule' %}is-active{% endif %}" href="{% url 'delivery_schedule' %}">
+                <span class="material-symbols-outlined">local_shipping</span>
+                <span class="text-sm">Deliveries</span>
             </a>
+            <a class="app-nav-link relative flex items-center gap-4 py-3 px-0 rounded-lg {% if request.resolver_match.url_name == 'material_list' or request.resolver_match.url_name == 'material_detail' or request.resolver_match.url_name == 'material_create' or request.resolver_match.url_name == 'material_edit' or request.resolver_match.url_name == 'stock_transaction' %}is-active{% endif %}" href="{% url 'material_list' %}">
+                <span class="material-symbols-outlined">inventory_2</span>
+                <span class="text-sm">Inventory</span>
+            </a>
+            <a class="app-nav-link relative flex items-center gap-4 py-3 px-0 rounded-lg {% if request.resolver_match.url_name == 'supplier_list' or request.resolver_match.url_name == 'supplier_create' or request.resolver_match.url_name == 'supplier_edit' %}is-active{% endif %}" href="{% url 'supplier_list' %}">
+                <span class="material-symbols-outlined">factory</span>
+                <span class="text-sm">Suppliers</span>
+            </a>
+            <a class="app-nav-link relative flex items-center gap-4 py-3 px-0 rounded-lg {% if request.resolver_match.url_name == 'payment_report' %}is-active{% endif %}" href="{% url 'payment_report' %}">
+                <span class="material-symbols-outlined">payments</span>
+                <span class="text-sm">Payments</span>
+            </a>
+
+
         </nav>
-        <div class="px-8 mt-auto pt-8 border-t border-white/10 relative z-10">
-            <div class="flex items-center gap-4 py-6">
-                <div class="w-10 h-10 rounded-full bg-secondary/20 border border-secondary/30 flex items-center justify-center text-secondary font-bold flex-shrink-0">
-                    {% if request.user.first_name %}{{ request.user.first_name.0|upper }}{% else %}{{ request.user.username.0|upper }}{% endif %}
-                </div>
-                <div class="overflow-hidden">
-                    <p class="text-[10px] font-black text-white/40 uppercase tracking-widest mb-0.5">Owner</p>
-                    <p class="text-sm font-bold text-white truncate leading-tight">
-                        {% if request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}
-                    </p>
-                </div>
-                <form action="{% url 'logout' %}" method="post" class="ml-auto">
-                    {% csrf_token %}
-                    <button type="submit" class="group flex items-center justify-center w-9 h-9 rounded-full bg-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all border border-white/5" title="Logout">
-                        <span class="material-symbols-outlined text-[18px]">logout</span>
-                    </button>
-                </form>
-            </div>
-        </div>
+
     </aside>
 
     <!-- Main Content Canvas -->
@@ -1056,12 +1146,6 @@
                     <input name="q" class="h-10 pl-10 pr-4 bg-slate-200 dark:bg-white/15 border border-slate-300 dark:border-white/25 rounded-xl text-sm w-40 md:w-80 focus:bg-slate-300 dark:focus:bg-white/20 focus:border-slate-400 dark:focus:border-white/40 transition-all placeholder:text-slate-400 dark:placeholder:text-white/40 text-slate-900 dark:text-white outline-none flex items-center" placeholder="Search customers, orders..." type="search"/>
                 </form>
                 {% endif %}
-            </div>
-            <div class="flex items-center gap-3 lg:gap-6">
-                <button id="themeToggle" class="theme-toggle" title="Toggle Light/Dark Mode">
-                    <span class="material-symbols-outlined text-[20px]" id="themeIcon">dark_mode</span>
-                </button>
-            </div>
         </header>
         
         <!-- Content Area -->
@@ -1554,38 +1638,7 @@
                 }
             });
         });
-        // Theme Toggle Logic
-        const themeToggle = document.getElementById('themeToggle');
-        const themeIcon = document.getElementById('themeIcon');
-        const body = document.body;
-
-        // Function to set theme
-        function setTheme(isDark) {
-            if (isDark) {
-                body.classList.add('dark-mode');
-                themeIcon.textContent = 'light_mode';
-                localStorage.setItem('theme', 'dark');
-            } else {
-                body.classList.remove('dark-mode');
-                themeIcon.textContent = 'dark_mode';
-                localStorage.setItem('theme', 'light');
-            }
-        }
-
-        // Initialize theme from localStorage
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark') {
-            setTheme(true);
-        } else {
-            setTheme(false); // Default to light
-        }
-
-        if (themeToggle) {
-            themeToggle.addEventListener('click', () => {
-                const isDark = body.classList.contains('dark-mode');
-                setTheme(!isDark);
-            });
-        }
+        // Dark Mode is fixed globally. No theme toggling required.
     </script>
 </body>
 </html>

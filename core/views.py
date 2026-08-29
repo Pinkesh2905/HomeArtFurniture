@@ -1,7 +1,5 @@
-from django.shortcuts import render
-from django.shortcuts import redirect
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import LoginView
 from django.contrib.auth.models import User
 from django.db.models import Sum, Count, Avg, F
 from django.db.models.functions import TruncDate
@@ -11,6 +9,7 @@ from django.utils import timezone
 from customers.models import Customer
 from customers.utils import normalize_phone
 from orders.models import Order, OrderItem, OrderStatus
+from inventory.models import Material
 import json
 
 
@@ -24,21 +23,6 @@ def format_inr(amount):
         return f"₹{int(val)}K" if val == int(val) else f"₹{val:.1f}K"
     else:
         return f"₹{int(amount)}"
-
-
-class CustomLoginView(LoginView):
-    template_name = 'registration/login.html'
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx['is_first_setup'] = not User.objects.filter(is_staff=True).exists()
-        return ctx
-
-    def dispatch(self, request, *args, **kwargs):
-        # Already logged in → go straight to dashboard
-        if request.user.is_authenticated:
-            return redirect('dashboard')
-        return super().dispatch(request, *args, **kwargs)
 
 
 @login_required
@@ -139,9 +123,9 @@ def dashboard(request):
 
     # ─── REVENUE TREND ───
     daily_qs = period_qs.annotate(
-        date=TruncDate('created_at')
-    ).values('date').annotate(rev=Sum('final_amount')).order_by('date')
-    daily_map = {r['date']: float(r['rev'] or 0) for r in daily_qs}
+        day_date=TruncDate('created_at')
+    ).values('day_date').annotate(rev=Sum('final_amount')).order_by('day_date')
+    daily_map = {r['day_date']: float(r['rev'] or 0) for r in daily_qs}
 
     trend_labels, trend_data = [], []
     for i in range((end_date - start_date).days + 1):
@@ -168,6 +152,12 @@ def dashboard(request):
     ).order_by('-qty'))
     fast_moving = all_prods[:3]
     slow_moving = list(reversed(all_prods[-3:])) if len(all_prods) > 3 else []
+
+    # ─── INVENTORY ALERTS ───
+    all_materials = Material.objects.filter(is_active=True)
+    low_stock_materials = [m for m in all_materials if m.is_low_stock and not m.is_out_of_stock]
+    out_of_stock_materials = [m for m in all_materials if m.is_out_of_stock]
+    total_stock_value = sum(m.stock_value for m in all_materials)
 
     context = {
         'time_filter': time_filter,
@@ -205,6 +195,11 @@ def dashboard(request):
         'top_customers': top_customers,
         'fast_moving': fast_moving,
         'slow_moving': slow_moving,
+        # Inventory
+        'low_stock_materials': low_stock_materials[:5],  # top 5 for widget
+        'out_of_stock_materials': out_of_stock_materials[:5],
+        'low_stock_count': len(low_stock_materials) + len(out_of_stock_materials),
+        'total_stock_value': total_stock_value,
     }
     return render(request, 'core/dashboard.html', context)
 
@@ -232,71 +227,4 @@ def global_search(request):
     return redirect(f"{reverse('order_list')}?q={q}")
 
 
-def signup(request):
-    from django.contrib.auth.models import User
-    from django.contrib.auth import login, authenticate
 
-    # If already logged in, go to dashboard (prevents back-button returning to signup)
-    if request.user.is_authenticated:
-        return redirect('dashboard')
-
-    # Only allow if no staff/superuser exists yet, OR if called by a superuser to add more staff
-    existing_users = User.objects.filter(is_staff=True).exists()
-    if existing_users and not (request.user.is_authenticated and request.user.is_superuser):
-        return redirect('login')
-
-    errors = {}
-    form_data = {}
-
-    if request.method == 'POST':
-        form_data = request.POST
-        full_name = request.POST.get('full_name', '').strip()
-        username = request.POST.get('username', '').strip()
-        phone = request.POST.get('phone', '').strip()
-        role = request.POST.get('role', 'staff').strip()
-        password1 = request.POST.get('password1', '')
-        password2 = request.POST.get('password2', '')
-
-        if not full_name:
-            errors['full_name'] = 'Full name is required.'
-        if not username:
-            errors['username'] = 'Username is required.'
-        elif User.objects.filter(username=username).exists():
-            errors['username'] = 'This username is already taken.'
-        if len(password1) < 6:
-            errors['password1'] = 'Password must be at least 6 characters.'
-        if password1 != password2:
-            errors['password2'] = 'Passwords do not match.'
-
-        if not errors:
-            first_name = full_name.split()[0] if full_name else ''
-            last_name = ' '.join(full_name.split()[1:]) if len(full_name.split()) > 1 else ''
-            user = User.objects.create_user(
-                username=username,
-                password=password1,
-                first_name=first_name,
-                last_name=last_name,
-                is_staff=True,
-                is_superuser=(role == 'owner'),
-            )
-            # Store phone in profile if available (use email field as fallback)
-            if phone:
-                user.email = phone
-                user.save(update_fields=['email'])
-
-            if not existing_users:
-                # Auto-login on first setup
-                user = authenticate(request, username=username, password=password1)
-                login(request, user)
-                return redirect('dashboard')
-            else:
-                from django.contrib import messages
-                messages.success(request, f"Staff member '{full_name}' created successfully.")
-                return redirect('dashboard')
-
-    context = {
-        'errors': errors,
-        'form_data': form_data,
-        'is_first_setup': not existing_users,
-    }
-    return render(request, 'registration/signup.html', context)

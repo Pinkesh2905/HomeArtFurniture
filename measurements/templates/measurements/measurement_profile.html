@@ -1,6 +1,6 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Customer & Measurements | Home Art Furniture Admin{% endblock %}
+{% block title %}Customer & Dimensions | Home Art Furniture Admin{% endblock %}
 
 {% block content %}
 <div class="p-4 sm:p-8 max-w-[1440px] mx-auto w-full space-y-6 relative z-10">
@@ -9,7 +9,7 @@
         <div>
             <p class="text-[10px] sm:text-xs font-bold text-theme-secondary mb-1 uppercase tracking-[0.2em]">Profile Management</p>
             <h2 class="font-h1 text-xl sm:text-2xl lg:text-3xl font-black text-theme-primary leading-tight drop-shadow-xl">
-                Customer & <br class="hidden sm:block"> Measurements
+                Customer & <br class="hidden sm:block"> Dimensions
             </h2>
         </div>
     </div>
@@ -19,7 +19,7 @@
         <input type="hidden" name="customer_id" id="customer_id" value="">
         
         <!-- Customer Details Card -->
-        <section class="glass-panel p-8 rounded-xl mb-10 border-secondary/10">
+        <section class="glass-panel p-8 rounded-xl mb-10 border-secondary/10 overflow-visible relative z-20">
             <!-- Tab Navigation -->
             <div class="flex p-1.5 bg-theme-input rounded-[16px] mb-10 max-w-sm mx-auto border border-theme-input">
                 <button type="button" id="btn-search-mode" onclick="setCustomerMode('search')" 
@@ -50,31 +50,39 @@
             </div>
 
             <!-- Fields Container (Shared but toggled) -->
-            <div id="section-fields" class="hidden mt-10 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div id="section-fields" class="hidden mt-10 animate-in fade-in slide-in-from-top-4 duration-500 relative z-30">
                 <div class="flex items-center justify-between mb-6">
                     <label id="fields-label" class="text-[10px] font-black text-theme-secondary uppercase tracking-[0.2em] pl-1">New Customer Details</label>
                     <button type="button" id="btn-reset-customer" onclick="resetCustomerSelection()" class="text-[10px] font-black text-secondary uppercase tracking-widest hover:underline hidden">Change Customer</button>
                 </div>
-                <div id="customer-fields" class="grid grid-cols-1 md:grid-cols-3 gap-8 p-6 bg-theme-input rounded-[16px] border border-theme-input">
+                <div id="customer-fields" class="grid grid-cols-1 md:grid-cols-3 gap-8 p-6 bg-theme-input rounded-[16px] border border-theme-input overflow-visible">
                     <div class="space-y-2">
                         <label class="text-[10px] font-black text-theme-secondary uppercase tracking-[0.2em] pl-1">Phone Number <span class="text-secondary">*</span></label>
                         <div class="flex gap-2">
-                            <select id="customer_country_code" name="customer_country_code" 
-                                    class="w-[110px] h-14 border-theme-input rounded-[12px] focus:ring-4 focus:ring-secondary/10 px-3 bg-theme-input text-theme-primary font-bold shadow-inner cursor-pointer">
-                                <option value="+91" selected>🇮🇳 +91</option>
-                                <option value="+1">🇺🇸 +1</option>
-                                <option value="+44">🇬🇧 +44</option>
-                                <option value="+971">🇦🇪 +971</option>
-                                <option value="+61">🇦🇺 +61</option>
-                                <option value="+966">🇸🇦 +966</option>
-                                <option value="+974">🇶🇦 +974</option>
-                                <option value="+965">🇰🇼 +965</option>
-                                <option value="+968">🇴🇲 +968</option>
-                                <option value="+973">🇧🇭 +973</option>
-                                <option value="+49">🇩🇪 +49</option>
-                                <option value="+65">🇸🇬 +65</option>
-                                <option value="+64">🇳🇿 +64</option>
-                            </select>
+                            <!-- Premium Custom Dropdown for Country Code -->
+                            <div class="haf-dropdown w-[110px] relative z-50">
+                                <input type="checkbox" id="country-code-checkbox" class="sr-only">
+                                <input type="hidden" id="customer_country_code" name="customer_country_code" value="+91">
+                                <label class="haf-dropdown__face h-14 border-theme-input bg-theme-input rounded-[12px] hover:bg-theme-input/80 transition-colors cursor-pointer" for="country-code-checkbox">
+                                    <div class="haf-dropdown__text font-bold text-theme-primary text-sm">🇮🇳 +91</div>
+                                    <div class="haf-dropdown__arrow border-theme-secondary"></div>
+                                </label>
+                                <ul class="haf-dropdown__items !w-[140px] max-h-60 overflow-y-auto">
+                                    <li class="haf-dropdown__item bg-secondary/10 font-bold" data-value="+91">🇮🇳 +91</li>
+                                    <li class="haf-dropdown__item" data-value="+1">🇺🇸 +1</li>
+                                    <li class="haf-dropdown__item" data-value="+44">🇬🇧 +44</li>
+                                    <li class="haf-dropdown__item" data-value="+971">🇦🇪 +971</li>
+                                    <li class="haf-dropdown__item" data-value="+61">🇦🇺 +61</li>
+                                    <li class="haf-dropdown__item" data-value="+966">🇸🇦 +966</li>
+                                    <li class="haf-dropdown__item" data-value="+974">🇶🇦 +974</li>
+                                    <li class="haf-dropdown__item" data-value="+965">🇰🇼 +965</li>
+                                    <li class="haf-dropdown__item" data-value="+968">🇴🇲 +968</li>
+                                    <li class="haf-dropdown__item" data-value="+973">🇧🇭 +973</li>
+                                    <li class="haf-dropdown__item" data-value="+49">🇩🇪 +49</li>
+                                    <li class="haf-dropdown__item" data-value="+65">🇸🇬 +65</li>
+                                    <li class="haf-dropdown__item" data-value="+64">🇳🇿 +64</li>
+                                </ul>
+                            </div>
                             <input id="customer_phone_local" class="flex-1 h-14 border-theme-input rounded-[12px] focus:ring-4 focus:ring-secondary/10 px-4 bg-theme-input text-theme-primary placeholder-theme font-semibold transition-all shadow-inner" placeholder="Local phone..." type="tel" name="customer_phone_local" required/>
                         </div>
                         <input id="customer_phone" type="hidden" name="customer_phone" />
@@ -99,7 +107,7 @@
                 <div class="p-6 border-b border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white/5 gap-4">
                     <div class="flex items-center gap-3">
                         <span class="material-symbols-outlined text-secondary">straighten</span>
-                        <h3 class="font-serif text-xl sm:text-2xl font-bold text-white">Measurements</h3>
+                        <h3 class="font-serif text-xl sm:text-2xl font-bold text-white">Dimensions</h3>
                     </div>
                     <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                         <button type="button" onclick="promptNewCategory()" class="h-[42px] px-6 bg-white/5 text-white/80 rounded-[12px] border border-white/10 font-bold hover:bg-white/10 hover:text-white transition-all text-xs flex items-center justify-center backdrop-blur-md uppercase tracking-widest">
@@ -109,7 +117,7 @@
                         <button type="button" onclick="addGarmentBlock()" class="btn-premium btn-premium--gold !py-0 h-[42px] px-6 !rounded-[12px] flex items-center justify-center text-center">
                             <span class="btn-premium__label flex items-center justify-center gap-2 text-xs">
                                 <span class="material-symbols-outlined text-lg">add</span>
-                                Add Garment
+                                Add Item
                             </span>
                         </button>
                     </div>
@@ -121,8 +129,8 @@
                         <div class="w-20 h-20 bg-theme-input rounded-full flex items-center justify-center mx-auto mb-4 border border-dashed border-theme-input">
                             <span class="material-symbols-outlined text-4xl text-theme-muted">straighten</span>
                         </div>
-                        <p class="text-theme-muted font-bold uppercase tracking-[0.2em] text-xs">No garments added</p>
-                        <p class="text-[10px] text-theme-muted mt-1 opacity-60">Click 'Add Garment' to start measuring</p>
+                        <p class="text-theme-muted font-bold uppercase tracking-[0.2em] text-xs">No items added</p>
+                        <p class="text-[10px] text-theme-muted mt-1 opacity-60">Click 'Add Item' to start entering dimensions</p>
                     </div>
                 </div>
             </section>
@@ -149,14 +157,14 @@
                 <span class="material-symbols-outlined text-secondary">add_circle</span>
                 Add New Category
             </h3>
-            <p class="text-theme-secondary text-[10px] font-black uppercase tracking-[0.2em] mt-2">Define garment type for measurements</p>
+            <p class="text-theme-secondary text-[10px] font-black uppercase tracking-[0.2em] mt-2">Define furniture type for dimensions</p>
         </div>
         
         <!-- Body -->
         <div class="p-8 space-y-8 bg-theme-input/50">
             <div>
                 <label class="text-[10px] font-black text-theme-muted uppercase tracking-[0.2em] block mb-3 pl-1">Category Name</label>
-                <input type="text" id="prompt-input" class="w-full border-theme-input rounded-[12px] p-4 bg-theme-input text-theme-primary text-xl font-bold focus:ring-4 focus:ring-secondary/10 focus:border-secondary/30 transition-all shadow-inner placeholder-theme" placeholder="e.g. Waistcoat">
+                <input type="text" id="prompt-input" class="w-full border-theme-input rounded-[12px] p-4 bg-theme-input text-theme-primary text-xl font-bold focus:ring-4 focus:ring-secondary/10 focus:border-secondary/30 transition-all shadow-inner placeholder-theme" placeholder="e.g. Sofa">
             </div>
             
             <div id="suggestion-container" class="space-y-4">
@@ -193,31 +201,49 @@
 
         hiddenInput.value = fullPhone || '';
 
-        if (!fullPhone) {
-            dropdown.value = '+91';
-            localInput.value = '';
-            return;
-        }
-
-        fullPhone = fullPhone.trim();
-        if (fullPhone.startsWith('+')) {
-            const prefixes = ['+971', '+973', '+974', '+965', '+968', '+966', '+91', '+44', '+61', '+64', '+65', '+49', '+33', '+1'];
-            let matched = false;
-            for (const p of prefixes) {
-                if (fullPhone.startsWith(p)) {
-                    dropdown.value = p;
-                    localInput.value = fullPhone.substring(p.length);
-                    matched = true;
-                    break;
+        let countryCodeVal = '+91';
+        if (fullPhone) {
+            fullPhone = fullPhone.trim();
+            if (fullPhone.startsWith('+')) {
+                const prefixes = ['+971', '+973', '+974', '+965', '+968', '+966', '+91', '+44', '+61', '+64', '+65', '+49', '+33', '+1'];
+                let matched = false;
+                for (const p of prefixes) {
+                    if (fullPhone.startsWith(p)) {
+                        countryCodeVal = p;
+                        localInput.value = fullPhone.substring(p.length);
+                        matched = true;
+                        break;
+                    }
                 }
-            }
-            if (!matched) {
-                dropdown.value = '+91';
+                if (!matched) {
+                    localInput.value = fullPhone;
+                }
+            } else {
                 localInput.value = fullPhone;
             }
         } else {
-            dropdown.value = '+91';
-            localInput.value = fullPhone;
+            localInput.value = '';
+        }
+
+        dropdown.value = countryCodeVal;
+        
+        // Update custom dropdown UI elements
+        const dropdownContainer = dropdown.closest('.haf-dropdown');
+        if (dropdownContainer) {
+            const faceText = dropdownContainer.querySelector('.haf-dropdown__text');
+            const items = dropdownContainer.querySelectorAll('.haf-dropdown__item');
+            let matchedItemText = '';
+            items.forEach(item => {
+                if (item.getAttribute('data-value') === countryCodeVal) {
+                    item.classList.add('bg-secondary/10', 'font-bold');
+                    matchedItemText = item.textContent.trim();
+                } else {
+                    item.classList.remove('bg-secondary/10', 'font-bold');
+                }
+            });
+            if (faceText && matchedItemText) {
+                faceText.textContent = matchedItemText;
+            }
         }
     }
 
@@ -276,7 +302,7 @@
             <div class="relative group">
                 <span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-theme-muted text-xs group-focus-within:text-secondary transition-colors">search</span>
                 <input type="text" class="dropdown-search-input w-full bg-theme-input border-theme-input rounded-lg pl-7 pr-3 py-1.5 text-[10px] text-theme-primary placeholder-theme focus:ring-1 focus:ring-secondary/50 focus:border-secondary/50 transition-all outline-none" 
-                       placeholder="Filter garments..." 
+                       placeholder="Filter items..." 
                        onclick="event.stopPropagation()"
                        onkeyup="filterDropdownOptions(this)">
             </div>
@@ -306,7 +332,7 @@
         const blockId = `garment-block-${garmentCounter}`;
 
         const options = getOptionsHTML(garmentType);
-        const selectedLabel = globalCategories.find(cat => cat.value === garmentType)?.label || 'Select Garment...';
+        const selectedLabel = globalCategories.find(cat => cat.value === garmentType)?.label || 'Select Furniture Type...';
         const notesValue = measurementData && measurementData.notes ? measurementData.notes : '';
         const isSample = measurementData && measurementData.is_sample_product ? true : false;
 
@@ -340,12 +366,12 @@
                                 ${options}
                             </ul>
                         </div>
-                        <!-- Toggle for Sample Product -->
+                        <!-- Toggle for Standard Size / Pre-built -->
                         <div class="flex items-center gap-2 ml-4 self-center whitespace-nowrap">
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" name="is_sample_${garmentCounter}" class="sr-only peer" onchange="toggleSampleProduct(this, '${blockId}')" ${isSample ? 'checked' : ''}>
                                 <div class="w-9 h-5 bg-theme-input peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-secondary"></div>
-                                <span class="ml-2 text-[10px] font-black text-theme-secondary uppercase tracking-[0.1em]">Sample Product</span>
+                                <span class="ml-2 text-[10px] font-black text-theme-secondary uppercase tracking-[0.1em]">Standard Size / Pre-built</span>
                             </label>
                         </div>
                     </div>
@@ -357,7 +383,7 @@
                 <div id="grid-${blockId}" class="w-full" style="${isSample ? 'display:none;' : ''}">
                     <div class="text-[10px] font-black text-theme-muted uppercase tracking-[0.3em] py-8 flex flex-col items-center justify-center gap-3 bg-theme-input rounded-2xl border border-dashed border-theme-input">
                         <span class="material-symbols-outlined text-2xl opacity-20">info</span>
-                        Select a garment to start
+                        Select a furniture type to start
                     </div>
                 </div>
                 
@@ -366,7 +392,7 @@
                     <textarea name="notes_${garmentCounter}" 
                               class="w-full bg-theme-input border-theme-input rounded-xl p-4 focus:border-secondary/20 focus:ring-4 focus:ring-secondary/5 focus:text-theme-primary text-theme-primary placeholder-theme text-sm font-medium transition-all shadow-inner" 
                               rows="1" 
-                              placeholder="Special instructions or fitting notes...">${notesValue}</textarea>
+                              placeholder="Special dimensions or design notes...">${notesValue}</textarea>
                 </div>
             </div>
         `;
@@ -416,7 +442,7 @@
         const parameters = garmentParameters[garmentValue];
 
         if (!parameters) {
-            gridContainer.innerHTML = `<div class="text-[10px] font-bold text-red-400 uppercase p-4">Unknown garment type selected.</div>`;
+            gridContainer.innerHTML = `<div class="text-[10px] font-bold text-red-400 uppercase p-4">Unknown furniture type selected.</div>`;
             return;
         }
 
@@ -702,13 +728,13 @@
     }
 
     async function promptNewCategory() {
-        const defaultCategorySuggestions = ["Sherwani", "Indo-Western", "Jodhpuri", "Kurta Pajama", "Waistcoat", "Blazer", "Tuxedo", "Suit", "Shirt", "Trouser", "Safari Suit", "Nehru Jacket", "Pathani Suit"];
+        const defaultCategorySuggestions = ["Sofa", "Dining Table", "Bed", "Wardrobe", "Chair", "Desk", "Cabinet", "Console"];
         const existingLabels = globalCategories.map(c => c.label.toLowerCase());
         const filtered = defaultCategorySuggestions.filter(s => !existingLabels.includes(s.toLowerCase()));
 
         openCustomPrompt(
             "New Category", 
-            "DEFINE GARMENT TYPE FOR MEASUREMENTS", 
+            "Define furniture type for dimensions", 
             filtered,
             async (name) => {
                 try {

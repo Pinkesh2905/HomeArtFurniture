@@ -1,0 +1,244 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{% if editing %}Edit {{ supplier.name }}{% else %}New Supplier{% endif %} | Home Art Furniture Admin{% endblock %}
+
+{% block content %}
+<style>
+    /* Danger Zone Styling */
+    .danger-zone-card {
+        background-color: rgba(239, 68, 68, 0.04) !important;
+        border: 1px solid rgba(239, 68, 68, 0.2) !important;
+    }
+    body.dark-mode .danger-zone-card {
+        background-color: rgba(239, 68, 68, 0.08) !important;
+        border: 1px solid rgba(239, 68, 68, 0.25) !important;
+    }
+
+    .danger-zone-title {
+        color: #dc2626 !important;
+    }
+    body.dark-mode .danger-zone-title {
+        color: #f87171 !important;
+    }
+
+    .danger-zone-text {
+        color: #7f1d1d !important;
+    }
+    body.dark-mode .danger-zone-text {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    .btn-danger-action {
+        background-color: rgba(239, 68, 68, 0.1) !important;
+        color: #b91c1c !important;
+        border: 1px solid rgba(239, 68, 68, 0.2) !important;
+        transition: all 0.2s;
+    }
+    .btn-danger-action:hover {
+        background-color: rgba(239, 68, 68, 0.15) !important;
+        color: #991b1b !important;
+    }
+    body.dark-mode .btn-danger-action {
+        background-color: rgba(239, 68, 68, 0.15) !important;
+        color: #f87171 !important;
+        border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    }
+    body.dark-mode .btn-danger-action:hover {
+        background-color: rgba(239, 68, 68, 0.25) !important;
+        color: #fca5a5 !important;
+    }
+
+    /* Form Input & Textarea Premium Styling */
+    .form-input-custom {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 14px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        outline: none;
+        background-color: #ffffff !important;
+        border: 1px solid rgba(0, 0, 0, 0.15) !important;
+        color: #0f172a !important;
+    }
+    body.dark-mode .form-input-custom {
+        background-color: rgba(5, 13, 35, 0.6) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: #ffffff !important;
+    }
+    .form-input-custom:focus {
+        border-color: #d4af37 !important;
+        box-shadow: 0 0 12px rgba(212, 175, 55, 0.2) !important;
+    }
+    body.dark-mode .form-input-custom:focus {
+        border-color: #f2ca50 !important;
+        box-shadow: 0 0 16px rgba(242, 202, 80, 0.25) !important;
+    }
+    .form-input-custom::placeholder {
+        color: #94a3b8 !important;
+    }
+    body.dark-mode .form-input-custom::placeholder {
+        color: rgba(255, 255, 255, 0.3) !important;
+    }
+
+    /* Form Labels Custom styling */
+    .form-label-custom {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 8px;
+        padding-left: 4px;
+        color: #475569 !important;
+    }
+    body.dark-mode .form-label-custom {
+        color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    /* Form Section Title custom styling */
+    .form-section-title {
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+        color: #0f172a !important;
+    }
+    body.dark-mode .form-section-title {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        color: #ffffff !important;
+    }
+</style>
+<div class="p-4 sm:p-8 max-w-[1200px] mx-auto w-full">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <div class="flex items-center gap-2 text-slate-500 dark:text-white/40 text-[10px] sm:text-xs mb-1.5 uppercase tracking-widest font-bold">
+                <a href="{% url 'supplier_list' %}" class="hover:text-secondary transition-colors">Suppliers</a>
+                <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+                {% if editing %}
+                <span class="text-secondary">Edit</span>
+                {% else %}
+                <span class="text-secondary">New Supplier</span>
+                {% endif %}
+            </div>
+            <h2 class="font-h2 text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-white drop-shadow-md">
+                {% if editing %}Edit Supplier{% else %}Add New Supplier{% endif %}
+            </h2>
+        </div>
+        <a href="{% url 'supplier_list' %}" class="btn-premium flex items-center justify-center gap-2 text-sm">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+            Cancel
+        </a>
+    </div>
+
+    {% if messages %}
+    <div class="mb-6 space-y-2">
+        {% for message in messages %}
+        <div class="p-4 rounded-xl text-sm font-medium border {% if message.tags == 'error' %}bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20 text-red-700 dark:text-red-400{% else %}bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="POST" action="">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column: Business & Contact details -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Business Details Card -->
+                <div class="glass-panel p-6 sm:p-8 rounded-[24px]">
+                    <h3 class="form-section-title">Business Details</h3>
+                    <div class="space-y-5">
+                        <div>
+                            <label class="form-label-custom">Supplier / Business Name *</label>
+                            <input type="text" name="name" value="{{ supplier.name|default:'' }}" required class="form-input-custom" placeholder="e.g. Prime Woodworks Ltd">
+                        </div>
+                        <div>
+                            <label class="form-label-custom">GST Number</label>
+                            <input type="text" name="gst_number" value="{{ supplier.gst_number|default:'' }}" class="form-input-custom font-mono uppercase" placeholder="e.g. 27AADCP8400C1ZT">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information Card -->
+                <div class="glass-panel p-6 sm:p-8 rounded-[24px]">
+                    <h3 class="form-section-title">Contact Information</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div>
+                            <label class="form-label-custom">Contact Person</label>
+                            <input type="text" name="contact_person" value="{{ supplier.contact_person|default:'' }}" class="form-input-custom" placeholder="e.g. Anjali Desai">
+                        </div>
+                        <div>
+                            <label class="form-label-custom">Email</label>
+                            <input type="email" name="email" value="{{ supplier.email|default:'' }}" class="form-input-custom" placeholder="e.g. contact@primewoods.com">
+                        </div>
+                        <div>
+                            <label class="form-label-custom">Phone Number *</label>
+                            <input type="text" name="phone" value="{{ supplier.phone|default:'' }}" required class="form-input-custom font-mono" placeholder="e.g. 9876543210">
+                        </div>
+                        <div>
+                            <label class="form-label-custom">Alt Phone</label>
+                            <input type="text" name="alt_phone" value="{{ supplier.alt_phone|default:'' }}" class="form-input-custom font-mono" placeholder="e.g. 9988776655">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Location & Internal Notes -->
+            <div class="space-y-6">
+                <!-- Location Details Card -->
+                <div class="glass-panel p-6 sm:p-8 rounded-[24px]">
+                    <h3 class="form-section-title">Location Details</h3>
+                    <div class="space-y-5">
+                        <div>
+                            <label class="form-label-custom">City</label>
+                            <input type="text" name="city" value="{{ supplier.city|default:'' }}" class="form-input-custom" placeholder="e.g. Mumbai">
+                        </div>
+                        <div>
+                            <label class="form-label-custom">Full Address</label>
+                            <textarea name="address" rows="3" class="form-input-custom resize-none" placeholder="e.g. 404 Woodwork Street, Industrial Area">{{ supplier.address|default:'' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Internal Notes Card -->
+                <div class="glass-panel p-6 sm:p-8 rounded-[24px]">
+                    <h3 class="form-section-title">Additional Info</h3>
+                    <div>
+                        <label class="form-label-custom">Internal Notes</label>
+                        <textarea name="notes" rows="3" class="form-input-custom resize-none" placeholder="e.g. Delivers within 3 working days">{{ supplier.notes|default:'' }}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 pt-6 border-t border-theme-border flex gap-3">
+            <button type="submit" class="w-full sm:w-auto btn-premium btn-premium--gold px-8 py-3 text-sm flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-[18px]">save</span>
+                {% if editing %}Save Changes{% else %}Add Supplier{% endif %}
+            </button>
+        </div>
+    </form>
+
+    {% if editing %}
+    <!-- Danger Zone -->
+    <div class="mt-12 glass-panel p-6 rounded-[24px] danger-zone-card">
+        <h3 class="text-sm font-bold danger-zone-title mb-2 flex items-center gap-2">
+            <span class="material-symbols-outlined">warning</span>
+            Danger Zone
+        </h3>
+        <p class="text-xs danger-zone-text mb-4">Archiving this supplier will hide them from the active list. Their historical transactions will be preserved.</p>
+        
+        <form method="POST" action="{% url 'supplier_delete' supplier.pk %}" onsubmit="return confirm('Are you sure you want to archive this supplier?');">
+            {% csrf_token %}
+            <button type="submit" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider btn-danger-action">
+                Archive Supplier
+            </button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

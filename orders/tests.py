@@ -5,8 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from customers.models import Customer
-from measurements.models import Measurement
-from salesperson.models import Salesperson
+from measurements.models import FurnitureDimension
 from .models import Order, OrderItem
 from .services import create_order_from_post
 
@@ -14,23 +13,22 @@ from .services import create_order_from_post
 class OrderServiceTests(TestCase):
     def setUp(self):
         self.customer = Customer.objects.create(full_name='Rajesh Kumar', phone='+91 98765 43210')
-        Measurement.objects.create(
+        FurnitureDimension.objects.create(
             customer=self.customer,
-            garment_category='shirt',
-            values={'Length': '40', 'Chest': '38'},
+            furniture_type='sofa',
+            values={'Length': '40', 'Width': '38'},
         )
 
     def test_order_item_uses_decimal_total(self):
         order = Order.objects.create(
             order_number='TMP-test',
             customer=self.customer,
-            booking_date='2026-05-03',
-            delivery_date='2026-05-10',
+            date='2026-05-03',
         )
         item = OrderItem.objects.create(
             order=order,
-            garment_category='shirt',
-            description='Shirt',
+            furniture_type='sofa',
+            description='sofa',
             quantity=2,
             rate=Decimal('499.50'),
             total_amount=Decimal('0.00'),
@@ -41,8 +39,8 @@ class OrderServiceTests(TestCase):
         from django.http import QueryDict
 
         query = QueryDict('', mutable=True)
-        query.setlist('item_garment_category[]', ['shirt'])
-        query.setlist('item_description[]', ['Shirt'])
+        query.setlist('item_furniture_type[]', ['sofa'])
+        query.setlist('item_description[]', ['sofa'])
         query.setlist('item_qty[]', ['2'])
         query.setlist('item_rate[]', ['500.00'])
         query['subtotal'] = '1.00'
@@ -65,8 +63,8 @@ class OrderServiceTests(TestCase):
         from django.http import QueryDict
 
         query = QueryDict('', mutable=True)
-        query.setlist('item_garment_category[]', ['shirt'])
-        query.setlist('item_description[]', ['Shirt'])
+        query.setlist('item_furniture_type[]', ['sofa'])
+        query.setlist('item_description[]', ['sofa'])
         query.setlist('item_qty[]', ['1'])
         query.setlist('item_rate[]', ['100.00'])
         query['discount'] = '101.00'
@@ -80,19 +78,12 @@ class OrderViewTests(TestCase):
         self.user = User.objects.create_user(username='admin', password='pass')
         self.customer = Customer.objects.create(full_name='Amit Shah', phone='9999999999')
 
-    def test_order_pages_require_login(self):
-        response = self.client.get(reverse('order_list'))
-        self.assertEqual(response.status_code, 302)
-        self.assertIn('/accounts/login/', response['Location'])
-
     def test_order_post_creates_items_and_redirects_to_print(self):
         self.client.force_login(self.user)
-        salesperson = Salesperson.objects.create(full_name='Kiran Patel', employee_code='SP-001')
         response = self.client.post(reverse('order_create'), {
             'customer_id': self.customer.id,
-            'salesperson': salesperson.id,
-            'item_garment_category[]': ['pant'],
-            'item_description[]': ['Pant'],
+            'item_furniture_type[]': ['dining_table'],
+            'item_description[]': ['dining_table'],
             'item_qty[]': ['1'],
             'item_rate[]': ['800.00'],
             'discount': '50.00',
@@ -103,33 +94,15 @@ class OrderViewTests(TestCase):
         self.assertEqual(order.final_amount, Decimal('750.00'))
         self.assertEqual(order.balance_due, Decimal('650.00'))
         self.assertEqual(order.items.count(), 1)
-        self.assertEqual(order.salesperson, salesperson)
 
-    def test_order_print_includes_salesperson(self):
-        self.client.force_login(self.user)
-        salesperson = Salesperson.objects.create(full_name='Meera Shah', employee_code='SP-002')
-        order = Order.objects.create(
-            order_number='HAF-20260503-010',
-            customer=self.customer,
-            salesperson=salesperson,
-            booking_date='2026-05-03',
-            delivery_date='2026-05-10',
-            final_amount=Decimal('500.00'),
-            grand_total=Decimal('500.00'),
-        )
 
-        response = self.client.get(reverse('order_print', args=[order.id]))
-
-        self.assertContains(response, 'Salesperson')
-        self.assertContains(response, salesperson.full_name)
 
     def test_order_detail_rejects_payment_above_balance(self):
         self.client.force_login(self.user)
         order = Order.objects.create(
             order_number='HAF-20260503-001',
             customer=self.customer,
-            booking_date='2026-05-03',
-            delivery_date='2026-05-10',
+            date='2026-05-03',
             final_amount=Decimal('500.00'),
             advance_paid=Decimal('100.00'),
             grand_total=Decimal('400.00'),
@@ -139,26 +112,21 @@ class OrderViewTests(TestCase):
         self.assertEqual(order.advance_paid, Decimal('100.00'))
         self.assertEqual(order.grand_total, Decimal('400.00'))
 
-    def test_order_list_filters_by_exact_delivery_and_return_dates(self):
+    def test_order_list_filters_by_exact_date(self):
         self.client.force_login(self.user)
         matching = Order.objects.create(
             order_number='HAF-20260503-001',
             customer=self.customer,
-            booking_date='2026-05-03',
-            delivery_date='2026-05-10',
-            return_date='2026-05-12',
+            date='2026-05-10',
         )
         Order.objects.create(
             order_number='HAF-20260503-002',
             customer=self.customer,
-            booking_date='2026-05-03',
-            delivery_date='2026-05-11',
-            return_date='2026-05-12',
+            date='2026-05-11',
         )
 
         response = self.client.get(reverse('order_list'), {
-            'delivery_date': '2026-05-10',
-            'return_date': '2026-05-12',
+            'date': '2026-05-10',
         })
 
         self.assertContains(response, matching.order_number)
@@ -169,19 +137,17 @@ class OrderViewTests(TestCase):
         matching = Order.objects.create(
             order_number='HAF-20260503-003',
             customer=self.customer,
-            booking_date='2026-05-03',
-            delivery_date='2026-05-10',
+            date='2026-05-10',
             grand_total=Decimal('1200.00'),
         )
         Order.objects.create(
             order_number='HAF-20260503-004',
             customer=self.customer,
-            booking_date='2026-05-03',
-            delivery_date='2026-05-11',
+            date='2026-05-11',
             grand_total=Decimal('900.00'),
         )
 
-        response = self.client.get(reverse('order_list_print'), {'delivery_date': '2026-05-10'})
+        response = self.client.get(reverse('order_list_print'), {'date': '2026-05-10'})
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Filtered Orders & Bills List')
@@ -194,8 +160,7 @@ class OrderViewTests(TestCase):
         order = Order.objects.create(
             order_number='HAF-20260503-100',
             customer=self.customer,
-            booking_date='2026-05-03',
-            delivery_date='2026-05-10',
+            date='2026-05-03',
             status='pending',
         )
         response = self.client.post(reverse('api_update_order_shortcut', args=[order.id]), {
@@ -213,8 +178,7 @@ class OrderViewTests(TestCase):
         order = Order.objects.create(
             order_number='HAF-20260503-101',
             customer=self.customer,
-            booking_date='2026-05-03',
-            delivery_date='2026-05-10',
+            date='2026-05-03',
             final_amount=Decimal('1000.00'),
             advance_paid=Decimal('200.00'),
             grand_total=Decimal('800.00'),
@@ -237,8 +201,7 @@ class OrderViewTests(TestCase):
         order = Order.objects.create(
             order_number='HAF-20260503-102',
             customer=self.customer,
-            booking_date='2026-05-03',
-            delivery_date='2026-05-10',
+            date='2026-05-03',
             final_amount=Decimal('1000.00'),
             advance_paid=Decimal('200.00'),
             grand_total=Decimal('800.00'),
@@ -253,31 +216,29 @@ class OrderViewTests(TestCase):
         self.assertFalse(data['success'])
         self.assertIn('errors', data)
 
-    def test_order_creation_with_duplicate_categories_and_different_measurements(self):
+    def test_order_creation_with_duplicate_categories_and_different_FurnitureDimensions(self):
         self.client.force_login(self.user)
-        salesperson = Salesperson.objects.create(full_name='Kiran Patel', employee_code='SP-001')
         
-        # Create 2 distinct measurements for self.customer for garment_category = 'shirt'
-        m1 = Measurement.objects.create(
+        # Create 2 distinct FurnitureDimensions for self.customer for furniture_type = 'sofa'
+        m1 = FurnitureDimension.objects.create(
             customer=self.customer,
-            garment_category='shirt',
-            values={'Length': '40', 'Chest': '38'},
-            notes='Shirt 1'
+            furniture_type='sofa',
+            values={'Length': '40', 'Width': '38'},
+            notes='sofa 1'
         )
-        m2 = Measurement.objects.create(
+        m2 = FurnitureDimension.objects.create(
             customer=self.customer,
-            garment_category='shirt',
-            values={'Length': '42', 'Chest': '40'},
-            notes='Shirt 2'
+            furniture_type='sofa',
+            values={'Length': '42', 'Width': '40'},
+            notes='sofa 2'
         )
         
-        # Post to order_create, passing item_measurement_id[] explicitly
+        # Post to order_create, passing item_FurnitureDimension_id[] explicitly
         response = self.client.post(reverse('order_create'), {
             'customer_id': self.customer.id,
-            'salesperson': salesperson.id,
-            'item_garment_category[]': ['shirt', 'shirt'],
-            'item_measurement_id[]': [str(m1.id), str(m2.id)],
-            'item_description[]': ['Shirt style A', 'Shirt style B'],
+            'item_furniture_type[]': ['sofa', 'sofa'],
+            'item_FurnitureDimension_id[]': [str(m1.id), str(m2.id)],
+            'item_description[]': ['sofa style A', 'sofa style B'],
             'item_qty[]': ['1', '1'],
             'item_rate[]': ['800.00', '900.00'],
             'discount': '0.00',
@@ -289,32 +250,30 @@ class OrderViewTests(TestCase):
         self.assertRedirects(response, reverse('order_print', args=[order.id]))
         self.assertEqual(order.items.count(), 2)
         
-        # Verify items point to distinct measurement records
+        # Verify items point to distinct FurnitureDimension records
         items = list(order.items.order_by('id'))
-        self.assertEqual(items[0].measurement.id, m1.id)
-        self.assertEqual(items[0].measurement.notes, 'Shirt 1')
-        self.assertEqual(items[1].measurement.id, m2.id)
-        self.assertEqual(items[1].measurement.notes, 'Shirt 2')
+        self.assertEqual(items[0].dimension.id, m1.id)
+        self.assertEqual(items[0].dimension.notes, 'sofa 1')
+        self.assertEqual(items[1].dimension.id, m2.id)
+        self.assertEqual(items[1].dimension.notes, 'sofa 2')
 
-    def test_order_creation_fallback_clones_shared_measurements(self):
+    def test_order_creation_fallback_clones_shared_FurnitureDimensions(self):
         self.client.force_login(self.user)
-        salesperson = Salesperson.objects.create(full_name='Kiran Patel', employee_code='SP-001')
         
-        # Only 1 shirt measurement exists
-        m = Measurement.objects.create(
+        # Only 1 sofa FurnitureDimension exists
+        m = FurnitureDimension.objects.create(
             customer=self.customer,
-            garment_category='shirt',
-            values={'Length': '40', 'Chest': '38'},
-            notes='Original Shirt'
+            furniture_type='sofa',
+            values={'Length': '40', 'Width': '38'},
+            notes='Original sofa'
         )
         
-        # Post 2 shirt items, both without explicit measurement IDs
+        # Post 2 sofa items, both without explicit FurnitureDimension IDs
         response = self.client.post(reverse('order_create'), {
             'customer_id': self.customer.id,
-            'salesperson': salesperson.id,
-            'item_garment_category[]': ['shirt', 'shirt'],
-            'item_measurement_id[]': ['', ''],
-            'item_description[]': ['Shirt A', 'Shirt B'],
+            'item_furniture_type[]': ['sofa', 'sofa'],
+            'item_FurnitureDimension_id[]': ['', ''],
+            'item_description[]': ['sofa A', 'sofa B'],
             'item_qty[]': ['1', '1'],
             'item_rate[]': ['800.00', '900.00'],
             'discount': '0.00',
@@ -325,46 +284,45 @@ class OrderViewTests(TestCase):
         items = list(order.items.order_by('id'))
         self.assertEqual(len(items), 2)
         
-        # First item should use the original measurement
-        self.assertEqual(items[0].measurement.id, m.id)
-        # Second item should use a cloned, separate measurement
-        self.assertNotEqual(items[1].measurement.id, m.id)
-        self.assertEqual(items[1].measurement.garment_category, 'shirt')
-        self.assertEqual(items[1].measurement.values, m.values)
+        # First item should use the original FurnitureDimension
+        self.assertEqual(items[0].dimension.id, m.id)
+        # Second item should use a cloned, separate FurnitureDimension
+        self.assertNotEqual(items[1].dimension.id, m.id)
+        self.assertEqual(items[1].dimension.furniture_type, 'sofa')
+        self.assertEqual(items[1].dimension.values, m.values)
 
-    def test_order_item_edit_clones_shared_measurement(self):
+    def test_order_item_edit_clones_shared_FurnitureDimension(self):
         self.client.force_login(self.user)
         
-        # Create a single shared measurement
-        m = Measurement.objects.create(
+        # Create a single shared FurnitureDimension
+        m = FurnitureDimension.objects.create(
             customer=self.customer,
-            garment_category='shirt',
-            values={'Length': '40', 'Chest': '38'},
-            notes='Shared Shirt'
+            furniture_type='sofa',
+            values={'Length': '40', 'Width': '38'},
+            notes='Shared sofa'
         )
         
         order = Order.objects.create(
             order_number='HAF-test-edit',
             customer=self.customer,
-            booking_date='2026-05-03',
-            delivery_date='2026-05-10',
+            date='2026-05-03',
         )
         
-        # 2 OrderItems share the same measurement ID
+        # 2 OrderItems share the same FurnitureDimension ID
         item1 = OrderItem.objects.create(
             order=order,
-            garment_category='shirt',
-            measurement=m,
-            description='Shirt 1',
+            furniture_type='sofa',
+            dimension=m,
+            description='sofa 1',
             quantity=1,
             rate=Decimal('500.00'),
             total_amount=Decimal('500.00')
         )
         item2 = OrderItem.objects.create(
             order=order,
-            garment_category='shirt',
-            measurement=m,
-            description='Shirt 2',
+            furniture_type='sofa',
+            dimension=m,
+            description='sofa 2',
             quantity=1,
             rate=Decimal('500.00'),
             total_amount=Decimal('500.00')
@@ -372,26 +330,80 @@ class OrderViewTests(TestCase):
         
         # Post edit to item2 only, changing Length from 40 to 42
         response = self.client.post(reverse('order_item_edit', args=[order.id, item2.id]), {
-            'description': 'Shirt 2 Updated',
+            'description': 'sofa 2 Updated',
             'quantity': '1',
             'rate': '500.00',
-            'is_sample_product': 'off',
+            'is_standard_catalog': 'off',
             'measure_Length': '42',
-            'measure_Chest': '38',
-            'measurement_notes': 'Only item 2 updated'
+            'measure_Width': '38',
+            'FurnitureDimension_notes': 'Only item 2 updated'
         })
         
-        # Verify item2's measurement is cloned and updated, while item1 is unchanged
+        # Verify item2's FurnitureDimension is cloned and updated, while item1 is unchanged
         item1.refresh_from_db()
         item2.refresh_from_db()
         
-        self.assertNotEqual(item1.measurement.id, item2.measurement.id)
+        self.assertNotEqual(item1.dimension.id, item2.dimension.id)
         
-        # Item 1 measurement remains 40
-        self.assertEqual(item1.measurement.values.get('Length'), '40')
-        self.assertEqual(item1.measurement.notes, 'Shared Shirt')
+        # Item 1 FurnitureDimension remains 40
+        self.assertEqual(item1.dimension.values.get('Length'), '40')
+        self.assertEqual(item1.dimension.notes, 'Shared sofa')
         
-        # Item 2 measurement is now 42
-        self.assertEqual(item2.measurement.values.get('Length'), '42')
-        self.assertEqual(item2.measurement.notes, 'Only item 2 updated')
+        # Item 2 FurnitureDimension is now 42
+        self.assertEqual(item2.dimension.values.get('Length'), '42')
+        self.assertEqual(item2.dimension.notes, 'Only item 2 updated')
+
+    def test_payment_report_view_filters_and_totals(self):
+        self.client.force_login(self.user)
+        # Cash order
+        Order.objects.create(
+            order_number='HAF-CASH-1',
+            customer=self.customer,
+            date='2026-06-01',
+            payment_method='cash',
+            advance_paid=Decimal('200.00'),
+            grand_total=Decimal('300.00'),
+        )
+        # UPI order
+        Order.objects.create(
+            order_number='HAF-UPI-1',
+            customer=self.customer,
+            date='2026-06-02',
+            payment_method='upi',
+            advance_paid=Decimal('400.00'),
+            grand_total=Decimal('100.00'),
+        )
+        
+        response = self.client.get(reverse('payment_report'), {
+            'start_date': '2026-06-01',
+            'end_date': '2026-06-03'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'HAF-CASH-1')
+        self.assertContains(response, 'HAF-UPI-1')
+        self.assertContains(response, '600.00')
+
+    def test_unauthenticated_order_views_redirect_to_login(self):
+        self.client.logout()
+        response = self.client.get(reverse('order_list'))
+        self.assertRedirects(response, f"{reverse('login')}?next={reverse('order_list')}")
+
+        response_create = self.client.get(reverse('order_create'))
+        self.assertRedirects(response_create, f"{reverse('login')}?next={reverse('order_create')}")
+
+    def test_public_order_invoice_accessible_without_login(self):
+        order = Order.objects.create(
+            order_number='HAF-PUBLIC-01',
+            customer=self.customer,
+            date='2026-06-01',
+            final_amount=Decimal('1500.00'),
+            advance_paid=Decimal('500.00'),
+            grand_total=Decimal('1000.00'),
+        )
+        self.client.logout()
+        response = self.client.get(reverse('public_invoice', args=[order.access_token]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'HAF-PUBLIC-01')
+        self.assertContains(response, self.customer.full_name)
+
 

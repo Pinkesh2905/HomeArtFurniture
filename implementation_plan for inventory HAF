@@ -1,0 +1,299 @@
+# Inventory Management Module — Implementation Plan
+
+## Overview
+
+Add a full **Inventory Management** module to the Home Art Furniture platform. This module tracks raw materials and supplies used in custom furniture builds (wood, fabric, hardware, adhesives, etc.), manages supplier relationships, records stock-in/stock-out transactions, and provides low-stock alerts on the dashboard.
+
+The module follows the exact same architectural patterns as the existing `orders`, `customers`, and `measurements` apps: function-based views, a `services.py` layer for business logic, Tailwind-based dark-mode templates extending `base.html`, and `django.test.TestCase` tests.
+
+---
+
+## Open Questions
+
+> [!IMPORTANT]
+> **Q1: Material Categories** — Should material categories (Wood, Fabric, Hardware, Paint, Adhesive, etc.) be a fixed `TextChoices` enum (like `FurnitureType`), or should they be user-configurable via a DB table (like `CustomFurnitureType`)? I recommend **fixed enum + custom DB table** (same hybrid approach as measurements).
+
+> [!IMPORTANT]
+> **Q2: Purchase Orders** — Do you want a full Purchase Order workflow (Create PO → Send to Supplier → Receive Goods → Close PO), or is a simpler "Record Stock In" form sufficient for now? I recommend **starting with simple stock-in/stock-out transactions** and adding POs later.
+
+> [!IMPORTANT]
+> **Q3: Order-Inventory Linkage** — Should we link inventory consumption to specific orders (e.g., "Order HAF-20260714-001 used 2m² of teak wood"), or is the inventory module standalone for now? I recommend **standalone first**, with linkage as a future enhancement.
+
+> [!IMPORTANT]
+> **Q4: Units of Measurement** — Materials will need different units (kg, meters, sq.ft, pieces, liters, sheets). Should units be a fixed enum or user-configurable? I recommend **fixed enum** covering the common units.
+
+---
+
+## Proposed Changes
+
+### Phase 1: Django App Scaffolding
+
+#### [NEW] `inventory/` (Django app directory)
+
+Create the new app with standard Django structure:
+
+```
+inventory/
+├── __init__.py
+├── admin.py
+├── apps.py
+├── models.py
+├── services.py
+├── urls.py
+├── views.py
+├── tests.py
+├── migrations/
+│   └── __init__.py
+└── templates/
+    └── inventory/
+        ├── material_list.html
+        ├── material_detail.html
+        ├── material_form.html
+        ├── supplier_list.html
+        ├── supplier_form.html
+        ├── stock_transaction_form.html
+        └── inventory_print.html
+```
+
+---
+
+### Phase 2: Data Models
+
+#### [NEW] [models.py](file:///c:/Projects/HomeArtFurniture/inventory/models.py)
+
+```python
+# ── Enums ──
+class MaterialCategory(models.TextChoices):
+    WOOD        = 'wood',        'Wood / Timber'
+    FABRIC      = 'fabric',      'Fabric / Upholstery'
+    HARDWARE    = 'hardware',    'Hardware (Screws, Nails, Hinges)'
+    PAINT       = 'paint',       'Paint / Polish / Finish'
+    ADHESIVE    = 'adhesive',    'Adhesive / Glue'
+    FOAM        = 'foam',        'Foam / Cushion'
+    GLASS       = 'glass',       'Glass / Mirror'
+    PLYWOOD     = 'plywood',     'Plywood / MDF / Particle Board'
+    METAL       = 'metal',       'Metal (Rods, Pipes, Frames)'
+    OTHER       = 'other',       'Other'
+
+class UnitOfMeasure(models.TextChoices):
+    PIECES      = 'pcs',     'Pieces'
+    KG          = 'kg',      'Kilograms'
+    METERS      = 'm',       'Meters'
+    SQ_FT       = 'sqft',   'Square Feet'
+    SQ_M        = 'sqm',    'Square Meters'
+    LITERS      = 'l',       'Liters'
+    SHEETS      = 'sheets',  'Sheets'
+    CUBIC_FT    = 'cuft',   'Cubic Feet'
+
+class TransactionType(models.TextChoices):
+    STOCK_IN    = 'in',   'Stock In'
+    STOCK_OUT   = 'out',  'Stock Out'
+    ADJUSTMENT  = 'adj',  'Adjustment'
+    DAMAGED     = 'dmg',  'Damaged / Wastage'
+
+# ── Models ──
+
+class Supplier(models.Model):
+    name          = CharField(max_length=200)
+    contact_person = CharField(max_length=150, blank=True)
+    phone         = CharField(max_length=15, db_index=True)
+    alt_phone     = CharField(max_length=15, blank=True)
+    email         = EmailField(blank=True)
+    address       = TextField(blank=True)
+    city          = CharField(max_length=100, blank=True)
+    gst_number    = CharField(max_length=20, blank=True)
+    notes         = TextField(blank=True)
+    is_active     = BooleanField(default=True)
+    created_at    = DateTimeField(auto_now_add=True)
+    updated_at    = DateTimeField(auto_now=True)
+
+class Material(models.Model):
+    name          = CharField(max_length=200)
+    sku           = CharField(max_length=50, unique=True, blank=True)  # auto-generated
+    category      = CharField(choices=MaterialCategory.choices)
+    unit          = CharField(choices=UnitOfMeasure.choices)
+    current_stock = DecimalField(max_digits=12, decimal_places=2, default=0)
+    min_stock     = DecimalField(max_digits=12, decimal_places=2, default=0)  # low-stock alert threshold
+    cost_per_unit = DecimalField(max_digits=10, decimal_places=2, default=0)
+    supplier      = ForeignKey(Supplier, null=True, blank=True, on_delete=SET_NULL)
+    location      = CharField(max_length=100, blank=True)  # warehouse shelf/zone
+    notes         = TextField(blank=True)
+    is_active     = BooleanField(default=True)
+    created_at    = DateTimeField(auto_now_add=True)
+    updated_at    = DateTimeField(auto_now=True)
+
+    @property
+    def is_low_stock(self):
+        return self.current_stock <= self.min_stock
+
+    @property
+    def stock_value(self):
+        return self.current_stock * self.cost_per_unit
+
+class StockTransaction(models.Model):
+    material       = ForeignKey(Material, on_delete=CASCADE, related_name='transactions')
+    transaction_type = CharField(choices=TransactionType.choices)
+    quantity       = DecimalField(max_digits=12, decimal_places=2)
+    unit_cost      = DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_cost     = DecimalField(max_digits=12, decimal_places=2, default=0)
+    reference      = CharField(max_length=100, blank=True)  # invoice/PO number
+    supplier       = ForeignKey(Supplier, null=True, blank=True, on_delete=SET_NULL)
+    notes          = TextField(blank=True)
+    date           = DateField(default=timezone.localdate)
+    created_at     = DateTimeField(auto_now_add=True)
+```
+
+**Key design decisions:**
+- `current_stock` is denormalized on `Material` for fast reads; updated via `services.py` inside `@transaction.atomic` when recording stock transactions.
+- SKU auto-generated on first save: `HAF-{CATEGORY_PREFIX}-{PK:04d}` (e.g., `HAF-WOOD-0001`).
+- `min_stock` enables low-stock alerts on the dashboard.
+
+---
+
+### Phase 3: Services Layer
+
+#### [NEW] [services.py](file:///c:/Projects/HomeArtFurniture/inventory/services.py)
+
+Business logic functions following the `orders/services.py` pattern:
+
+| Function | Purpose |
+|----------|---------|
+| `record_stock_in(material, qty, unit_cost, supplier, reference, notes, date)` | Creates a `STOCK_IN` transaction, updates `material.current_stock += qty` |
+| `record_stock_out(material, qty, reference, notes, date)` | Creates a `STOCK_OUT` transaction, validates sufficient stock, updates `material.current_stock -= qty` |
+| `record_adjustment(material, new_qty, notes, date)` | Creates an `ADJUSTMENT` transaction with delta, sets `material.current_stock = new_qty` |
+| `record_damage(material, qty, notes, date)` | Creates a `DAMAGED` transaction, updates `material.current_stock -= qty` |
+| `create_material_from_post(post_data)` | Parses form POST data, validates, creates `Material` |
+| `update_material_from_post(material, post_data)` | Parses form POST data, validates, updates `Material` |
+| `create_supplier_from_post(post_data)` | Parses form POST data, creates `Supplier` |
+| `update_supplier_from_post(supplier, post_data)` | Updates `Supplier` from POST |
+
+All stock mutations wrapped in `@transaction.atomic` with proper validation.
+
+---
+
+### Phase 4: Views & URLs
+
+#### [NEW] [views.py](file:///c:/Projects/HomeArtFurniture/inventory/views.py)
+
+| View | URL | Description |
+|------|-----|-------------|
+| `material_list` | `/inventory/` | List all materials with search, category filter, stock status filter (All / Low Stock / Out of Stock) |
+| `material_detail` | `/inventory/<id>/` | Material details + transaction history timeline |
+| `material_create` | `/inventory/new/` | Add new material form |
+| `material_edit` | `/inventory/<id>/edit/` | Edit material form |
+| `material_delete` | `/inventory/<id>/delete/` | Delete material (POST only) |
+| `stock_transaction` | `/inventory/<id>/transaction/` | Record stock in/out/adjustment form |
+| `supplier_list` | `/inventory/suppliers/` | List all suppliers |
+| `supplier_create` | `/inventory/suppliers/new/` | Add supplier form |
+| `supplier_edit` | `/inventory/suppliers/<id>/edit/` | Edit supplier |
+| `supplier_delete` | `/inventory/suppliers/<id>/delete/` | Delete supplier |
+| `inventory_print` | `/inventory/print/` | Print-friendly inventory report (standalone HTML like `order_list_print.html`) |
+
+#### [NEW] [urls.py](file:///c:/Projects/HomeArtFurniture/inventory/urls.py)
+
+```python
+urlpatterns = [
+    path('', views.material_list, name='material_list'),
+    path('new/', views.material_create, name='material_create'),
+    path('suppliers/', views.supplier_list, name='supplier_list'),
+    path('suppliers/new/', views.supplier_create, name='supplier_create'),
+    path('suppliers/<int:supplier_id>/edit/', views.supplier_edit, name='supplier_edit'),
+    path('suppliers/<int:supplier_id>/delete/', views.supplier_delete, name='supplier_delete'),
+    path('print/', views.inventory_print, name='inventory_print'),
+    path('<int:material_id>/', views.material_detail, name='material_detail'),
+    path('<int:material_id>/edit/', views.material_edit, name='material_edit'),
+    path('<int:material_id>/delete/', views.material_delete, name='material_delete'),
+    path('<int:material_id>/transaction/', views.stock_transaction, name='stock_transaction'),
+]
+```
+
+---
+
+### Phase 5: Templates (UI)
+
+All templates extend `core/base.html`, use the existing dark-mode Tailwind theme, and follow the card/glass-morphism design patterns already established.
+
+#### [NEW] `material_list.html`
+- **Header**: Breadcrumb + "Inventory" title + "Add Material" button
+- **Summary cards** (3 across): Total Materials, Low Stock Alerts (red badge), Total Stock Value (₹)
+- **Filter bar**: Search input, Category dropdown, Stock Status filter (All / Low / Out)
+- **Table**: SKU, Name, Category, Stock (with color-coded progress bar), Unit Cost, Stock Value, Supplier, Actions
+- **Row highlights**: Red tint for out-of-stock, amber tint for low-stock
+
+#### [NEW] `material_detail.html`
+- **Material info card**: Name, SKU, category, unit, current stock (large display), cost, supplier, location
+- **Quick action buttons**: Stock In, Stock Out, Adjust, Record Damage
+- **Transaction history table**: Date, Type (badge), Qty, Unit Cost, Total, Reference, Notes
+
+#### [NEW] `material_form.html`
+- Form fields: Name, Category (dropdown), Unit (dropdown), Min Stock, Cost/Unit, Supplier (dropdown), Location, Notes
+- Same styling as `order_form.html`
+
+#### [NEW] `supplier_list.html` / `supplier_form.html`
+- Simple CRUD list & form for suppliers
+
+#### [NEW] `inventory_print.html`
+- Standalone HTML (no `base.html`), same approach as `order_list_print.html`
+- Landscape A4, black-on-white table with all materials and stock levels
+
+---
+
+### Phase 6: Integration Points
+
+#### [MODIFY] [settings.py](file:///c:/Projects/HomeArtFurniture/homeartfurniture/settings.py)
+- Add `'inventory'` to `INSTALLED_APPS`
+
+#### [MODIFY] [urls.py](file:///c:/Projects/HomeArtFurniture/homeartfurniture/urls.py)
+- Add `path('inventory/', include('inventory.urls'))`
+
+#### [MODIFY] [base.html](file:///c:/Projects/HomeArtFurniture/core/templates/core/base.html)
+- Add sidebar nav link for Inventory (icon: `inventory_2`, label: "Inventory") between Orders and Payments
+
+#### [MODIFY] [views.py](file:///c:/Projects/HomeArtFurniture/core/views.py) (Dashboard)
+- Add low-stock count and total stock value to dashboard context
+- Show a "Low Stock Alerts" card/widget on the dashboard
+
+---
+
+### Phase 7: Admin & Tests
+
+#### [NEW] [admin.py](file:///c:/Projects/HomeArtFurniture/inventory/admin.py)
+- `MaterialAdmin`: list_display, list_filter by category/stock status, search by name/SKU
+- `SupplierAdmin`: list_display, search by name/phone
+- `StockTransactionAdmin`: list_display with material name, type, qty, date; list_filter by type/date
+
+#### [NEW] [tests.py](file:///c:/Projects/HomeArtFurniture/inventory/tests.py)
+
+| Test | Description |
+|------|-------------|
+| `test_material_creation` | Create material, verify fields and auto-SKU |
+| `test_stock_in_updates_current_stock` | Record stock-in, assert `current_stock` incremented |
+| `test_stock_out_updates_current_stock` | Record stock-out, assert `current_stock` decremented |
+| `test_stock_out_insufficient_raises` | Attempt to withdraw more than available, expect `ValidationError` |
+| `test_adjustment_sets_absolute_stock` | Record adjustment, assert `current_stock` set to exact value |
+| `test_damage_reduces_stock` | Record damage, assert deduction |
+| `test_low_stock_property` | Assert `is_low_stock` returns `True` when `current_stock <= min_stock` |
+| `test_material_list_view_200` | GET `/inventory/` returns 200 |
+| `test_material_create_post` | POST to create form, assert redirect and DB record |
+| `test_supplier_crud` | Create, edit, delete supplier |
+| `test_stock_transaction_view` | POST stock-in via form, verify transaction created |
+| `test_inventory_print_view` | GET print view returns 200 with standalone HTML |
+
+---
+
+## Verification Plan
+
+### Automated Tests
+```bash
+python manage.py test inventory
+python manage.py test  # full suite to ensure no regressions
+```
+
+### Manual Verification
+- Navigate to `/inventory/` and verify the material list loads with proper dark-mode styling
+- Add a material, verify it appears in the list
+- Record stock-in and stock-out transactions, verify `current_stock` updates
+- Set `min_stock` higher than `current_stock`, verify low-stock badge appears
+- Check sidebar shows "Inventory" link with correct active state
+- Click "Print Report" and verify landscape PDF renders correctly
+- Verify dashboard shows low-stock alert widget

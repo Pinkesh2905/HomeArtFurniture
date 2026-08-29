@@ -30,15 +30,23 @@
                         {% endfor %}
                     </span>
                 </div>
-                <p class="text-theme-secondary text-xs sm:text-sm mt-1">Placed on {{ order.booking_date }}</p>
+                <p class="text-theme-secondary text-xs sm:text-sm mt-1">Date: {{ order.date }}</p>
             </div>
         </div>
         <div class="flex gap-3">
+            <a href="{% url 'order_print' order.id %}?original_only=true" target="_blank" class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-[14px] font-bold text-sm bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 hover:bg-emerald-500/20 transition-all duration-200" title="Print Original Bill (Page 1)">
+                <span class="material-symbols-outlined text-lg">print</span>
+                Original Bill
+            </a>
+            <a href="{{ whatsapp_link }}" target="_blank" class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-[14px] font-bold text-sm bg-green-500 text-white hover:bg-green-600 transition-all duration-200 shadow-xl" title="Send WhatsApp Message">
+                <span class="material-symbols-outlined text-lg">chat</span>
+                WhatsApp
+            </a>
             <a href="{% url 'order_print' order.id %}" class="flex-1 sm:flex-none btn-premium btn-premium--gold !py-3 !px-8 shadow-2xl">
                 <span class="material-symbols-outlined text-lg mr-2">print</span>
-                Print Invoice
+                Print Full
             </a>
-            <button type="button" onclick="openDeleteModal()" class="flex items-center gap-2 px-6 py-3 rounded-[14px] font-bold text-sm bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 hover:text-red-300 transition-all duration-200" title="Delete this order permanently">
+            <button type="button" onclick="openDeleteModal()" class="flex items-center justify-center gap-2 px-6 py-3 rounded-[14px] font-bold text-sm bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 hover:text-red-300 transition-all duration-200" title="Delete this order permanently">
                 <span class="material-symbols-outlined text-lg">delete_forever</span>
                 <span class="hidden sm:inline">Delete</span>
             </button>
@@ -52,7 +60,7 @@
             <div class="glass-panel overflow-hidden p-6">
                 <div class="flex items-center gap-3 mb-6">
                     <span class="material-symbols-outlined text-secondary">checkroom</span>
-                    <h3 class="font-serif text-xl font-semibold text-slate-900 dark:text-white">Garments</h3>
+                    <h3 class="font-serif text-xl font-semibold text-slate-900 dark:text-white">Furniture Items</h3>
                 </div>
                 <div class="space-y-4">
                     {% for item in items %}
@@ -176,18 +184,7 @@
                 </div>
             </div>
 
-            <div class="glass-panel p-6 relative z-10">
-                <h3 class="font-serif text-lg font-semibold text-theme-primary mb-4">Salesperson</h3>
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-secondary/20 text-secondary flex items-center justify-center font-bold border border-secondary/30">
-                        <span class="material-symbols-outlined text-[20px]">badge</span>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-theme-primary">{{ order.salesperson.full_name|default:"Not assigned" }}</h4>
-                        <p class="text-sm text-theme-secondary">{{ order.salesperson.employee_code|default:"-" }}</p>
-                    </div>
-                </div>
-            </div>
+
 
             <!-- Financial Summary -->
             <div class="glass-panel p-6">
@@ -209,12 +206,7 @@
                             {% if order.discount_amount > 0 %}-{% endif %}₹{{ order.discount_amount }}
                         </span>
                     </div>
-                    {% if order.is_buy_back %}
-                    <div class="flex justify-between text-secondary">
-                        <span class="text-theme-secondary">Deposit Amount{% if order.is_deposit_paid %} (Paid){% else %} (Pending){% endif %}</span>
-                        <span>₹{{ order.deposit_amount }}</span>
-                    </div>
-                    {% endif %}
+
                     <div class="flex justify-between font-bold text-theme-primary pt-2 border-t border-theme-input bg-theme-input/5 px-2 -mx-2 rounded-lg">
                         <span class="text-secondary">Net Amount</span>
                         <span>₹{{ order.final_amount }}</span>
@@ -352,24 +344,44 @@ function openEditOrderModal() {
     const localInput = document.getElementById('edit_customer_phone_local');
     
     if (dropdown && localInput) {
+        let countryCodeVal = '+91';
         if (fullPhone.startsWith('+')) {
             const prefixes = ['+971', '+973', '+974', '+965', '+968', '+966', '+91', '+44', '+61', '+64', '+65', '+49', '+33', '+1'];
             let matched = false;
             for (const p of prefixes) {
                 if (fullPhone.startsWith(p)) {
-                    dropdown.value = p;
+                    countryCodeVal = p;
                     localInput.value = fullPhone.substring(p.length);
                     matched = true;
                     break;
                 }
             }
             if (!matched) {
-                dropdown.value = '+91';
                 localInput.value = fullPhone;
             }
         } else {
-            dropdown.value = '+91';
             localInput.value = fullPhone;
+        }
+
+        dropdown.value = countryCodeVal;
+
+        // Update custom dropdown UI elements
+        const dropdownContainer = dropdown.closest('.haf-dropdown');
+        if (dropdownContainer) {
+            const faceText = dropdownContainer.querySelector('.haf-dropdown__text');
+            const items = dropdownContainer.querySelectorAll('.haf-dropdown__item');
+            let matchedItemText = '';
+            items.forEach(item => {
+                if (item.getAttribute('data-value') === countryCodeVal) {
+                    item.classList.add('bg-secondary/10', 'font-bold');
+                    matchedItemText = item.textContent.trim();
+                } else {
+                    item.classList.remove('bg-secondary/10', 'font-bold');
+                }
+            });
+            if (faceText && matchedItemText) {
+                faceText.textContent = matchedItemText;
+            }
         }
     }
     modal.style.setProperty('display', 'flex', 'important');
@@ -458,22 +470,30 @@ document.addEventListener('keydown', function(e) {
                     <div>
                         <label class="block text-xs font-bold text-theme-secondary uppercase tracking-widest mb-2 px-1">Phone</label>
                         <div class="flex gap-2">
-                            <select id="edit_customer_country_code" name="customer_country_code" 
-                                    class="w-[100px] bg-theme-input border border-theme-input rounded-[12px] px-2 py-3 focus:outline-none focus:border-secondary/50 text-theme-primary transition-all cursor-pointer">
-                                <option value="+91">🇮🇳 +91</option>
-                                <option value="+1">🇺🇸 +1</option>
-                                <option value="+44">🇬🇧 +44</option>
-                                <option value="+971">🇦🇪 +971</option>
-                                <option value="+61">🇦🇺 +61</option>
-                                <option value="+966">🇸🇦 +966</option>
-                                <option value="+974">🇶🇦 +974</option>
-                                <option value="+965">🇰🇼 +965</option>
-                                <option value="+968">🇴🇲 +968</option>
-                                <option value="+973">🇧🇭 +973</option>
-                                <option value="+49">🇩🇪 +49</option>
-                                <option value="+65">🇸🇬 +65</option>
-                                <option value="+64">🇳🇿 +64</option>
-                            </select>
+                            <!-- Premium Custom Dropdown for Country Code -->
+                            <div class="haf-dropdown w-[110px] relative z-50">
+                                <input type="checkbox" id="edit-country-code-checkbox" class="sr-only">
+                                <input type="hidden" id="edit_customer_country_code" name="customer_country_code" value="+91">
+                                <label class="haf-dropdown__face h-[46px] border-theme-input bg-theme-input rounded-[12px] hover:bg-theme-input/80 transition-colors cursor-pointer !flex items-center justify-between !px-3" for="edit-country-code-checkbox">
+                                    <div class="haf-dropdown__text font-bold text-theme-primary text-xs">🇮🇳 +91</div>
+                                    <div class="haf-dropdown__arrow border-theme-secondary !mr-0"></div>
+                                </label>
+                                <ul class="haf-dropdown__items !w-[140px] max-h-60 overflow-y-auto !top-full !bottom-auto">
+                                    <li class="haf-dropdown__item bg-secondary/10 font-bold" data-value="+91">🇮🇳 +91</li>
+                                    <li class="haf-dropdown__item" data-value="+1">🇺🇸 +1</li>
+                                    <li class="haf-dropdown__item" data-value="+44">🇬🇧 +44</li>
+                                    <li class="haf-dropdown__item" data-value="+971">🇦🇪 +971</li>
+                                    <li class="haf-dropdown__item" data-value="+61">🇦🇺 +61</li>
+                                    <li class="haf-dropdown__item" data-value="+966">🇸🇦 +966</li>
+                                    <li class="haf-dropdown__item" data-value="+974">🇶🇦 +974</li>
+                                    <li class="haf-dropdown__item" data-value="+965">🇰🇼 +965</li>
+                                    <li class="haf-dropdown__item" data-value="+968">🇴🇲 +968</li>
+                                    <li class="haf-dropdown__item" data-value="+973">🇧🇭 +973</li>
+                                    <li class="haf-dropdown__item" data-value="+49">🇩🇪 +49</li>
+                                    <li class="haf-dropdown__item" data-value="+65">🇸🇬 +65</li>
+                                    <li class="haf-dropdown__item" data-value="+64">🇳🇿 +64</li>
+                                </ul>
+                            </div>
                             <input type="text" id="edit_customer_phone_local" name="customer_phone_local" class="flex-1 bg-theme-input border border-theme-input rounded-[12px] px-4 py-3 focus:outline-none focus:border-secondary/50 text-theme-primary transition-all">
                         </div>
                         <input type="hidden" id="edit_customer_phone" name="customer_phone" value="{{ order.customer.phone }}">
@@ -482,15 +502,7 @@ document.addEventListener('keydown', function(e) {
                         <label class="block text-xs font-bold text-theme-secondary uppercase tracking-widest mb-2 px-1">City</label>
                         <input type="text" name="customer_city" value="{{ order.customer.city }}" class="w-full bg-theme-input border border-theme-input rounded-[12px] px-4 py-3 focus:outline-none focus:border-secondary/50 text-theme-primary transition-all">
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-theme-secondary uppercase tracking-widest mb-2 px-1">Salesperson</label>
-                        <select name="salesperson" class="w-full bg-theme-input border border-theme-input rounded-[12px] px-4 py-3 focus:outline-none focus:border-secondary/50 text-theme-primary transition-all appearance-none cursor-pointer">
-                            <option value="">None</option>
-                            {% for sp in salespeople %}
-                            <option value="{{ sp.id }}" {% if order.salesperson.id == sp.id %}selected{% endif %}>{{ sp.full_name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-theme-secondary uppercase tracking-widest mb-2 px-1">Order Notes</label>
@@ -505,14 +517,14 @@ document.addEventListener('keydown', function(e) {
     </div>
 </div>
 
-<!-- Edit Garment Modals -->
+<!-- Edit Dimensions Modals -->
 {% for item in items %}
 <div id="editItemModal-{{ item.id }}" class="fixed inset-0 z-[9999] flex items-center justify-center p-4" style="display:none !important;">
     <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeEditItemModal('{{ item.id }}')"></div>
     <div class="relative z-10 glass-panel w-full max-w-3xl p-6 md:p-8 rounded-[24px] border border-theme-input shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
         <h3 class="font-serif text-2xl font-bold text-theme-primary mb-6 flex items-center gap-3">
             <span class="material-symbols-outlined text-secondary">checkroom</span>
-            Edit Garment
+            Edit Dimensions
         </h3>
         <form method="POST" action="{% url 'order_item_edit' order.id item.id %}">
             {% csrf_token %}
@@ -535,33 +547,33 @@ document.addEventListener('keydown', function(e) {
                     </div>
                 </div>
 
-                {% if item.measurement %}
+                {% if item.dimension %}
                 <div class="border-t border-theme-input pt-6">
                     <div class="flex items-center justify-between mb-6">
                         <h4 class="font-serif text-lg font-bold text-theme-primary flex items-center gap-2">
                             <span class="material-symbols-outlined text-theme-secondary text-xl">straighten</span>
-                            Measurement Values
+                            Dimensions
                         </h4>
                         
                         <!-- Sample Product Toggle -->
                         <div class="flex items-center gap-3 bg-secondary/5 border border-secondary/20 px-4 py-2 rounded-full">
                             <span class="text-[10px] font-bold text-secondary uppercase tracking-widest">Sample Product</span>
                             <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" name="is_sample_product" class="sr-only peer" 
-                                    {% if item.measurement.is_sample_product %}checked{% endif %}
+                                <input type="checkbox" name="is_standard_catalog" class="sr-only peer" 
+                                    {% if item.dimension.is_standard_catalog %}checked{% endif %}
                                     onchange="toggleSampleInModal(this, '{{ item.id }}')">
                                 <div class="w-9 h-5 bg-slate-200 dark:bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-secondary"></div>
                             </label>
                         </div>
                     </div>
 
-                    <div id="measure-grid-{{ item.id }}" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 {% if item.measurement.is_sample_product %}hidden{% endif %}">
-                        {% for cat, params in garment_parameters.items %}
-                            {% if cat == item.garment_category %}
+                    <div id="measure-grid-{{ item.id }}" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 {% if item.dimension.is_standard_catalog %}hidden{% endif %}">
+                        {% for cat, params in furniture_parameters.items %}
+                            {% if cat == item.furniture_type %}
                                 {% for param in params %}
                                 <div>
                                     <label class="block text-xs font-bold text-theme-secondary uppercase tracking-widest mb-2 px-1">{{ param }}</label>
-                                    <input type="text" name="measure_{{ param }}" value="{% for k,v in item.measurement.values.items %}{% if k == param %}{{ v }}{% endif %}{% endfor %}" class="w-full bg-theme-input border border-theme-input rounded-[12px] px-3 py-2 text-sm focus:outline-none focus:border-secondary/50 text-theme-primary transition-all">
+                                    <input type="text" name="measure_{{ param }}" value="{% for k,v in item.dimension.values.items %}{% if k == param %}{{ v }}{% endif %}{% endfor %}" class="w-full bg-theme-input border border-theme-input rounded-[12px] px-3 py-2 text-sm focus:outline-none focus:border-secondary/50 text-theme-primary transition-all">
                                 </div>
                                 {% endfor %}
                             {% endif %}
@@ -570,15 +582,15 @@ document.addEventListener('keydown', function(e) {
                 </div>
                 
                 <div class="pt-2">
-                    <label class="block text-xs font-bold text-theme-secondary uppercase tracking-widest mb-2 px-1">Measurement Notes</label>
-                    <textarea name="measurement_notes" rows="2" class="w-full bg-theme-input border border-theme-input rounded-[12px] px-4 py-3 focus:outline-none focus:border-secondary/50 text-theme-primary transition-all resize-none">{{ item.measurement.notes }}</textarea>
+                    <label class="block text-xs font-bold text-theme-secondary uppercase tracking-widest mb-2 px-1">Dimension Notes</label>
+                    <textarea name="FurnitureDimension_notes" rows="2" class="w-full bg-theme-input border border-theme-input rounded-[12px] px-4 py-3 focus:outline-none focus:border-secondary/50 text-theme-primary transition-all resize-none">{{ item.dimension.notes }}</textarea>
                 </div>
                 {% endif %}
             </div>
             
             <div class="flex gap-3 mt-8 pt-4 border-t border-theme-input">
                 <button type="button" onclick="closeEditItemModal('{{ item.id }}')" class="flex-1 px-6 py-3 rounded-[12px] font-bold text-sm text-theme-secondary border border-theme-input hover:bg-theme-input hover:text-theme-primary transition-all">Cancel</button>
-                <button type="submit" class="flex-1 btn-premium !py-3">Save Garment</button>
+                <button type="submit" class="flex-1 btn-premium !py-3">Save Dimensions</button>
             </div>
         </form>
     </div>

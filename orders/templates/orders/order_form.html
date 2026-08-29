@@ -55,24 +55,7 @@
         </section>
 
         <section class="glass-panel p-6 mt-6 relative z-30">
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-theme-primary uppercase tracking-widest pl-1">SALESPERSON</label>
-                    <div class="haf-dropdown">
-                        <input type="checkbox" id="salesperson-dropdown">
-                        <input type="hidden" name="salesperson" value="">
-                        <label class="haf-dropdown__face bg-theme-input border-theme-input rounded-[12px] hover:bg-theme-input/80 transition-colors" for="salesperson-dropdown">
-                            <div class="haf-dropdown__text text-theme-primary font-bold">Select Salesperson</div>
-                            <div class="haf-dropdown__arrow border-theme-secondary"></div>
-                        </label>
-                        <ul class="haf-dropdown__items">
-                            <li class="haf-dropdown__item" data-value="">No salesperson</li>
-                            {% for person in salespeople %}
-                            <li class="haf-dropdown__item" data-value="{{ person.id }}">{{ person.full_name }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
                     <label class="text-xs font-bold text-theme-primary uppercase tracking-widest pl-1">ORDER TYPE</label>
                     <div class="haf-dropdown">
@@ -80,7 +63,7 @@
                         <input type="hidden" name="order_type" value="{{ current_order_type|default:'custom' }}">
                         <label class="haf-dropdown__face bg-theme-input border-theme-input rounded-[12px] hover:bg-theme-input/80 transition-colors" for="order-type-dropdown">
                             <div class="haf-dropdown__text text-theme-primary font-bold">
-                                {% if current_order_type == 'custom' or not current_order_type %}Custom Tailoring
+                                {% if current_order_type == 'custom' or not current_order_type %}Custom Build
                                 {% elif current_order_type == 'rental' %}Rental Service
                                 {% else %}Select Order Type{% endif %}
                             </div>
@@ -94,9 +77,9 @@
                     </div>
                 </div>
                 <div class="space-y-2">
-                    <label class="text-xs font-bold text-theme-primary uppercase tracking-widest pl-1">DELIVERY DATE</label>
+                    <label class="text-xs font-bold text-theme-primary uppercase tracking-widest pl-1">DATE</label>
                     <div class="haf-datepicker">
-                        <input type="hidden" name="delivery_date" value="">
+                        <input type="hidden" name="date" value="">
                         <div class="haf-datepicker__face">
                             <input type="text" class="haf-datepicker__text" placeholder="dd/mm/yyyy" value="">
                             <span class="material-symbols-outlined text-secondary text-[20px]">calendar_today</span>
@@ -128,53 +111,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-theme-primary uppercase tracking-widest pl-1">RETURN DATE</label>
-                    <div class="haf-datepicker">
-                        <input type="hidden" name="return_date" value="">
-                        <div class="haf-datepicker__face">
-                            <input type="text" class="haf-datepicker__text" placeholder="dd/mm/yyyy" value="">
-                            <span class="material-symbols-outlined text-secondary text-[20px]">calendar_today</span>
-                        </div>
-                        <div class="haf-datepicker__popup">
-                            <div class="haf-calendar">
-                                <div class="haf-calendar__header">
-                                    <div class="haf-calendar__header-info">
-                                        <h3>---</h3>
-                                        <h2>Select Date</h2>
-                                    </div>
-                                </div>
-                                <div class="haf-calendar__nav">
-                                    <button type="button" class="prev-month"><span class="material-symbols-outlined">chevron_left</span></button>
-                                    <div class="haf-calendar__nav-title">Month Year</div>
-                                    <button type="button" class="next-month"><span class="material-symbols-outlined">chevron_right</span></button>
-                                </div>
-                                <div class="haf-calendar__body">
-                                    <div class="haf-calendar__days">
-                                        <div class="haf-calendar__day-name">S</div>
-                                        <div class="haf-calendar__day-name">M</div>
-                                        <div class="haf-calendar__day-name">T</div>
-                                        <div class="haf-calendar__day-name">W</div>
-                                        <div class="haf-calendar__day-name">T</div>
-                                        <div class="haf-calendar__day-name">F</div>
-                                        <div class="haf-calendar__day-name">S</div>
-                                    </div>
-                                    <div class="haf-calendar__numbers"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-theme-primary uppercase tracking-widest pl-1">BUY BACK</label>
-                    <div class="glass-panel p-3 border border-theme-input rounded-[12px] flex items-center justify-between mt-1" style="height: 48px;">
-                        <span class="text-theme-secondary font-bold text-sm">Is Buy Back?</span>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" name="is_buy_back" id="buy-back-toggle" class="sr-only peer">
-                            <div class="w-11 h-6 bg-theme-input peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary shadow-inner"></div>
-                        </label>
                     </div>
                 </div>
             </div>
@@ -219,9 +155,9 @@
                                 <input type="checkbox" class="bundle-checkbox w-5 h-5 rounded border-2 border-theme-secondary/50 bg-theme-input/50 cursor-pointer text-secondary focus:ring-secondary/50">
                                 <div class="w-full">
                                     <label class="md:hidden text-xs font-bold text-theme-secondary uppercase tracking-widest block mb-1">Item Description</label>
-                                    <input type="hidden" name="item_garment_category[]" value="{{ item.type }}">
-                                    <input type="hidden" name="item_measurement_id[]" value="{{ item.measurement_id }}">
-                                    <input type="text" name="item_description[]" class="w-full bg-theme-input border border-theme-input rounded-[16px] p-3 font-semibold text-theme-primary text-sm sm:text-base placeholder-theme focus:outline-none focus:border-secondary/30 focus:ring-1 focus:ring-secondary/20 transition-all shadow-sm desc-input" value="{{ item.label }}" placeholder="e.g. Custom Shirt" required>
+                                    <input type="hidden" name="item_furniture_type[]" value="{{ item.type }}">
+                                    <input type="hidden" name="item_FurnitureDimension_id[]" value="{{ item.measurement_id }}">
+                                    <input type="text" name="item_description[]" class="w-full bg-theme-input border border-theme-input rounded-[16px] p-3 font-semibold text-theme-primary text-sm sm:text-base placeholder-theme focus:outline-none focus:border-secondary/30 focus:ring-1 focus:ring-secondary/20 transition-all shadow-sm desc-input" value="{{ item.label }}" placeholder="e.g. Custom Sofa" required>
                                 </div>
                             </div>
 
@@ -261,9 +197,9 @@
                                 <input type="checkbox" class="bundle-checkbox w-5 h-5 rounded border-2 border-theme-secondary/50 bg-theme-input/50 cursor-pointer text-secondary focus:ring-secondary/50">
                                 <div class="w-full">
                                     <label class="md:hidden text-xs font-bold text-theme-secondary uppercase tracking-widest block mb-1">Item Description</label>
-                                    <input type="hidden" name="item_garment_category[]" value="">
-                                    <input type="hidden" name="item_measurement_id[]" value="">
-                                    <input type="text" name="item_description[]" class="w-full bg-theme-input border border-theme-input rounded-[16px] p-3 font-semibold text-theme-primary text-sm sm:text-base placeholder-theme focus:outline-none focus:border-secondary/30 focus:ring-1 focus:ring-secondary/20 transition-all shadow-sm desc-input" placeholder="e.g. Custom Shirt" required>
+                                    <input type="hidden" name="item_furniture_type[]" value="">
+                                    <input type="hidden" name="item_FurnitureDimension_id[]" value="">
+                                    <input type="text" name="item_description[]" class="w-full bg-theme-input border border-theme-input rounded-[16px] p-3 font-semibold text-theme-primary text-sm sm:text-base placeholder-theme focus:outline-none focus:border-secondary/30 focus:ring-1 focus:ring-secondary/20 transition-all shadow-sm desc-input" placeholder="e.g. Custom Sofa" required>
                                 </div>
                             </div>
 
@@ -299,7 +235,7 @@
                             <span class="material-symbols-outlined text-red-500 text-3xl animate-pulse">flag</span>
                             <div>
                                 <h3 class="font-serif text-xl font-semibold text-theme-primary">🚩 Outsource Required</h3>
-                                <p class="text-sm text-theme-secondary mt-1 max-w-md">Check this if the catalog / garment is NOT available in-store and must be ordered from a 3rd party supplier.</p>
+                                <p class="text-sm text-theme-secondary mt-1 max-w-md">Check this if the catalog / item is NOT available in-store and must be ordered from a 3rd party supplier.</p>
                             </div>
                         </div>
                         <div class="flex items-center mt-2">
@@ -333,7 +269,7 @@
                         <span class="material-symbols-outlined text-secondary">edit_note</span>
                         <h3 class="font-serif text-2xl font-semibold text-theme-primary">Order Notes</h3>
                     </div>
-                    <textarea name="notes" class="w-full bg-theme-input border border-theme-input rounded-[12px] p-4 text-theme-primary placeholder-theme focus:outline-none focus:border-secondary/50 transition-all" placeholder="Mention specific customizations or tailoring instructions for this order..." rows="3"></textarea>
+                    <textarea name="notes" class="w-full bg-theme-input border border-theme-input rounded-[12px] p-4 text-theme-primary placeholder-theme focus:outline-none focus:border-secondary/50 transition-all" placeholder="Mention specific customizations or notes for this order..." rows="3"></textarea>
                 </div>
             </div>
 
@@ -350,17 +286,6 @@
                         <div class="flex justify-between items-center text-secondary" id="discount-container">
                             <span class="text-theme-secondary">Discount</span>
                             <input type="number" name="discount" id="discount-input" class="w-24 bg-theme-input border border-theme-input rounded-[12px] p-1 text-right text-theme-primary font-bold focus:outline-none focus:border-secondary/50 transition-all" value="0" step="0.01">
-                        </div>
-                        <div class="flex justify-between items-center text-secondary hidden" id="deposit-container">
-                            <span class="text-theme-secondary">Deposit Amount</span>
-                            <input type="number" name="deposit_amount" id="deposit-input" class="w-24 bg-theme-input border border-theme-input rounded-[12px] p-1 text-right text-theme-primary font-bold focus:outline-none focus:border-secondary/50 transition-all" value="0" step="0.01">
-                        </div>
-                        <div class="flex justify-between items-center hidden" id="deposit-paid-container">
-                            <span class="text-theme-secondary">Deposit Paid?</span>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" name="is_deposit_paid" id="deposit-paid-toggle" class="sr-only peer">
-                                <div class="w-11 h-6 bg-theme-input peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500 shadow-inner"></div>
-                            </label>
                         </div>
                         <div class="flex justify-between items-center border-t border-theme-input pt-4">
                             <span class="text-theme-secondary">Taxable Amount</span>
@@ -423,11 +348,7 @@
         const rowTemplate = document.getElementById('row-template');
         const discountInput = document.getElementById('discount-input');
         const advanceInput = document.getElementById('advance-input');
-        const buyBackToggle = document.getElementById('buy-back-toggle');
-        const depositInput = document.getElementById('deposit-input');
         const discountContainer = document.getElementById('discount-container');
-        const depositContainer = document.getElementById('deposit-container');
-        const depositPaidContainer = document.getElementById('deposit-paid-container');
         
         let rowCounter = document.querySelectorAll('.item-row').length + 1;
 
@@ -442,29 +363,8 @@
                 subtotal += total;
             });
 
-            const isBuyBack = buyBackToggle.checked;
-            
-            if (isBuyBack) {
-                discountContainer.classList.add('hidden');
-                depositContainer.classList.remove('hidden');
-                depositPaidContainer.classList.remove('hidden');
-            } else {
-                discountContainer.classList.remove('hidden');
-                depositContainer.classList.add('hidden');
-                depositPaidContainer.classList.add('hidden');
-            }
-
-            const discount = isBuyBack ? 0 : (parseFloat(discountInput.value) || 0);
-            const depositAmount = isBuyBack ? (subtotal * 0.5) : 0;
-            
-            if (isBuyBack) {
-                depositInput.value = depositAmount.toFixed(2);
-                depositInput.readOnly = true;
-            } else {
-                depositInput.readOnly = false;
-            }
-
-            const taxable = Math.max(0, subtotal - discount - depositAmount);
+            const discount = parseFloat(discountInput.value) || 0;
+            const taxable = Math.max(0, subtotal - discount);
             const advance = parseFloat(advanceInput.value) || 0;
             const balanceDue = Math.max(0, taxable - advance);
 
@@ -600,46 +500,7 @@
         addItemBtn.addEventListener('click', addItemRow);
         discountInput.addEventListener('input', calculateTotals);
         advanceInput.addEventListener('input', calculateTotals);
-        buyBackToggle.addEventListener('change', calculateTotals);
-        depositInput.addEventListener('input', calculateTotals);
 
-        // Date Validation: Return Date >= Delivery Date
-        const deliveryInput = document.querySelector('input[name="delivery_date"]');
-        const returnInput = document.querySelector('input[name="return_date"]');
-
-        function validateDates() {
-            if (deliveryInput.value && returnInput.value) {
-                const delivery = new Date(deliveryInput.value);
-                const returnD = new Date(returnInput.value);
-                
-                // Set hours to 0 to compare only dates
-                delivery.setHours(0,0,0,0);
-                returnD.setHours(0,0,0,0);
-
-                if (returnD < delivery) {
-                    alert("⚠️ Invalid Date Selection: The Return Date cannot be before the Delivery Date. Please adjust the schedule.");
-                    
-                    // Reset the return date input and display
-                    returnInput.value = "";
-                    const picker = returnInput.closest('.haf-datepicker');
-                    const textDisplay = picker.querySelector('.haf-datepicker__text');
-                    
-                    if (textDisplay.tagName === 'INPUT') {
-                        textDisplay.value = "";
-                    } else {
-                        textDisplay.textContent = "dd/mm/yyyy";
-                    }
-                    textDisplay.classList.add('placeholder');
-                    
-                    // Reset the header display in the popup if it exists
-                    const headerDay = picker.querySelector('.haf-calendar__header-info h2');
-                    const headerMonth = picker.querySelector('.haf-calendar__header-info h3');
-                    if (headerDay) headerDay.textContent = "Select Date";
-                    if (headerMonth) headerMonth.textContent = "---";
-                }
-            }
-        }
-        
         // Red Flag -> Urgent Toggle Logic
         const mainFlagCheckbox = document.getElementById('is_red_flagged_checkbox');
         const urgentContainer = document.getElementById('urgent-toggle-container');
@@ -659,9 +520,6 @@
                 urgentContainer.classList.remove('hidden');
             }
         }
-
-        if (deliveryInput) deliveryInput.addEventListener('change', validateDates);
-        if (returnInput) returnInput.addEventListener('change', validateDates);
         
         calculateTotals();
     });

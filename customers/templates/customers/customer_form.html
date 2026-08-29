@@ -1,0 +1,152 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Add Customer | Home Art Furniture Admin{% endblock %}
+
+{% block content %}
+<style>
+    /* Form Input & Textarea Premium Styling */
+    .form-input-custom {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 14px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        outline: none;
+        background-color: #ffffff !important;
+        border: 1px solid rgba(0, 0, 0, 0.15) !important;
+        color: #0f172a !important;
+    }
+    body.dark-mode .form-input-custom {
+        background-color: rgba(5, 13, 35, 0.6) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: #ffffff !important;
+    }
+    .form-input-custom:focus {
+        border-color: #d4af37 !important;
+        box-shadow: 0 0 12px rgba(212, 175, 55, 0.2) !important;
+    }
+    body.dark-mode .form-input-custom:focus {
+        border-color: #f2ca50 !important;
+        box-shadow: 0 0 16px rgba(242, 202, 80, 0.25) !important;
+    }
+    .form-input-custom::placeholder {
+        color: #94a3b8 !important;
+    }
+    body.dark-mode .form-input-custom::placeholder {
+        color: rgba(255, 255, 255, 0.3) !important;
+    }
+
+    /* Form Labels Custom styling */
+    .form-label-custom {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 8px;
+        padding-left: 4px;
+        color: #475569 !important;
+    }
+    body.dark-mode .form-label-custom {
+        color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    /* Form Section Title */
+    .form-section-title {
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+        color: #0f172a !important;
+    }
+    body.dark-mode .form-section-title {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        color: #ffffff !important;
+    }
+</style>
+<div class="p-4 sm:p-8 max-w-[1200px] mx-auto w-full">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <div class="flex items-center gap-2 text-slate-500 dark:text-white/40 text-[10px] sm:text-xs mb-1.5 uppercase tracking-widest font-bold">
+                <a href="{% url 'customer_list' %}" class="hover:text-secondary transition-colors">Customers</a>
+                <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+                <span class="text-secondary">New Customer</span>
+            </div>
+            <h2 class="font-h2 text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-white drop-shadow-md">
+                Add New Customer
+            </h2>
+        </div>
+        <a href="{% url 'customer_list' %}" class="btn-premium flex items-center justify-center gap-2 text-sm">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+            <span class="hidden sm:inline btn-premium__label">Cancel</span>
+        </a>
+    </div>
+
+    <!-- Form Card -->
+    <form method="POST" action="{% url 'customer_create' %}">
+        {% csrf_token %}
+
+        <div class="glass-panel p-6 sm:p-8 mb-6">
+            <h3 class="form-section-title flex items-center gap-2">
+                <span class="material-symbols-outlined text-secondary text-[18px]">person</span>
+                Customer Information
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Full Name -->
+                <div>
+                    <label class="form-label-custom" for="full_name">Full Name *</label>
+                    <input type="text" id="full_name" name="full_name" required
+                        class="form-input-custom"
+                        placeholder="e.g. Rajesh Kumar"
+                        value="{{ form_data.full_name|default:'' }}">
+                </div>
+
+                <!-- Phone Number -->
+                <div>
+                    <label class="form-label-custom" for="phone">Phone Number *</label>
+                    <div class="flex gap-2">
+                        <input type="text" name="country_code"
+                            class="form-input-custom !w-[80px] text-center"
+                            value="{{ form_data.country_code|default:'+91' }}"
+                            placeholder="+91">
+                        <input type="tel" id="phone" name="phone" required
+                            class="form-input-custom flex-1"
+                            placeholder="e.g. 9876543210"
+                            value="{{ form_data.phone|default:'' }}">
+                    </div>
+                </div>
+
+                <!-- City -->
+                <div>
+                    <label class="form-label-custom" for="city">City</label>
+                    <input type="text" id="city" name="city"
+                        class="form-input-custom"
+                        placeholder="e.g. Jaipur"
+                        value="{{ form_data.city|default:'' }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p class="text-xs text-theme-muted order-2 sm:order-1">
+                <span class="text-red-400">*</span> Required fields
+            </p>
+            <div class="flex gap-3 w-full sm:w-auto order-1 sm:order-2">
+                <a href="{% url 'customer_list' %}" class="btn-premium flex-1 sm:flex-initial flex items-center justify-center gap-2">
+                    <span class="btn-premium__label">Cancel</span>
+                </a>
+                <button type="submit" class="btn-premium btn-premium--gold flex-1 sm:flex-initial flex items-center justify-center gap-2">
+                    <span class="btn-premium__label flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px]">person_add</span>
+                        Save Customer
+                    </span>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

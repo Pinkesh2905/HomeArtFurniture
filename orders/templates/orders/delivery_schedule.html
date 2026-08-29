@@ -278,10 +278,6 @@
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase tracking-widest">
                                 <span class="w-1.5 h-1.5 rounded-full bg-blue-400 mr-1.5 animate-pulse"></span> In Progress
                             </span>
-                            {% elif order.status == 'ready' %}
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-green-500/10 text-green-400 border border-green-500/20 uppercase tracking-widest">
-                                <span class="w-1.5 h-1.5 rounded-full bg-green-400 mr-1.5"></span> Ready
-                            </span>
                             {% elif order.status == 'delivered' %}
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-white/5 text-white/40 border border-white/10 uppercase tracking-widest">
                                 <span class="w-1.5 h-1.5 rounded-full bg-white/20 mr-1.5"></span> Delivered
@@ -289,10 +285,6 @@
                             {% elif order.status == 'cancelled' %}
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/20 uppercase tracking-widest">
                                 <span class="w-1.5 h-1.5 rounded-full bg-red-400 mr-1.5"></span> Cancelled
-                            </span>
-                            {% elif order.status == 'returned' %}
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20 uppercase tracking-widest">
-                                <span class="w-1.5 h-1.5 rounded-full bg-purple-400 mr-1.5"></span> Returned
                             </span>
                             {% endif %}
                         </div>
@@ -331,12 +323,8 @@
                                         <dd class="font-medium text-white/80">{{ order.get_order_type_display }}</dd>
                                     </div>
                                     <div class="flex justify-between text-sm">
-                                        <dt class="text-white/40">Booking Date</dt>
-                                        <dd class="font-medium text-white/80">{{ order.booking_date|date:"d M Y" }}</dd>
-                                    </div>
-                                    <div class="flex justify-between text-sm">
-                                        <dt class="text-white/40">Delivery Date</dt>
-                                        <dd class="font-bold {% if delivery_date < today %}text-red-500{% elif delivery_date == today %}text-amber-500{% else %}text-white{% endif %}">{{ order.delivery_date|date:"d M Y" }}</dd>
+                                        <dt class="text-white/40">Order Date</dt>
+                                        <dd class="font-bold {% if delivery_date < today %}text-red-500{% elif delivery_date == today %}text-amber-500{% else %}text-white{% endif %}">{{ order.date|date:"d M Y" }}</dd>
                                     </div>
                                     {% if order.notes %}
                                     <div class="pt-3 border-t border-white/5">
@@ -351,7 +339,7 @@
                             <div class="p-6">
                                 <h4 class="text-[10px] font-black uppercase tracking-widest text-white/40 mb-4 flex items-center gap-2">
                                     <span class="material-symbols-outlined text-[16px]">checkroom</span>
-                                    Garment Items
+                                    Furniture Items
                                 </h4>
                                 <div class="space-y-2">
                                     {% for item in order.items.all %}
@@ -359,8 +347,8 @@
                                         <div>
                                             <p class="font-bold text-white">{{ item.description }}</p>
                                             <div class="flex items-center gap-2 mt-0.5">
-                                                {% if item.garment_category %}
-                                                <span class="text-[10px] text-white/40 font-bold uppercase tracking-wider">{{ item.garment_category }}</span>
+                                                {% if item.furniture_type %}
+                                                <span class="text-[10px] text-white/40 font-bold uppercase tracking-wider">{{ item.furniture_type }}</span>
                                                 <span class="text-white/10 text-[10px]">·</span>
                                                 {% endif %}
                                                 <span class="text-[10px] text-white/40 font-medium">Qty: {{ item.quantity }} × ₹{{ item.rate }}</span>

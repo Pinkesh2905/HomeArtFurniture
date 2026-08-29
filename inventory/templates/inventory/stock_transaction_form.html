@@ -1,0 +1,269 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Update Stock - {{ material.name }} | Home Art Furniture Admin{% endblock %}
+
+{% block content %}
+<style>
+    /* Form Input & Textarea Premium Styling */
+    .form-input-custom {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 14px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        outline: none;
+        background-color: #ffffff !important;
+        border: 1px solid rgba(0, 0, 0, 0.15) !important;
+        color: #0f172a !important;
+    }
+    body.dark-mode .form-input-custom {
+        background-color: rgba(5, 13, 35, 0.6) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: #ffffff !important;
+    }
+    .form-input-custom:focus {
+        border-color: #d4af37 !important;
+        box-shadow: 0 0 12px rgba(212, 175, 55, 0.2) !important;
+    }
+    body.dark-mode .form-input-custom:focus {
+        border-color: #f2ca50 !important;
+        box-shadow: 0 0 16px rgba(242, 202, 80, 0.25) !important;
+    }
+    .form-input-custom::placeholder {
+        color: #94a3b8 !important;
+    }
+    body.dark-mode .form-input-custom::placeholder {
+        color: rgba(255, 255, 255, 0.3) !important;
+    }
+
+    /* Form Labels Custom styling */
+    .form-label-custom {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 8px;
+        padding-left: 4px;
+        color: #475569 !important;
+    }
+    body.dark-mode .form-label-custom {
+        color: rgba(255, 255, 255, 0.5) !important;
+    }
+</style>
+<div class="p-4 sm:p-8 max-w-[1200px] mx-auto w-full">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <div class="flex items-center gap-2 text-slate-500 dark:text-white/40 text-[10px] sm:text-xs mb-1.5 uppercase tracking-widest font-bold">
+                <a href="{% url 'material_list' %}" class="hover:text-secondary transition-colors">Inventory</a>
+                <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+                <a href="{% url 'material_detail' material.pk %}" class="hover:text-secondary transition-colors">{{ material.sku }}</a>
+                <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+                <span class="text-secondary">Update Stock</span>
+            </div>
+            <h2 class="font-h2 text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-white drop-shadow-md">Record Transaction</h2>
+        </div>
+        <a href="{% url 'material_detail' material.pk %}" class="btn-premium flex items-center justify-center gap-2 text-sm">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+            Cancel
+        </a>
+    </div>
+
+    <!-- Material Context Card -->
+    <div class="glass-panel p-5 rounded-[16px] mb-6 flex items-center justify-between border-l-4 border-l-secondary">
+        <div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-lg">{{ material.name }}</h3>
+            <p class="text-xs text-slate-500 dark:text-white/50">{{ material.get_category_display }} | SKU: {{ material.sku }}</p>
+        </div>
+        <div class="text-right">
+            <p class="text-[10px] font-bold text-slate-500 dark:text-white/40 uppercase tracking-widest mb-1">Current Stock</p>
+            <p class="text-xl font-black text-slate-900 dark:text-white">{{ material.current_stock|floatformat:2 }} <span class="text-xs font-normal text-slate-500">{{ material.get_unit_display }}</span></p>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="mb-6 space-y-2">
+        {% for message in messages %}
+        <div class="p-4 rounded-xl text-sm font-medium border {% if message.tags == 'error' %}bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20 text-red-700 dark:text-red-400{% else %}bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="glass-panel p-6 sm:p-8 rounded-[24px] relative z-10">
+        <form method="POST" action="">
+            {% csrf_token %}
+            
+            <div class="space-y-6">
+                <!-- Transaction Type & Date -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 pb-6 border-b border-theme-border relative z-30">
+                    <div>
+                        <label class="form-label-custom">Transaction Type *</label>
+                        <div class="haf-dropdown">
+                            <input type="checkbox" id="transaction-type-dropdown">
+                            <input type="hidden" name="transaction_type" id="id_transaction_type" value="in">
+                            <label class="haf-dropdown__face !h-[46px] rounded-xl font-bold" for="transaction-type-dropdown">
+                                <div class="haf-dropdown__text text-slate-900 dark:text-white font-bold text-xs sm:text-sm">
+                                    Stock In
+                                </div>
+                                <div class="haf-dropdown__arrow border-theme-secondary"></div>
+                            </label>
+                            <ul class="haf-dropdown__items">
+                                {% for value, label in transaction_types %}
+                                <li class="haf-dropdown__item" data-value="{{ value }}">{{ label }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <p id="txn_help_text" class="text-[10px] text-slate-500 dark:text-white/40 mt-2 px-1">Adds to current stock level.</p>
+                    </div>
+
+                    <div>
+                        <label class="form-label-custom">Date *</label>
+                        <div class="haf-datepicker">
+                            <input type="hidden" name="date" value="{{ today|date:'Y-m-d' }}">
+                            <div class="haf-datepicker__face !h-[46px] rounded-xl">
+                                <input type="text" class="haf-datepicker__text" placeholder="dd/mm/yyyy" value="{{ today|date:'d/m/Y' }}">
+                                <span class="material-symbols-outlined text-secondary text-[20px]">calendar_today</span>
+                            </div>
+                            <div class="haf-datepicker__popup">
+                                <div class="haf-calendar">
+                                    <div class="haf-calendar__header">
+                                        <div class="haf-calendar__header-info">
+                                            <h3>---</h3>
+                                            <h2>Select Date</h2>
+                                        </div>
+                                    </div>
+                                    <div class="haf-calendar__nav">
+                                        <button type="button" class="prev-month"><span class="material-symbols-outlined">chevron_left</span></button>
+                                        <div class="haf-calendar__nav-title">Month Year</div>
+                                        <button type="button" class="next-month"><span class="material-symbols-outlined">chevron_right</span></button>
+                                    </div>
+                                    <div class="haf-calendar__body">
+                                        <div class="haf-calendar__days">
+                                            <div class="haf-calendar__day-name">S</div>
+                                            <div class="haf-calendar__day-name">M</div>
+                                            <div class="haf-calendar__day-name">T</div>
+                                            <div class="haf-calendar__day-name">W</div>
+                                            <div class="haf-calendar__day-name">T</div>
+                                            <div class="haf-calendar__day-name">F</div>
+                                            <div class="haf-calendar__day-name">S</div>
+                                        </div>
+                                        <div class="haf-calendar__numbers"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quantities & Costs -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 pb-6 border-b border-theme-border relative z-20">
+                    <div>
+                        <label class="form-label-custom flex justify-between items-center">
+                            Quantity *
+                            <span class="text-[9px] text-slate-400 font-normal lowercase normal-case">in {{ material.get_unit_display }}</span>
+                        </label>
+                        <input type="number" step="any" min="0.01" name="quantity" required class="form-input-custom text-xl font-bold font-mono">
+                    </div>
+                    
+                    <div id="cost_container">
+                        <label class="form-label-custom">Unit Cost (₹)</label>
+                        <input type="number" step="0.01" min="0" name="unit_cost" value="{{ material.cost_per_unit|floatformat:2 }}" class="form-input-custom">
+                        <p class="text-[10px] text-slate-500 dark:text-white/40 mt-1 px-1">Updates the material's saved cost per unit.</p>
+                    </div>
+                </div>
+
+                <!-- Metadata -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 relative z-10">
+                    <div id="supplier_container">
+                        <label class="form-label-custom">Supplier</label>
+                        <div class="haf-dropdown">
+                            <input type="checkbox" id="supplier-dropdown">
+                            <input type="hidden" name="supplier" value="{{ material.supplier.pk|default:'' }}">
+                            <label class="haf-dropdown__face !h-[46px] rounded-xl" for="supplier-dropdown">
+                                <div class="haf-dropdown__text text-slate-900 dark:text-white font-bold text-xs sm:text-sm">
+                                    {% if material.supplier %}
+                                        {{ material.supplier.name }}
+                                    {% else %}
+                                        -- Select Supplier --
+                                    {% endif %}
+                                </div>
+                                <div class="haf-dropdown__arrow border-theme-secondary"></div>
+                            </label>
+                            <ul class="haf-dropdown__items">
+                                <li class="haf-dropdown__item text-slate-500" data-value="">-- Select Supplier --</li>
+                                {% for supplier in suppliers %}
+                                <li class="haf-dropdown__item" data-value="{{ supplier.pk }}">{{ supplier.name }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div id="reference_container">
+                        <label class="form-label-custom">Reference No.</label>
+                        <input type="text" name="reference" class="form-input-custom" placeholder="PO, Invoice, or Order ID">
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label class="form-label-custom">Notes</label>
+                        <textarea name="notes" rows="2" class="form-input-custom resize-none" placeholder="Reason for adjustment, damage details, etc."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-theme-border flex gap-3">
+                <button type="submit" class="w-full sm:w-auto btn-premium btn-premium--gold px-8 py-3 text-sm flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">done</span>
+                    Record Transaction
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const typeSelect = document.getElementById('id_transaction_type');
+        const costContainer = document.getElementById('cost_container');
+        const supplierContainer = document.getElementById('supplier_container');
+        const refContainer = document.getElementById('reference_container');
+        const helpText = document.getElementById('txn_help_text');
+
+        function updateForm() {
+            const val = typeSelect.value;
+            
+            // Show/hide fields based on transaction type
+            if (val === 'in') {
+                costContainer.style.display = 'block';
+                supplierContainer.style.display = 'block';
+                refContainer.style.display = 'block';
+                helpText.textContent = "Adds to current stock level. You can update the unit cost.";
+                helpText.className = "text-[10px] text-emerald-600 dark:text-emerald-400 mt-2 px-1 font-bold";
+            } else if (val === 'out') {
+                costContainer.style.display = 'none';
+                supplierContainer.style.display = 'none';
+                refContainer.style.display = 'block';
+                helpText.textContent = "Deducts from current stock level. Useful when assigning to an order.";
+                helpText.className = "text-[10px] text-amber-600 dark:text-amber-400 mt-2 px-1 font-bold";
+            } else if (val === 'adj') {
+                costContainer.style.display = 'none';
+                supplierContainer.style.display = 'none';
+                refContainer.style.display = 'none';
+                helpText.textContent = "Sets stock to the exact quantity entered below (override).";
+                helpText.className = "text-[10px] text-blue-600 dark:text-blue-400 mt-2 px-1 font-bold";
+            } else if (val === 'dmg') {
+                costContainer.style.display = 'none';
+                supplierContainer.style.display = 'none';
+                refContainer.style.display = 'none';
+                helpText.textContent = "Deducts from stock due to damage, loss, or wastage.";
+                helpText.className = "text-[10px] text-red-600 dark:text-red-400 mt-2 px-1 font-bold";
+            }
+        }
+
+        typeSelect.addEventListener('change', updateForm);
+        updateForm(); // Initial run
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,178 @@
+# HomeArt Furniture — Workflow & URL Mapping Analysis
+
+## Current Application Architecture
+
+### Apps & URL Map (37 total routes)
+
+| # | App | URL Pattern | View | Purpose |
+|---|-----|-------------|------|---------|
+| 1 | **Core** | `/` | `dashboard` | Analytics dashboard with KPIs |
+| 2 | | `/search/` | `global_search` | Search by phone/name/order# |
+| — | — | — | — | — |
+| 3 | **Customers** | `/customers/` | `customer_list` | Paginated customer list |
+| 4 | | `/customers/<id>/` | `customer_detail` | Customer profile + order history |
+| 5 | | `/customers/api/by-phone/<phone>/` | `api_get_customer_by_phone` | AJAX lookup by phone |
+| 6 | | `/customers/api/search/` | `api_search_customers` | AJAX search autocomplete |
+| — | — | — | — | — |
+| 7 | **Measurements** | `/measurements/profile/` | `measurement_profile` | Furniture dimensions + customer entry |
+| 8 | | `/measurements/api/custom-category/add/` | `add_custom_category` | Add custom furniture type |
+| 9 | | `/measurements/api/custom-parameter/add/` | `add_custom_parameter` | Add custom dimension parameter |
+| — | — | — | — | — |
+| 10 | **Orders** | `/orders/` | `order_list` | All orders with filters |
+| 11 | | `/orders/new/` | `order_create` | Create order (billing) |
+| 12 | | `/orders/delivery-schedule/` | `delivery_schedule` | Calendar-grouped deliveries |
+| 13 | | `/orders/payments/` | `payment_report` | Cash vs UPI payment breakdown |
+| 14 | | `/orders/payments/print/` | `payment_report_print` | Printable payment report |
+| 15 | | `/orders/print-list/` | `order_list_print` | Printable order list |
+| 16 | | `/orders/<id>/` | `order_detail` | Single order with status/payment update |
+| 17 | | `/orders/<id>/edit-info/` | `order_edit_info` | Edit order metadata |
+| 18 | | `/orders/<id>/item/<item_id>/edit/` | `order_item_edit` | Edit line item |
+| 19 | | `/orders/<id>/print/` | `order_print` | Printable invoice with dimensions |
+| 20 | | `/orders/<id>/delete/` | `order_delete` | Delete order |
+| 21 | | `/orders/api/<id>/update-shortcut/` | `api_update_order_shortcut` | AJAX quick status/payment update |
+| — | — | — | — | — |
+| 22 | **Inventory** | `/inventory/` | `material_list` | All materials with stock filters |
+| 23 | | `/inventory/new/` | `material_create` | Add new material |
+| 24 | | `/inventory/suppliers/` | `supplier_list` | Supplier directory |
+| 25 | | `/inventory/suppliers/new/` | `supplier_create` | Add new supplier |
+| 26 | | `/inventory/suppliers/<id>/edit/` | `supplier_edit` | Edit supplier |
+| 27 | | `/inventory/suppliers/<id>/delete/` | `supplier_delete` | Archive supplier |
+| 28 | | `/inventory/print/` | `inventory_print` | Printable inventory report |
+| 29 | | `/inventory/<id>/` | `material_detail` | Material detail + transaction history |
+| 30 | | `/inventory/<id>/edit/` | `material_edit` | Edit material |
+| 31 | | `/inventory/<id>/delete/` | `material_delete` | Archive material |
+| 32 | | `/inventory/<id>/transaction/` | `stock_transaction` | Record stock in/out/adjust/damage |
+
+---
+
+## Current Sidebar Navigation (6 links)
+
+```
+Home (Dashboard)  →  /
+Customers         →  /customers/
+Dimensions        →  /measurements/profile/
+Orders            →  /orders/
+Inventory         →  /inventory/
+Payments          →  /orders/payments/
+```
+
+---
+
+## 🔍 Workflow Pain Points for a Store Owner
+
+### 1. **The "New Order" Flow Is Too Many Steps**
+**Current flow**: Home → Dimensions → Enter/find customer → Add furniture → Select items → "Proceed to Billing" → Order form → Print
+
+> [!WARNING]
+> A store owner **cannot create an order directly**. They MUST go through the Dimensions page first, even if the customer already has dimensions on file. The `/orders/new/` route requires a `customer_id` query param, and without it redirects back to `/measurements/profile/`.
+
+**Impact**: For a repeat customer ordering the same sofa they ordered last year, the owner still has to navigate through the full dimensions workflow.
+
+### 2. **Delivery Schedule Is Hidden**
+The delivery schedule page (`/orders/delivery-schedule/`) is one of the most critical daily views for a store owner — "what needs to go out today?" — but it has **no sidebar link**. It's only reachable from within the Orders page (if there's a link there at all).
+
+### 3. **Suppliers Are Buried Under Inventory**
+Suppliers live at `/inventory/suppliers/` with no direct sidebar link. A store owner who wants to quickly call their wood supplier must navigate: Inventory → find a "Suppliers" link → browse the list.
+
+### 4. **No Quick-Add for Common Actions**
+The most frequent daily actions for a furniture store owner:
+- 📞 **Walk-in customer arrives** → Need to search/create customer, take dimensions, create order
+- 📦 **Stock arrives from supplier** → Need to find the material and record stock-in
+- 🚚 **Delivery day check** → Need to see today's deliveries
+- 💰 **Payment received** → Need to find an order and record payment
+
+None of these have dedicated "quick action" shortcuts from the dashboard or sidebar.
+
+### 5. **Dashboard Doesn't Link to Actions**
+The dashboard shows metrics (total orders, revenue, low stock alerts) but most widgets are display-only. The low stock alert shows materials but doesn't link directly to "Stock In" for that material.
+
+### 6. **No "Create Customer" Standalone Page**
+Customers are created implicitly through the Dimensions page. There's no `/customers/new/` route. If a store owner wants to just add a customer's contact info without taking dimensions, they can't.
+
+### 7. **Delivery Schedule vs. Orders Overlap**
+Both the Orders list and Delivery Schedule show orders. The distinction isn't clear from the sidebar. A store owner thinks in terms of: "what's pending?", "what's due today?", and "what's overdue?" — all of which require navigating to different pages or applying filters.
+
+---
+
+## ✅ Recommended Workflow Optimizations
+
+### Priority 1: Restructure Navigation for Daily Operations
+
+**Proposed new sidebar structure:**
+
+```
+📊  Dashboard           →  /
+👤  Customers            →  /customers/
+📐  Dimensions           →  /measurements/profile/
+🛒  New Order            →  /measurements/profile/  (same, but renamed + promoted)
+📋  Orders               →  /orders/
+🚚  Deliveries           →  /orders/delivery-schedule/
+📦  Inventory            →  /inventory/
+🏭  Suppliers            →  /inventory/suppliers/
+💰  Payments             →  /orders/payments/
+```
+
+**Key changes:**
+- Add **Deliveries** as a dedicated sidebar link (it's currently hidden)
+- Add **Suppliers** as a dedicated sidebar link (it's currently buried)
+- Rename "Dimensions" → "New Order" since that's the primary purpose (taking dimensions + billing)
+
+### Priority 2: Add Quick Actions to Dashboard
+
+Add a "Quick Actions" row at the top of the dashboard with large, tappable cards:
+
+| Action | Icon | Links To |
+|--------|------|----------|
+| New Order | `add_shopping_cart` | `/measurements/profile/` |
+| Today's Deliveries | `local_shipping` | `/orders/delivery-schedule/?date=today` |
+| Record Stock In | `inventory` | `/inventory/` (with "Stock In" shortcut) |
+| Record Payment | `payments` | `/orders/?due=balance` |
+
+### Priority 3: Make Dashboard Alerts Actionable
+
+- **Low Stock Alert** items should link to `/inventory/<id>/transaction/` (stock-in page) instead of just showing the name
+- **Pending Payments** should link to `/orders/<id>/` for that specific order
+- **Overdue Deliveries** count should link to `/orders/delivery-schedule/?due=overdue`
+
+### Priority 4: Streamline "Repeat Customer" Order Flow
+
+Add a shortcut flow:
+1. From `/customers/<id>/` (customer detail), add a **"New Order"** button that pre-fills the dimensions page with the customer's existing data
+2. The existing link already works (`/measurements/profile/?customer_id=<id>`) but it's not prominently surfaced
+
+### Priority 5: Add Direct "Create Customer" Route
+
+Create `/customers/new/` that allows creating a customer without going through the dimensions flow. This is useful when:
+- A customer calls to inquire but hasn't visited yet
+- The owner wants to save contact info quickly
+- Customer data needs to be entered before the customer's visit
+
+---
+
+## 📊 Effort vs. Impact Matrix
+
+| Optimization | Effort | Impact | Priority |
+|-------------|--------|--------|----------|
+| Add Deliveries + Suppliers to sidebar | 🟢 Low | 🔴 High | **P1** |
+| Rename "Dimensions" → "New Order" | 🟢 Low | 🟡 Medium | **P1** |
+| Dashboard quick-action cards | 🟡 Medium | 🔴 High | **P2** |
+| Make dashboard alerts clickable | 🟡 Medium | 🔴 High | **P2** |
+| "New Order" button on customer detail | 🟢 Low | 🟡 Medium | **P3** |
+| Standalone `/customers/new/` page | 🟡 Medium | 🟡 Medium | **P3** |
+
+---
+
+## Questions for You
+
+> [!IMPORTANT]
+> Before implementing, I'd like to confirm a few things:
+
+1. **Sidebar restructure**: Should we go ahead with adding **Deliveries** and **Suppliers** as separate sidebar items? This adds 2 more links to the nav (8 total, from current 6).
+
+2. **"Dimensions" rename**: The Dimensions page serves dual purpose — taking dimensions AND proceeding to billing. Should we rename it to **"New Order"** (since that's the primary goal), or keep it as "Dimensions" and add a separate "New Order" link?
+
+3. **Dashboard Quick Actions**: Would you like the quick-action cards at the top of the dashboard? This is a moderate UI change to the dashboard template.
+
+4. **Customer creation**: Would you like a standalone "Add Customer" page, or is the current flow (create during dimensions) sufficient?
+
+5. **Any other daily pain points** you experience as the store owner that I should consider?

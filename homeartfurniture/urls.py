@@ -18,17 +18,14 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from core.views import CustomLoginView
-
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # Ensure custom login takes precedence over default auth URLs
-    path('accounts/login/', CustomLoginView.as_view(), name='login'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('orders/', include('orders.urls')),
     path('customers/', include('customers.urls')),
     path('measurements/', include('measurements.urls')),
-    path('salespeople/', include('salesperson.urls')),
+    path('inventory/', include('inventory.urls')),
+
 
     path('', include('core.urls')),
 ]

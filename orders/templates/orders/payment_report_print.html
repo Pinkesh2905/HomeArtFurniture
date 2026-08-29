@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payments Report Print | Home Art Furniture</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 10mm;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            background: #ffffff;
+            color: #000000;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11px;
+            line-height: 1.35;
+        }
+        .toolbar {
+            width: 100%;
+            max-width: 1120px;
+            margin: 18px auto;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .toolbar button {
+            border: 1px solid #1e293b;
+            background: #1e293b;
+            color: #ffffff;
+            padding: 9px 14px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .sheet {
+            width: 100%;
+            max-width: 1120px;
+            margin: 0 auto 24px;
+            background: #ffffff;
+            padding: 22px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #000;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+        h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #000;
+            letter-spacing: -0.02em;
+        }
+        .subtitle {
+            margin-top: 4px;
+            color: #444;
+            font-size: 11px;
+        }
+        .meta {
+            text-align: right;
+            color: #000;
+        }
+        .meta strong {
+            font-size: 14px;
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        .metrics {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .metric-card {
+            flex: 1;
+            border: 1px solid #000;
+            border-radius: 4px;
+            padding: 12px;
+        }
+        .metric-title {
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .metric-val {
+            font-size: 20px;
+            font-weight: 900;
+            margin-bottom: 6px;
+        }
+        .metric-sub {
+            font-size: 10px;
+            color: #333;
+        }
+        
+        h2 {
+            font-size: 14px;
+            text-transform: uppercase;
+            margin: 24px 0 8px 0;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #000;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 6px 8px;
+            text-align: left;
+        }
+        th {
+            font-size: 9px;
+            font-weight: bold;
+            text-transform: uppercase;
+            background: #f4f4f4;
+        }
+        td {
+            font-size: 10px;
+            vertical-align: middle;
+        }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        
+        .badge {
+            display: inline-block;
+            border: 1px solid #000;
+            border-radius: 12px;
+            padding: 2px 6px;
+            font-size: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        @media print {
+            body { background: transparent; }
+            .toolbar { display: none !important; }
+            .sheet { border: none; margin: 0; padding: 0; max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+        <button onclick="window.print()">Print Report</button>
+    </div>
+
+    <div class="sheet">
+        <header>
+            <div>
+                <h1>HOME ART FURNITURE</h1>
+                <div class="subtitle">Premium Custom Builds & Rentals</div>
+            </div>
+            <div class="meta">
+                <strong>PAYMENTS & COLLECTION REPORT</strong>
+                Period: {{ start_date|date:"d M Y" }} &mdash; {{ end_date|date:"d M Y" }}<br>
+                Generated: {{ generated_at|date:"d M Y, H:i" }}
+            </div>
+        </header>
+
+        <div class="metrics">
+            <div class="metric-card">
+                <div class="metric-title">Cash Collection</div>
+                <div class="metric-val">₹{{ total_cash_advance|floatformat:2 }}</div>
+                <div class="metric-sub">Orders: {{ cash_count }} | Pending: ₹{{ total_cash_pending|floatformat:2 }}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">UPI / QR Collection</div>
+                <div class="metric-val">₹{{ total_upi_advance|floatformat:2 }}</div>
+                <div class="metric-sub">Orders: {{ upi_count }} | Pending: ₹{{ total_upi_pending|floatformat:2 }}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Total Collected</div>
+                <div class="metric-val">₹{{ total_advance|floatformat:2 }}</div>
+                <div class="metric-sub">Combined | Total Pending: ₹{{ total_pending|floatformat:2 }}</div>
+            </div>
+        </div>
+
+        <!-- Cash Collections -->
+        <h2>Cash Collections</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th class="text-right">Advance Paid</th>
+                    <th class="text-right">Pending Balance</th>
+                    <th class="text-center">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in cash_orders %}
+                <tr>
+                    <td>{{ order.date|date:"d M Y" }}</td>
+                    <td><strong>{{ order.order_number }}</strong></td>
+                    <td>
+                        <strong>{{ order.customer.full_name }}</strong><br>
+                        {{ order.customer.phone }}
+                    </td>
+                    <td class="text-right"><strong>₹{{ order.advance_paid }}</strong></td>
+                    <td class="text-right">
+                        {% if order.grand_total > 0 %}
+                            <span class="badge">₹{{ order.grand_total }}</span>
+                        {% else %}
+                            <span class="badge">Paid</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <span class="badge">{{ order.get_status_display }}</span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No cash collections in this period.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- UPI Collections -->
+        <h2>UPI / QR Collections</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th class="text-right">Advance Paid</th>
+                    <th class="text-right">Pending Balance</th>
+                    <th class="text-center">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in upi_orders %}
+                <tr>
+                    <td>{{ order.date|date:"d M Y" }}</td>
+                    <td><strong>{{ order.order_number }}</strong></td>
+                    <td>
+                        <strong>{{ order.customer.full_name }}</strong><br>
+                        {{ order.customer.phone }}
+                    </td>
+                    <td class="text-right"><strong>₹{{ order.advance_paid }}</strong></td>
+                    <td class="text-right">
+                        {% if order.grand_total > 0 %}
+                            <span class="badge">₹{{ order.grand_total }}</span>
+                        {% else %}
+                            <span class="badge">Paid</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <span class="badge">{{ order.get_status_display }}</span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No UPI / QR collections in this period.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
