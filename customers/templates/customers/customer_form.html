@@ -115,13 +115,13 @@
         </div>
         {% endif %}
 
-        <div class="glass-panel p-6 sm:p-8 mb-6">
+        <div class="glass-panel p-6 sm:p-8 mb-6 overflow-visible">
             <h3 class="form-section-title flex items-center gap-2">
                 <span class="material-symbols-outlined text-secondary text-[18px]">person</span>
                 Customer Information
             </h3>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-visible">
                 <!-- Full Name -->
                 <div>
                     <label class="form-label-custom" for="full_name">Full Name *</label>
@@ -138,10 +138,44 @@
                         <span id="phone_counter" class="text-[11px] font-bold text-slate-400 dark:text-white/40">0 / 10 digits</span>
                     </div>
                     <div class="flex gap-2">
-                        <input type="text" name="country_code"
-                            class="form-input-custom !w-[80px] text-center font-medium"
-                            value="{{ form_data.country_code|default:'+91' }}"
-                            placeholder="+91">
+                        <!-- Custom Dropdown for Country Code with Nation Flags -->
+                        <div class="haf-dropdown w-[110px] relative z-30">
+                            <input type="checkbox" id="country-code-checkbox" class="sr-only">
+                            <input type="hidden" id="country_code" name="country_code" value="{{ form_data.country_code|default:'+91' }}">
+                            <label class="haf-dropdown__face !h-[38px] !rounded-lg border-theme-input bg-theme-input hover:bg-theme-input/80 transition-colors cursor-pointer !px-2.5 !flex items-center justify-between" for="country-code-checkbox">
+                                <div class="haf-dropdown__text font-bold text-theme-primary text-xs">
+                                    {% if form_data.country_code == '+1' %}🇺🇸 +1
+                                    {% elif form_data.country_code == '+44' %}🇬🇧 +44
+                                    {% elif form_data.country_code == '+971' %}🇦🇪 +971
+                                    {% elif form_data.country_code == '+61' %}🇦🇺 +61
+                                    {% elif form_data.country_code == '+966' %}🇸🇦 +966
+                                    {% elif form_data.country_code == '+974' %}🇶🇦 +974
+                                    {% elif form_data.country_code == '+965' %}🇰🇼 +965
+                                    {% elif form_data.country_code == '+968' %}🇴🇲 +968
+                                    {% elif form_data.country_code == '+973' %}🇧🇭 +973
+                                    {% elif form_data.country_code == '+49' %}🇩🇪 +49
+                                    {% elif form_data.country_code == '+65' %}🇸🇬 +65
+                                    {% elif form_data.country_code == '+64' %}🇳🇿 +64
+                                    {% else %}🇮🇳 +91{% endif %}
+                                </div>
+                                <div class="haf-dropdown__arrow border-theme-secondary !mr-0"></div>
+                            </label>
+                            <ul class="haf-dropdown__items !w-[140px] max-h-60 overflow-y-auto !top-full !bottom-auto shadow-2xl">
+                                <li class="haf-dropdown__item {% if not form_data.country_code or form_data.country_code == '+91' %}bg-secondary/10 font-bold{% endif %}" data-value="+91">🇮🇳 +91</li>
+                                <li class="haf-dropdown__item {% if form_data.country_code == '+1' %}bg-secondary/10 font-bold{% endif %}" data-value="+1">🇺🇸 +1</li>
+                                <li class="haf-dropdown__item {% if form_data.country_code == '+44' %}bg-secondary/10 font-bold{% endif %}" data-value="+44">🇬🇧 +44</li>
+                                <li class="haf-dropdown__item {% if form_data.country_code == '+971' %}bg-secondary/10 font-bold{% endif %}" data-value="+971">🇦🇪 +971</li>
+                                <li class="haf-dropdown__item {% if form_data.country_code == '+61' %}bg-secondary/10 font-bold{% endif %}" data-value="+61">🇦🇺 +61</li>
+                                <li class="haf-dropdown__item {% if form_data.country_code == '+966' %}bg-secondary/10 font-bold{% endif %}" data-value="+966">🇸🇦 +966</li>
+                                <li class="haf-dropdown__item {% if form_data.country_code == '+974' %}bg-secondary/10 font-bold{% endif %}" data-value="+974">🇶🇦 +974</li>
+                                <li class="haf-dropdown__item {% if form_data.country_code == '+965' %}bg-secondary/10 font-bold{% endif %}" data-value="+965">🇰🇼 +965</li>
+                                <li class="haf-dropdown__item {% if form_data.country_code == '+968' %}bg-secondary/10 font-bold{% endif %}" data-value="+968">🇴🇲 +968</li>
+                                <li class="haf-dropdown__item {% if form_data.country_code == '+973' %}bg-secondary/10 font-bold{% endif %}" data-value="+973">🇧🇭 +973</li>
+                                <li class="haf-dropdown__item {% if form_data.country_code == '+49' %}bg-secondary/10 font-bold{% endif %}" data-value="+49">🇩🇪 +49</li>
+                                <li class="haf-dropdown__item {% if form_data.country_code == '+65' %}bg-secondary/10 font-bold{% endif %}" data-value="+65">🇸🇬 +65</li>
+                                <li class="haf-dropdown__item {% if form_data.country_code == '+64' %}bg-secondary/10 font-bold{% endif %}" data-value="+64">🇳🇿 +64</li>
+                            </ul>
+                        </div>
                         <input type="tel" id="phone" name="phone" required
                             maxlength="10" minlength="10" pattern="[0-9]{10}" inputmode="numeric"
                             class="form-input-custom flex-1 font-mono tracking-wider"

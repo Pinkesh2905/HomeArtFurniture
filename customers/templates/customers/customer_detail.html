@@ -181,7 +181,7 @@
 
 <!-- Edit Customer Modal -->
 <div id="editCustomerModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] hidden flex items-center justify-center p-4 transition-opacity duration-200 opacity-0">
-    <div class="glass-panel max-w-md w-full p-6 sm:p-7 rounded-2xl border border-[rgba(160,132,94,0.3)] shadow-2xl relative bg-[#FAF7F2] dark:bg-[#1E130E] transform transition-transform duration-200 scale-95" id="editCustomerModalBox">
+    <div class="glass-panel max-w-md w-full p-6 sm:p-7 rounded-2xl border border-[rgba(160,132,94,0.3)] shadow-2xl relative bg-[#FAF7F2] dark:bg-[#1E130E] transform transition-transform duration-200 scale-95 overflow-visible" id="editCustomerModalBox">
         <div class="flex items-center justify-between pb-4 border-b border-theme-input mb-5">
             <div class="flex items-center gap-2.5">
                 <span class="material-symbols-outlined text-secondary text-[22px]">manage_accounts</span>
@@ -217,9 +217,30 @@
                         <span id="edit_phone_counter" class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">10 / 10 digits</span>
                     </div>
                     <div class="flex gap-2">
-                        <input type="text" id="edit_country_code" name="country_code"
-                            class="w-[75px] h-10 px-2 text-center rounded-lg border border-theme-input bg-theme-input text-theme-primary text-sm font-medium focus:outline-none focus:border-secondary transition-all"
-                            value="+91">
+                        <!-- Custom Dropdown for Country Code with Nation Flags -->
+                        <div class="haf-dropdown w-[110px] relative z-30">
+                            <input type="checkbox" id="edit-country-code-checkbox" class="sr-only">
+                            <input type="hidden" id="edit_country_code" name="country_code" value="+91">
+                            <label class="haf-dropdown__face !h-10 !rounded-lg border-theme-input bg-theme-input hover:bg-theme-input/80 transition-colors cursor-pointer !px-2.5 !flex items-center justify-between" for="edit-country-code-checkbox">
+                                <div class="haf-dropdown__text font-bold text-theme-primary text-xs">🇮🇳 +91</div>
+                                <div class="haf-dropdown__arrow border-theme-secondary !mr-0"></div>
+                            </label>
+                            <ul class="haf-dropdown__items !w-[140px] max-h-60 overflow-y-auto !top-full !bottom-auto shadow-2xl">
+                                <li class="haf-dropdown__item bg-secondary/10 font-bold" data-value="+91">🇮🇳 +91</li>
+                                <li class="haf-dropdown__item" data-value="+1">🇺🇸 +1</li>
+                                <li class="haf-dropdown__item" data-value="+44">🇬🇧 +44</li>
+                                <li class="haf-dropdown__item" data-value="+971">🇦🇪 +971</li>
+                                <li class="haf-dropdown__item" data-value="+61">🇦🇺 +61</li>
+                                <li class="haf-dropdown__item" data-value="+966">🇸🇦 +966</li>
+                                <li class="haf-dropdown__item" data-value="+974">🇶🇦 +974</li>
+                                <li class="haf-dropdown__item" data-value="+965">🇰🇼 +965</li>
+                                <li class="haf-dropdown__item" data-value="+968">🇴🇲 +968</li>
+                                <li class="haf-dropdown__item" data-value="+973">🇧🇭 +973</li>
+                                <li class="haf-dropdown__item" data-value="+49">🇩🇪 +49</li>
+                                <li class="haf-dropdown__item" data-value="+65">🇸🇬 +65</li>
+                                <li class="haf-dropdown__item" data-value="+64">🇳🇿 +64</li>
+                            </ul>
+                        </div>
                         <input type="tel" id="edit_phone_local" name="phone" required
                             maxlength="10" minlength="10" pattern="[0-9]{10}" inputmode="numeric"
                             class="flex-1 h-10 px-3 font-mono tracking-wider rounded-lg border border-theme-input bg-theme-input text-theme-primary text-sm focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all"
@@ -280,11 +301,34 @@ document.addEventListener('DOMContentLoaded', () => {
         phoneInput.value = localPart;
 
         // Set country code
-        if (rawPhone.startsWith('+') && !rawPhone.startsWith('+91')) {
-            const cc = rawPhone.slice(0, rawPhone.length - localPart.length);
-            document.getElementById('edit_country_code').value = cc;
-        } else {
-            document.getElementById('edit_country_code').value = '+91';
+        let cc = '+91';
+        if (rawPhone.startsWith('+')) {
+            const prefixes = ['+971', '+973', '+974', '+965', '+968', '+966', '+91', '+44', '+61', '+64', '+65', '+49', '+33', '+1'];
+            for (const p of prefixes) {
+                if (rawPhone.startsWith(p)) {
+                    cc = p;
+                    break;
+                }
+            }
+        }
+        const editCcInput = document.getElementById('edit_country_code');
+        if (editCcInput) {
+            editCcInput.value = cc;
+            const dropdownContainer = editCcInput.closest('.haf-dropdown');
+            if (dropdownContainer) {
+                const faceText = dropdownContainer.querySelector('.haf-dropdown__text');
+                const items = dropdownContainer.querySelectorAll('.haf-dropdown__item');
+                let matchedText = '';
+                items.forEach(item => {
+                    if (item.getAttribute('data-value') === cc) {
+                        item.classList.add('bg-secondary/10', 'font-bold');
+                        matchedText = item.textContent.trim();
+                    } else {
+                        item.classList.remove('bg-secondary/10', 'font-bold');
+                    }
+                });
+                if (faceText && matchedText) faceText.textContent = matchedText;
+            }
         }
 
         sanitizeAndValidatePhone();
