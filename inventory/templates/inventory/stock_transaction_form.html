@@ -82,15 +82,6 @@
         </div>
     </div>
 
-    {% if messages %}
-    <div class="mb-6 space-y-2">
-        {% for message in messages %}
-        <div class="p-4 rounded-xl text-sm font-medium border {% if message.tags == 'error' %}bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20 text-red-700 dark:text-red-400{% else %}bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400{% endif %}">
-            {{ message }}
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
 
     <div class="glass-panel p-6 sm:p-8 rounded-[24px] relative z-10">
         <form method="POST" action="">

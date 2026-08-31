@@ -13,42 +13,78 @@
         </div>
     </div>
     {% endif %}
-    <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <div class="flex items-center gap-5">
-            <a href="{% url 'order_list' %}" class="w-12 h-12 rounded-full border border-theme-input flex items-center justify-center text-theme-secondary hover:text-theme-primary hover:bg-theme-input/20 transition-all shadow-xl shrink-0 group">
-                <span class="material-symbols-outlined group-hover:-translate-x-1 transition-transform">arrow_back</span>
+    <div class="mb-8 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+        <div class="flex items-start sm:items-center gap-3.5 sm:gap-4 min-w-0">
+            <!-- Back button -->
+            <a href="{% url 'order_list' %}" class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl border border-theme-input bg-theme-input/40 flex items-center justify-center text-theme-secondary hover:text-theme-primary hover:bg-theme-input transition-all shadow-sm shrink-0 group mt-0.5 sm:mt-0" title="Back to Orders">
+                <span class="material-symbols-outlined text-[20px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
             </a>
-            <div>
-                <div class="flex items-center gap-3">
-                    <h2 class="font-h1 text-3xl sm:text-4xl font-bold text-theme-primary tracking-tight">Order #{{ order.order_number }}</h2>
-                    <button type="button" onclick="openEditOrderModal()" class="w-8 h-8 rounded-full bg-secondary/10 text-secondary hover:bg-secondary/20 flex items-center justify-center transition-all shadow-sm shrink-0" title="Edit Order Info">
-                        <span class="material-symbols-outlined text-[16px]">edit</span>
-                    </button>
-                    <span class="px-3 py-1 rounded-full bg-secondary/20 border border-secondary/30 text-secondary text-[10px] font-bold uppercase tracking-wider">
-                        {% for value,label in statuses %}
-                            {% if order.status == value %}{{ label }}{% endif %}
-                        {% endfor %}
-                    </span>
+            
+            <div class="min-w-0 flex-1">
+                <!-- Small label + Date metadata row -->
+                <div class="flex items-center gap-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary mb-1">
+                    <span class="tracking-widest">ORDER</span>
+                    <span>&bull;</span>
+                    <span>{{ order.date|date:"d M Y" }}</span>
                 </div>
-                <p class="text-theme-secondary text-xs sm:text-sm mt-1">Date: {{ order.date }}</p>
+                
+                <!-- Mono order number + Edit button + Status badge row -->
+                <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <h1 class="font-mono text-xl sm:text-2xl lg:text-3xl font-black text-theme-primary tracking-tight">
+                        #{{ order.order_number }}
+                    </h1>
+                    
+                    <div class="inline-flex items-center gap-2 shrink-0">
+                        <button type="button" onclick="openEditOrderModal()" class="w-7 h-7 rounded-lg bg-secondary/15 text-secondary hover:bg-secondary/25 flex items-center justify-center transition-all shadow-sm cursor-pointer" title="Edit Order Info">
+                            <span class="material-symbols-outlined text-[15px]">edit</span>
+                        </button>
+                        
+                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider
+                            {% if order.status == 'delivered' %}bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30
+                            {% elif order.status == 'in_progress' %}bg-blue-500/15 text-blue-800 dark:text-blue-300 border border-blue-500/30
+                            {% elif order.status == 'pending' %}bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30
+                            {% elif order.status == 'cancelled' %}bg-rose-500/15 text-rose-800 dark:text-rose-300 border border-rose-500/30
+                            {% else %}bg-zinc-500/15 text-zinc-700 dark:text-zinc-300 border border-zinc-500/30{% endif %}">
+                            {% for value,label in statuses %}
+                                {% if order.status == value %}{{ label }}{% endif %}
+                            {% endfor %}
+                        </span>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="flex gap-3">
-            <a href="{% url 'order_print' order.id %}?original_only=true" target="_blank" class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-[14px] font-bold text-sm bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 hover:bg-emerald-500/20 transition-all duration-200" title="Print Original Bill (Page 1)">
-                <span class="material-symbols-outlined text-lg">print</span>
-                Original Bill
+
+        <!-- Action Buttons Row: 2x2 grid on mobile, flex on desktop -->
+        <div class="grid grid-cols-2 sm:flex sm:items-center gap-2.5 sm:gap-3 w-full lg:w-auto">
+            <!-- Original Bill (Page 1) -->
+            <a href="{% url 'order_print' order.id %}?original_only=true" target="_blank" 
+               class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-600/30 hover:bg-emerald-500/20 transition-all shadow-sm" 
+               title="Print Original Bill (Page 1)">
+                <span class="material-symbols-outlined text-base">print</span>
+                <span>Original Bill</span>
             </a>
-            <a href="{{ whatsapp_link }}" target="_blank" class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-[14px] font-bold text-sm bg-green-500 text-white hover:bg-green-600 transition-all duration-200 shadow-xl" title="Send WhatsApp Message">
-                <span class="material-symbols-outlined text-lg">chat</span>
-                WhatsApp
+
+            <!-- WhatsApp Message (Retoned neutral with brand green icon) -->
+            <a href="{{ whatsapp_link }}" target="_blank" 
+               class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-theme-input/60 text-theme-primary border border-theme-input hover:bg-theme-input transition-all shadow-sm" 
+               title="Send WhatsApp Message">
+                <span class="material-symbols-outlined text-base text-[#25D366] shrink-0">chat</span>
+                <span>WhatsApp</span>
             </a>
-            <a href="{% url 'order_print' order.id %}" class="flex-1 sm:flex-none btn-premium btn-premium--gold !py-3 !px-8 shadow-2xl">
-                <span class="material-symbols-outlined text-lg mr-2">print</span>
-                Print Full
+
+            <!-- Print Full -->
+            <a href="{% url 'order_print' order.id %}" 
+               class="btn-premium btn-premium--gold flex items-center justify-center gap-2 !py-2.5 !px-5 !rounded-xl !text-xs sm:!text-sm shadow-md">
+                <span class="material-symbols-outlined text-base">print</span>
+                <span>Print Full</span>
             </a>
-            <button type="button" onclick="openDeleteModal()" class="flex items-center justify-center gap-2 px-6 py-3 rounded-[14px] font-bold text-sm bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 hover:text-red-300 transition-all duration-200" title="Delete this order permanently">
-                <span class="material-symbols-outlined text-lg">delete_forever</span>
-                <span class="hidden sm:inline">Delete</span>
+
+            <!-- Delete Order -->
+            <button type="button" onclick="openDeleteModal()" 
+                    class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-rose-500/10 text-rose-800 dark:text-rose-300 border border-rose-600/30 hover:bg-rose-500/20 transition-all shadow-sm cursor-pointer" 
+                    title="Delete this order permanently">
+                <span class="material-symbols-outlined text-base">delete_forever</span>
+                <span>Delete</span>
             </button>
         </div>
     </div>
@@ -71,12 +107,12 @@
                             </div>
                             <div>
                                 <h4 class="font-bold text-theme-primary text-lg">{{ item.description }}</h4>
-                                <p class="text-sm text-theme-muted font-medium">Qty: {{ item.quantity }} &times; ₹{{ item.rate }}</p>
+                                <p class="text-sm text-theme-muted font-medium">Qty: {{ item.quantity }} &times; <span class="font-mono font-semibold">₹{{ item.rate }}</span></p>
                             </div>
                         </div>
                         <div class="text-right">
                             <div class="text-xs font-bold text-theme-secondary uppercase tracking-widest mb-1">Subtotal</div>
-                            <div class="font-bold text-xl text-theme-primary mb-2">₹{{ item.total_amount }}</div>
+                            <div class="font-mono font-bold text-xl text-theme-primary mb-2">₹{{ item.total_amount }}</div>
                             <button type="button" onclick="openEditItemModal('{{ item.id }}')" class="text-[10px] text-secondary hover:text-theme-primary font-bold uppercase tracking-wider flex items-center justify-end gap-1 ml-auto transition-colors">
                                 <span class="material-symbols-outlined text-[14px]">edit</span> Edit
                             </button>
@@ -191,29 +227,29 @@
                 <h3 class="font-serif text-lg font-semibold text-theme-primary mb-4">Payment</h3>
                 
                 <div class="space-y-2 mb-4 text-sm">
-                    <div class="flex justify-between text-theme-secondary">
+                    <div class="flex justify-between text-theme-secondary items-center">
                         <span>Subtotal</span>
-                        <span class="text-theme-primary">₹{{ order.subtotal }}</span>
+                        <span class="font-mono font-bold text-theme-primary">₹{{ order.subtotal }}</span>
                     </div>
                     <div class="flex justify-between text-secondary items-center">
                         <div class="flex items-center gap-2">
                             <span class="text-theme-secondary">Discount</span>
-                            <button type="button" onclick="openEditDiscountModal()" class="w-6 h-6 rounded-full hover:bg-secondary/10 flex items-center justify-center text-secondary transition-all" title="Edit total discount">
+                            <button type="button" onclick="openEditDiscountModal()" class="w-6 h-6 rounded-full hover:bg-secondary/10 flex items-center justify-center text-secondary transition-all cursor-pointer" title="Edit total discount">
                                 <span class="material-symbols-outlined text-[14px]">edit</span>
                             </button>
                         </div>
-                        <span class="{% if order.discount_amount > 0 %}text-secondary{% else %}text-theme-primary{% endif %}">
+                        <span class="font-mono font-bold {% if order.discount_amount > 0 %}text-secondary{% else %}text-theme-primary{% endif %}">
                             {% if order.discount_amount > 0 %}-{% endif %}₹{{ order.discount_amount }}
                         </span>
                     </div>
 
-                    <div class="flex justify-between font-bold text-theme-primary pt-2 border-t border-theme-input bg-theme-input/5 px-2 -mx-2 rounded-lg">
+                    <div class="flex justify-between font-bold text-theme-primary pt-2 border-t border-theme-input bg-theme-input/5 px-2 -mx-2 rounded-lg items-center">
                         <span class="text-secondary">Net Amount</span>
-                        <span>₹{{ order.final_amount }}</span>
+                        <span class="font-mono font-bold text-base">₹{{ order.final_amount }}</span>
                     </div>
-                    <div class="flex justify-between text-theme-secondary pt-2 px-1">
+                    <div class="flex justify-between text-theme-secondary pt-2 px-1 items-center">
                         <span>Advance Paid</span>
-                        <span class="text-theme-primary">₹{{ order.advance_paid }}</span>
+                        <span class="font-mono font-bold text-theme-primary">₹{{ order.advance_paid }}</span>
                     </div>
                     <div class="flex justify-between text-theme-muted text-[10px] mt-1 italic px-1">
                         <span>Payment Method</span>
@@ -226,7 +262,7 @@
                     <div class="flex justify-between items-end relative z-10">
                         <div>
                             <span class="text-xs font-bold text-theme-secondary uppercase tracking-widest block mb-1">Balance Due</span>
-                            <span class="font-serif text-3xl font-bold tracking-tight">₹{{ balance_due|floatformat:2 }}</span>
+                            <span class="font-mono text-2xl sm:text-3xl font-black tracking-tight">₹{{ balance_due|floatformat:2 }}</span>
                         </div>
                         <span class="material-symbols-outlined text-theme-muted text-4xl">payments</span>
                     </div>
@@ -305,20 +341,20 @@
             </div>
         </div>
         <div class="bg-red-500/10 border border-red-500/20 rounded-[14px] p-4 mb-6">
-            <p class="text-sm text-red-300 leading-relaxed">
+            <p class="text-sm text-red-800 dark:text-red-200 leading-relaxed">
                 You are about to permanently delete order
-                <span class="font-bold text-red-200">{{ order.order_number }}</span>
-                for <span class="font-bold text-red-200">{{ order.customer.full_name }}</span>.
+                <span class="font-bold text-red-900 dark:text-red-100">{{ order.order_number }}</span>
+                for <span class="font-bold text-red-900 dark:text-red-100">{{ order.customer.full_name }}</span>.
                 All order items and billing records for this order will be removed.
             </p>
         </div>
         <div class="flex gap-3">
-            <button type="button" onclick="closeDeleteModal()" class="flex-1 px-6 py-3 rounded-[12px] font-bold text-sm text-slate-600 dark:text-white/70 border border-slate-300 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 transition-all">
+            <button type="button" onclick="closeDeleteModal()" class="flex-1 px-6 py-3 rounded-[12px] font-bold text-sm text-slate-700 dark:text-white/80 border border-slate-300 dark:border-white/20 hover:bg-slate-100 dark:hover:bg-white/10 transition-all cursor-pointer">
                 Cancel
             </button>
             <form method="POST" action="{% url 'order_delete' order.id %}" class="flex-1">
                 {% csrf_token %}
-                <button type="submit" class="w-full px-6 py-3 rounded-[12px] font-bold text-sm bg-red-500/20 text-red-300 border border-red-500/40 hover:bg-red-500/30 hover:text-red-200 transition-all">
+                <button type="submit" class="btn-dialog-delete w-full !py-3 !rounded-[12px] text-sm">
                     Yes, Delete Permanently
                 </button>
             </form>
@@ -494,7 +530,7 @@ document.addEventListener('keydown', function(e) {
                                     <li class="haf-dropdown__item" data-value="+64">🇳🇿 +64</li>
                                 </ul>
                             </div>
-                            <input type="text" id="edit_customer_phone_local" name="customer_phone_local" class="flex-1 bg-theme-input border border-theme-input rounded-[12px] px-4 py-3 focus:outline-none focus:border-secondary/50 text-theme-primary transition-all">
+                            <input type="tel" id="edit_customer_phone_local" name="customer_phone_local" maxlength="10" minlength="10" pattern="[0-9]{10}" inputmode="numeric" class="flex-1 bg-theme-input border border-theme-input rounded-[12px] px-4 py-3 focus:outline-none focus:border-secondary/50 text-theme-primary transition-all font-mono" placeholder="10-digit mobile...">
                         </div>
                         <input type="hidden" id="edit_customer_phone" name="customer_phone" value="{{ order.customer.phone }}">
                     </div>
@@ -608,8 +644,8 @@ document.addEventListener('keydown', function(e) {
             {% csrf_token %}
             <div class="mb-6">
                 <label class="block text-xs font-bold text-theme-secondary uppercase tracking-widest mb-2 px-1">Total Discount Amount (₹)</label>
-                <input type="number" step="0.01" max="{{ order.subtotal }}" name="total_discount" value="{{ order.discount_amount }}" class="w-full bg-theme-input border border-theme-input rounded-[12px] px-4 py-3 focus:outline-none focus:border-secondary/50 text-theme-primary font-bold transition-all" required>
-                <p class="text-[10px] text-theme-secondary mt-2 px-1">Subtotal: ₹{{ order.subtotal }}</p>
+                <input type="number" step="0.01" max="{{ order.subtotal }}" name="total_discount" value="{{ order.discount_amount }}" class="w-full bg-theme-input border border-theme-input rounded-[12px] px-4 py-3 focus:outline-none focus:border-secondary/50 text-theme-primary font-mono font-bold transition-all" required>
+                <p class="text-[10px] text-theme-secondary mt-2 px-1">Subtotal: <span class="font-mono font-bold">₹{{ order.subtotal }}</span></p>
             </div>
             <div class="flex gap-3">
                 <button type="button" onclick="closeEditDiscountModal()" class="flex-1 px-6 py-3 rounded-[12px] font-bold text-sm text-theme-secondary border border-theme-input hover:bg-theme-input transition-all">Cancel</button>

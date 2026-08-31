@@ -23,7 +23,7 @@ echo "Updating system packages..."
 sudo apt update && sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y
 
 echo "Installing dependencies..."
-sudo DEBIAN_FRONTEND=noninteractive apt install python3-pip python3-venv python3-dev nginx curl git libpq-dev postgresql-client -y
+sudo DEBIAN_FRONTEND=noninteractive apt install python3-pip python3-venv python3-dev nginx curl git libpq-dev postgresql-client nodejs npm -y
 
 echo "Cloning / updating repository..."
 if [ -d "HomeArtFurniture" ]; then
@@ -39,6 +39,10 @@ echo "Setting up virtual environment..."
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+
+echo "Building Tailwind CSS assets..."
+npm install
+npm run build:css
 
 echo "Checking production environment configuration..."
 if [ -f "/home/ubuntu/production.env" ]; then

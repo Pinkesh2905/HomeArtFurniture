@@ -5,70 +5,210 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Staff Login | Home Art Furniture</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="icon" type="image/svg+xml" href="{% static 'core/img/favicon.svg' %}"/>
+    <link rel="stylesheet" href="{% static 'core/css/tailwind.css' %}"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Outfit:wght@100..900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Serif+Display:ital@0;1&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet"/>
     <style>
         .material-symbols-outlined {
             font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
         }
-        :root {
-            --page-bg: #f8fafc;
-            --accent: #b45309;
-            --accent-dark: #92400e;
-            --primary: #0f172a;
-        }
         body {
-            background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.8) 0%, rgba(241, 245, 249, 0.95) 100%), #f1f5f9;
-            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            min-height: 100vh;
-        }
-        .brand-font {
-            font-family: "Outfit", sans-serif;
+            font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #2C2421;
+            margin: 0;
+            padding: 0;
+            background-color: #FAF7F2;
         }
         .serif-font {
-            font-family: "Playfair Display", serif;
+            font-family: "DM Serif Display", Georgia, serif;
+        }
+        .walnut-brand-panel {
+            background-color: #3B2820 !important;
+            background-image: 
+                radial-gradient(circle at 30% 25%, rgba(194, 168, 130, 0.18) 0%, transparent 60%),
+                radial-gradient(circle at 80% 80%, rgba(160, 132, 94, 0.15) 0%, transparent 50%);
+            color: #FAF7F2 !important;
+        }
+        .dovetail-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='80' height='40' viewBox='0 0 80 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 20 L24 20 L28 14 L36 14 L40 20 L64 20 L68 14 L76 14 L80 20' fill='none' stroke='%23C2A882' stroke-width='1.2' stroke-opacity='0.18'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+        }
+        .brand-subtitle {
+            color: #E2CBA8 !important;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+        }
+        .brand-description {
+            color: #D4C5B0 !important;
+        }
+        .login-btn {
+            background-color: #3B2820 !important;
+            color: #FAF7F2 !important;
+            box-shadow: 0 4px 14px rgba(59, 40, 32, 0.2);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .login-btn:hover {
+            background-color: #241711 !important;
+            box-shadow: 0 6px 20px rgba(59, 40, 32, 0.3);
+            transform: translateY(-1px);
+        }
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Enforce split proportions on desktop, stacked on mobile */
+        @media (min-width: 1024px) {
+            .walnut-brand-panel {
+                width: 42% !important;
+                flex: 0 0 42% !important;
+                min-height: 100vh !important;
+            }
+            .auth-form-panel {
+                width: 58% !important;
+                flex: 1 1 58% !important;
+                min-height: 100vh !important;
+            }
+        }
+        @media (max-width: 1023px) {
+            .walnut-brand-panel {
+                width: 100% !important;
+                flex: 0 0 auto !important;
+                padding-top: 2.5rem !important;
+                padding-bottom: 2.5rem !important;
+            }
+            .auth-form-panel {
+                width: 100% !important;
+                flex: 1 1 auto !important;
+            }
         }
     </style>
 </head>
-<body class="flex items-center justify-center p-4 min-h-screen">
-    <div class="w-full max-w-md">
-        <!-- Logo & Brand Header -->
-        <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200/80 shadow-md mb-4">
-                <span class="material-symbols-outlined text-amber-700 text-3xl">chair</span>
-            </div>
-            <h1 class="brand-font text-3xl font-bold tracking-tight text-slate-900">Home Art Furniture</h1>
-            <p class="text-sm font-medium text-slate-500 mt-1">Store Management & Atelier Portal</p>
-        </div>
+<body class="min-h-screen flex flex-col lg:flex-row bg-[#FAF7F2]">
 
-        <!-- Login Card -->
-        <div class="bg-white/80 backdrop-blur-xl border border-slate-200/80 rounded-3xl shadow-xl p-8 sm:p-10">
-            <div class="mb-6">
-                <h2 class="serif-font text-2xl font-bold text-slate-900">Staff Sign In</h2>
-                <p class="text-xs text-slate-500 mt-1">Authorized store personnel access only.</p>
+    <!-- LEFT PANEL: Brand & Atelier Identity (Walnut Background) -->
+    <div class="walnut-brand-panel relative flex flex-col items-center justify-center text-center p-8 sm:p-12 lg:p-14 overflow-hidden shrink-0 border-b lg:border-b-0 lg:border-r border-[#A0845E]/25">
+        <!-- Subtle Dovetail Background Pattern Accent -->
+        <div class="dovetail-pattern absolute inset-0 pointer-events-none opacity-60"></div>
+
+        <!-- Ambient Warm Glow Accents -->
+        <div class="absolute -top-20 -left-20 w-80 h-80 rounded-full bg-[#A0845E]/15 blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-20 -right-20 w-80 h-80 rounded-full bg-[#C2A882]/15 blur-3xl pointer-events-none"></div>
+
+        <!-- Brand Content Container -->
+        <div class="relative z-10 flex flex-col items-center max-w-sm w-full mx-auto">
+            <!-- Inline SVG Logo Mark (Walnut Showroom Emblem with Parchment & Brass Accents) -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 135" class="w-60 sm:w-72 lg:w-80 h-auto drop-shadow-2xl mb-4">
+                <defs>
+                    <linearGradient id="brassGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#F3E5D0" />
+                        <stop offset="50%" stop-color="#CBB18C" />
+                        <stop offset="100%" stop-color="#9C7F59" />
+                    </linearGradient>
+                </defs>
+                
+                <!-- House & Furniture Overlay in Showroom Light Palette -->
+                <g>
+                    <!-- White/Parchment Roof Peak -->
+                    <path d="M 60 44 L 100 10 L 140 44" fill="none" stroke="#FAF7F2" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <!-- Brass Window Panes -->
+                    <g>
+                        <rect x="94.5" y="17" width="4.5" height="4.5" fill="url(#brassGrad)"/>
+                        <rect x="101" y="17" width="4.5" height="4.5" fill="url(#brassGrad)"/>
+                        <rect x="94.5" y="23.5" width="4.5" height="4.5" fill="url(#brassGrad)"/>
+                        <rect x="101" y="23.5" width="4.5" height="4.5" fill="url(#brassGrad)"/>
+                    </g>
+                    <!-- Bedside Table (Left) -->
+                    <g>
+                        <rect x="71" y="41" width="9" height="7" fill="url(#brassGrad)"/>
+                        <circle cx="75.5" cy="43.5" r="0.6" fill="#3B2820"/>
+                        <circle cx="75.5" cy="46.5" r="0.6" fill="#3B2820"/>
+                        <path d="M 72.5 48 L 71.5 51 M 78.5 48 L 79.5 51" stroke="url(#brassGrad)" stroke-width="1.2" stroke-linecap="round"/>
+                        <line x1="75.5" y1="41" x2="75.5" y2="36" stroke="url(#brassGrad)" stroke-width="1.2"/>
+                        <path d="M 72 36 L 79 36 L 77.5 30 L 73.5 30 Z" fill="#FAF7F2"/>
+                    </g>
+                    <!-- Center Sofa -->
+                    <g>
+                        <rect x="86" y="41.5" width="28" height="6.5" rx="2" fill="url(#brassGrad)"/>
+                        <rect x="88" y="35" width="11.5" height="8.5" rx="2" fill="url(#brassGrad)"/>
+                        <rect x="100.5" y="35" width="11.5" height="8.5" rx="2" fill="url(#brassGrad)"/>
+                        <rect x="82.5" y="38" width="4.5" height="10" rx="1.5" fill="url(#brassGrad)"/>
+                        <rect x="113" y="38" width="4.5" height="10" rx="1.5" fill="url(#brassGrad)"/>
+                        <path d="M 85.5 48 L 84 51 M 114.5 48 L 116 51" stroke="url(#brassGrad)" stroke-width="2" stroke-linecap="round"/>
+                    </g>
+                    <!-- Plant (Right) -->
+                    <g>
+                        <path d="M 122.5 43 L 127.5 43 L 126 49.5 L 124 49.5 Z" fill="url(#brassGrad)"/>
+                        <line x1="125" y1="43" x2="125" y2="33" stroke="#FAF7F2" stroke-width="1.2"/>
+                        <path d="M 125 40 Q 128.5 39 128.5 36 Q 125 37 125 40" fill="#FAF7F2"/>
+                        <path d="M 125 38 Q 121.5 37 121.5 34 Q 125 35 125 38" fill="#FAF7F2"/>
+                        <path d="M 125 34 Q 127 31 125 29 Q 123 31 125 34" fill="#FAF7F2"/>
+                    </g>
+                </g>
+                <!-- Brand Wordmark -->
+                <g>
+                    <text x="100" y="83" font-family="'DM Serif Display', Georgia, serif" font-size="27" font-weight="700" text-anchor="middle">
+                        <tspan fill="#FAF7F2">Home </tspan>
+                        <tspan fill="url(#brassGrad)">Art</tspan>
+                    </text>
+                    <g transform="translate(100, 102)">
+                        <line x1="-75" y1="-3.5" x2="-50" y2="-3.5" stroke="url(#brassGrad)" stroke-width="1.2"/>
+                        <text x="3" y="0" font-family="'DM Sans', sans-serif" font-size="9" font-weight="700" fill="#FAF7F2" letter-spacing="4" text-anchor="middle">FURNITURE</text>
+                        <line x1="50" y1="-3.5" x2="75" y2="-3.5" stroke="url(#brassGrad)" stroke-width="1.2"/>
+                    </g>
+                    <text x="100" y="120" font-family="'DM Sans', sans-serif" font-size="7.5" font-weight="600" fill="#E6D7C3" letter-spacing="1.5" text-anchor="middle">COMFORT  •  QUALITY  •  STYLE</text>
+                </g>
+            </svg>
+
+            <!-- Prominent Dovetail Accent Divider -->
+            <div class="flex items-center justify-center w-full my-3">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 16" class="w-44 sm:w-52 h-4 opacity-85">
+                    <path d="M0 8 L35 8 L42 2 L54 2 L61 8 L75 8 L82 2 L94 2 L101 8 L115 8 L122 2 L134 2 L141 8 L160 8" fill="none" stroke="#CBB18C" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+            </div>
+
+            <!-- Subtitle Badge -->
+            <p class="brand-subtitle mt-1">
+                Store Management &amp; Atelier
+            </p>
+            <p class="brand-description text-xs mt-3 max-w-xs hidden lg:block leading-relaxed font-normal opacity-85">
+                Handcrafted bespoke furniture systems, customer measurements, inventories &amp; order tracking.
+            </p>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: Authentication Form (Parchment Surface) -->
+    <div class="auth-form-panel flex flex-col justify-center items-center p-8 sm:p-14 lg:p-16">
+        <div class="w-full max-w-md mx-auto">
+            <!-- Form Header (No card wrapper needed) -->
+            <div class="mb-8">
+                <h1 class="serif-font text-3xl sm:text-4xl font-bold text-[#2C2421] tracking-tight">Staff Sign In</h1>
+                <p class="text-sm text-[#665A55] mt-2 font-medium">Authorized store personnel access only.</p>
             </div>
 
             <!-- Error Banner -->
             {% if form.errors %}
-            <div class="mb-6 flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-3.5 text-red-800">
-                <span class="material-symbols-outlined text-red-500 text-xl shrink-0 mt-0.5">error</span>
+            <div class="mb-6 flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4 text-red-900 shadow-sm">
+                <span class="material-symbols-outlined text-red-600 text-xl shrink-0 mt-0.5">error</span>
                 <div class="text-xs">
-                    <p class="font-semibold">Authentication failed</p>
-                    <p class="text-red-700 mt-0.5">Invalid username or password. Please verify your credentials.</p>
+                    <p class="font-semibold text-red-700">Authentication failed</p>
+                    <p class="text-red-600 mt-0.5">Invalid username or password. Please verify your credentials.</p>
                 </div>
             </div>
             {% endif %}
 
+            <!-- Login Form -->
             <form method="POST" action="{% url 'login' %}" autocomplete="off" class="space-y-5">
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ next|default:'/' }}">
 
                 <!-- Username Field -->
                 <div>
-                    <label for="id_username" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Username</label>
+                    <label for="id_username" class="block text-xs font-bold text-[#2C2421] uppercase tracking-wider mb-2">Username</label>
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#665A55]">
                             <span class="material-symbols-outlined text-[20px]">person</span>
                         </div>
                         <input
@@ -79,16 +219,16 @@
                             autofocus
                             value="{{ form.username.value|default:'' }}"
                             placeholder="Enter username"
-                            class="w-full pl-11 pr-4 py-3 bg-slate-50/80 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600 transition"
+                            class="w-full pl-11 pr-4 py-3 bg-white border border-[#3B2820]/20 rounded-xl text-sm text-[#2C2421] placeholder:text-[#665A55]/50 focus:outline-none focus:ring-2 focus:ring-[#A0845E]/40 focus:border-[#A0845E] shadow-sm transition"
                         />
                     </div>
                 </div>
 
                 <!-- Password Field -->
                 <div>
-                    <label for="id_password" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Password</label>
+                    <label for="id_password" class="block text-xs font-bold text-[#2C2421] uppercase tracking-wider mb-2">Password</label>
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#665A55]">
                             <span class="material-symbols-outlined text-[20px]">lock</span>
                         </div>
                         <input
@@ -97,12 +237,12 @@
                             id="id_password"
                             required
                             placeholder="Enter password"
-                            class="w-full pl-11 pr-11 py-3 bg-slate-50/80 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600 transition"
+                            class="w-full pl-11 pr-11 py-3 bg-white border border-[#3B2820]/20 rounded-xl text-sm text-[#2C2421] placeholder:text-[#665A55]/50 focus:outline-none focus:ring-2 focus:ring-[#A0845E]/40 focus:border-[#A0845E] shadow-sm transition"
                         />
                         <button
                             type="button"
                             onclick="togglePasswordVisibility()"
-                            class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition"
+                            class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#665A55] hover:text-[#2C2421] transition cursor-pointer"
                             title="Toggle password visibility"
                         >
                             <span class="material-symbols-outlined text-[20px]" id="eye-icon">visibility</span>
@@ -110,18 +250,19 @@
                     </div>
                 </div>
 
-                <!-- Submit Button -->
+                <!-- Submit Button (Walnut Primary) -->
                 <button
                     type="submit"
-                    class="w-full mt-2 py-3.5 px-4 bg-amber-700 hover:bg-amber-800 active:bg-amber-900 text-white font-semibold text-sm rounded-xl shadow-lg shadow-amber-900/10 hover:shadow-amber-900/20 transition-all duration-200 flex items-center justify-center gap-2"
+                    class="login-btn w-full mt-2 py-3.5 px-5 font-bold text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 cursor-pointer"
                 >
                     <span>Sign In</span>
                     <span class="material-symbols-outlined text-lg">arrow_forward</span>
                 </button>
             </form>
 
-            <div class="mt-8 pt-6 border-t border-slate-100 text-center">
-                <p class="text-xs text-slate-400">
+            <!-- Footer Note -->
+            <div class="mt-8 pt-6 border-t border-[#3B2820]/10 text-center">
+                <p class="text-xs text-[#665A55]">
                     Protected System &bull; Home Art Furniture internal use only
                 </p>
             </div>

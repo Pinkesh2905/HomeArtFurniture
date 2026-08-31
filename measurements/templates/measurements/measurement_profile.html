@@ -3,68 +3,68 @@
 {% block title %}Customer & Dimensions | Home Art Furniture Admin{% endblock %}
 
 {% block content %}
-<div class="p-4 sm:p-8 max-w-[1440px] mx-auto w-full space-y-6 relative z-10">
+<div class="p-4 sm:p-6 max-w-[1440px] mx-auto w-full space-y-5 relative z-10">
     <!-- Header Section -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-4">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 mb-2">
         <div>
-            <p class="text-[10px] sm:text-xs font-bold text-theme-secondary mb-1 uppercase tracking-[0.2em]">Profile Management</p>
-            <h2 class="font-h1 text-xl sm:text-2xl lg:text-3xl font-black text-theme-primary leading-tight drop-shadow-xl">
-                Customer & <br class="hidden sm:block"> Dimensions
+            <p class="text-[10px] font-bold text-theme-secondary mb-0.5 uppercase tracking-[0.2em]">Profile Management</p>
+            <h2 class="font-h1 text-xl sm:text-2xl font-black text-theme-primary leading-tight drop-shadow-sm">
+                Customer &amp; Dimensions
             </h2>
         </div>
     </div>
 
-    <form method="POST" action="{% url 'measurement_profile' %}">
+    <form method="POST" action="{% url 'measurement_profile' %}" id="measurement-profile-form">
         {% csrf_token %}
         <input type="hidden" name="customer_id" id="customer_id" value="">
         
         <!-- Customer Details Card -->
-        <section class="glass-panel p-8 rounded-xl mb-10 border-secondary/10 overflow-visible relative z-20">
+        <section class="glass-panel p-5 sm:p-6 rounded-xl mb-6 border-secondary/10 overflow-visible relative z-20">
             <!-- Tab Navigation -->
-            <div class="flex p-1.5 bg-theme-input rounded-[16px] mb-10 max-w-sm mx-auto border border-theme-input">
+            <div class="flex p-1 bg-theme-input rounded-[10px] mb-5 max-w-xs mx-auto border border-theme-input">
                 <button type="button" id="btn-search-mode" onclick="setCustomerMode('search')" 
-                        class="flex-1 py-3 px-4 rounded-[12px] text-[10px] font-black uppercase tracking-widest transition-all bg-secondary text-white shadow-lg shadow-secondary/20">
+                        class="flex-1 py-1.5 px-3 rounded-[8px] text-[11px] font-bold uppercase tracking-wider transition-all bg-secondary text-white shadow-md shadow-secondary/20">
                     Search Profile
                 </button>
                 <button type="button" id="btn-create-mode" onclick="setCustomerMode('create')" 
-                        class="flex-1 py-3 px-4 rounded-[12px] text-[10px] font-black uppercase tracking-widest transition-all text-theme-muted hover:text-theme-primary">
+                        class="flex-1 py-1.5 px-3 rounded-[8px] text-[11px] font-bold uppercase tracking-wider transition-all text-theme-muted hover:text-theme-primary">
                     Create New
                 </button>
             </div>
 
             <!-- Search Mode Content -->
-            <div id="section-search" class="block space-y-6">
+            <div id="section-search" class="block space-y-4">
                 <div class="relative group">
-                    <label class="text-[10px] font-black text-theme-secondary uppercase tracking-[0.2em] block mb-3 pl-1">Find Existing Customer</label>
+                    <label class="text-[10px] font-black text-theme-secondary uppercase tracking-[0.2em] block mb-2 pl-1">Find Existing Customer</label>
                     <div class="relative">
-                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-theme-muted text-2xl group-focus-within:text-secondary transition-colors">person_search</span>
+                        <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-theme-muted text-xl group-focus-within:text-secondary transition-colors">person_search</span>
                         <input id="customer_search" type="text" autocomplete="off"
-                               class="w-full border-theme-input rounded-[12px] focus:ring-4 focus:ring-secondary/10 focus:border-secondary/30 p-4 pl-12 bg-theme-input text-theme-primary placeholder-theme text-lg font-semibold transition-all shadow-inner"
+                               class="w-full h-10 border-theme-input rounded-lg focus:ring-2 focus:ring-secondary/20 focus:border-secondary/40 py-2 pl-11 pr-4 bg-theme-input text-theme-primary placeholder-theme text-sm font-semibold transition-all shadow-inner"
                                placeholder="Type customer name or phone number..."
                                value="{{ initial_phone|default:'' }}" />
                     </div>
                     <!-- Search Results Dropdown -->
-                    <div id="search-results" class="absolute z-50 left-0 right-0 mt-2 bg-theme-glass backdrop-blur-xl rounded-[16px] shadow-2xl max-h-80 overflow-y-auto hidden border border-theme-input">
+                    <div id="search-results" class="absolute z-50 left-0 right-0 mt-1.5 bg-theme-glass backdrop-blur-xl rounded-xl shadow-xl max-h-80 overflow-y-auto hidden border border-theme-input">
                     </div>
                 </div>
             </div>
 
             <!-- Fields Container (Shared but toggled) -->
-            <div id="section-fields" class="hidden mt-10 animate-in fade-in slide-in-from-top-4 duration-500 relative z-30">
-                <div class="flex items-center justify-between mb-6">
+            <div id="section-fields" class="hidden mt-4 animate-in fade-in slide-in-from-top-3 duration-300 relative z-30">
+                <div class="flex items-center justify-between mb-3">
                     <label id="fields-label" class="text-[10px] font-black text-theme-secondary uppercase tracking-[0.2em] pl-1">New Customer Details</label>
                     <button type="button" id="btn-reset-customer" onclick="resetCustomerSelection()" class="text-[10px] font-black text-secondary uppercase tracking-widest hover:underline hidden">Change Customer</button>
                 </div>
-                <div id="customer-fields" class="grid grid-cols-1 md:grid-cols-3 gap-8 p-6 bg-theme-input rounded-[16px] border border-theme-input overflow-visible">
-                    <div class="space-y-2">
+                <div id="customer-fields" class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 p-4 sm:p-5 bg-theme-input rounded-xl border border-theme-input overflow-visible">
+                    <div class="space-y-1.5">
                         <label class="text-[10px] font-black text-theme-secondary uppercase tracking-[0.2em] pl-1">Phone Number <span class="text-secondary">*</span></label>
                         <div class="flex gap-2">
-                            <!-- Premium Custom Dropdown for Country Code -->
-                            <div class="haf-dropdown w-[110px] relative z-50">
+                            <!-- Custom Dropdown for Country Code -->
+                            <div class="haf-dropdown w-[100px] relative z-50">
                                 <input type="checkbox" id="country-code-checkbox" class="sr-only">
                                 <input type="hidden" id="customer_country_code" name="customer_country_code" value="+91">
-                                <label class="haf-dropdown__face h-14 border-theme-input bg-theme-input rounded-[12px] hover:bg-theme-input/80 transition-colors cursor-pointer" for="country-code-checkbox">
-                                    <div class="haf-dropdown__text font-bold text-theme-primary text-sm">🇮🇳 +91</div>
+                                <label class="haf-dropdown__face h-10 border-theme-input bg-theme-input rounded-lg hover:bg-theme-input/80 transition-colors cursor-pointer px-2.5" for="country-code-checkbox">
+                                    <div class="haf-dropdown__text font-bold text-theme-primary text-xs">🇮🇳 +91</div>
                                     <div class="haf-dropdown__arrow border-theme-secondary"></div>
                                 </label>
                                 <ul class="haf-dropdown__items !w-[140px] max-h-60 overflow-y-auto">
@@ -83,65 +83,73 @@
                                     <li class="haf-dropdown__item" data-value="+64">🇳🇿 +64</li>
                                 </ul>
                             </div>
-                            <input id="customer_phone_local" class="flex-1 h-14 border-theme-input rounded-[12px] focus:ring-4 focus:ring-secondary/10 px-4 bg-theme-input text-theme-primary placeholder-theme font-semibold transition-all shadow-inner" placeholder="Local phone..." type="tel" name="customer_phone_local" required/>
+                            <input id="customer_phone_local" class="flex-1 h-10 border-theme-input rounded-lg focus:ring-2 focus:ring-secondary/20 px-3 bg-theme-input text-theme-primary placeholder-theme text-sm font-semibold transition-all shadow-inner font-mono" placeholder="10-digit mobile..." type="tel" name="customer_phone_local" maxlength="10" minlength="10" pattern="[0-9]{10}" inputmode="numeric" required/>
                         </div>
                         <input id="customer_phone" type="hidden" name="customer_phone" />
                     </div>
-                    <div class="space-y-2">
+                    <div class="space-y-1.5">
                         <label class="text-[10px] font-black text-theme-secondary uppercase tracking-[0.2em] pl-1">Full Name <span class="text-secondary">*</span></label>
-                        <input id="customer_name" class="w-full h-14 border-theme-input rounded-[12px] focus:ring-4 focus:ring-secondary/10 px-4 bg-theme-input text-theme-primary placeholder-theme font-semibold transition-all shadow-inner" placeholder="e.g. Rajesh Kumar" type="text" name="customer_name" required/>
+                        <input id="customer_name" class="w-full h-10 border-theme-input rounded-lg focus:ring-2 focus:ring-secondary/20 px-3 bg-theme-input text-theme-primary placeholder-theme text-sm font-semibold transition-all shadow-inner" placeholder="e.g. Rajesh Kumar" type="text" name="customer_name" required/>
                     </div>
-                    <div class="space-y-2">
+                    <div class="space-y-1.5">
                         <label class="text-[10px] font-black text-theme-secondary uppercase tracking-[0.2em] pl-1">City / Location</label>
-                        <input id="customer_city" class="w-full h-14 border-theme-input rounded-[12px] focus:ring-4 focus:ring-secondary/10 px-4 bg-theme-input text-theme-primary placeholder-theme font-semibold transition-all shadow-inner" placeholder="e.g. Jaipur" type="text" name="customer_city"/>
+                        <input id="customer_city" class="w-full h-10 border-theme-input rounded-lg focus:ring-2 focus:ring-secondary/20 px-3 bg-theme-input text-theme-primary placeholder-theme text-sm font-semibold transition-all shadow-inner" placeholder="e.g. Jaipur" type="text" name="customer_city"/>
                     </div>
                 </div>
-                <p id="search-status" class="text-xs mt-4 px-4 font-bold hidden"></p>
+                <!-- Action to save customer when creating new -->
+                <div id="create-customer-action" class="mt-4 flex justify-end">
+                    <button type="submit" name="save_furniture" class="btn-premium btn-premium--gold h-11 px-5 !rounded-lg flex items-center justify-center gap-2 text-xs uppercase tracking-wider font-bold shadow-md">
+                        <span class="material-symbols-outlined text-base">person_add</span>
+                        Save Customer &amp; Continue
+                    </button>
+                </div>
+                <p id="search-status" class="text-xs mt-3 px-1 font-bold hidden"></p>
             </div>
         </section>
 
         <!-- Measurement Content (Hidden until customer context exists) -->
-        <div id="measurement-content" class="hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <!-- Garment & Measurement Section -->
-            <section class="glass-panel rounded-xl overflow-hidden mb-10 border-white/10">
-                <div class="p-6 border-b border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white/5 gap-4">
-                    <div class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-secondary">straighten</span>
-                        <h3 class="font-serif text-xl sm:text-2xl font-bold text-white">Dimensions</h3>
+        <div id="measurement-content" class="hidden animate-in fade-in slide-in-from-bottom-3 duration-500">
+            <!-- Furniture & Dimension Section -->
+            <section class="glass-panel rounded-xl overflow-visible mb-6 border-white/10 relative z-10">
+                <div class="px-5 py-3.5 border-b border-theme-input flex flex-col sm:flex-row justify-between items-start sm:items-center bg-theme-input/40 gap-3 rounded-t-xl">
+                    <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-secondary text-xl">straighten</span>
+                        <h3 class="font-serif text-lg sm:text-xl font-bold text-theme-primary">Dimensions</h3>
                     </div>
-                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-                        <button type="button" onclick="promptNewCategory()" class="h-[42px] px-6 bg-white/5 text-white/80 rounded-[12px] border border-white/10 font-bold hover:bg-white/10 hover:text-white transition-all text-xs flex items-center justify-center backdrop-blur-md uppercase tracking-widest">
-                            <span class="material-symbols-outlined text-lg mr-2">add_box</span>
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
+                        <button type="button" onclick="promptNewCategory()" class="h-9 px-3.5 bg-theme-input text-theme-primary rounded-lg border border-theme-input font-bold hover:bg-secondary/10 hover:text-secondary transition-all text-xs flex items-center justify-center uppercase tracking-wider">
+                            <span class="material-symbols-outlined text-base mr-1.5">add_box</span>
                             New Category
                         </button>
-                        <button type="button" onclick="addGarmentBlock()" class="btn-premium btn-premium--gold !py-0 h-[42px] px-6 !rounded-[12px] flex items-center justify-center text-center">
-                            <span class="btn-premium__label flex items-center justify-center gap-2 text-xs">
-                                <span class="material-symbols-outlined text-lg">add</span>
+                        <button type="button" onclick="addFurnitureBlock()" class="btn-premium btn-premium--gold h-9 px-4 !rounded-lg flex items-center justify-center text-center">
+                            <span class="btn-premium__label flex items-center justify-center gap-1.5 text-xs">
+                                <span class="material-symbols-outlined text-base">add</span>
                                 Add Item
                             </span>
                         </button>
                     </div>
                 </div>
                 
-                <div class="p-8 bg-theme-input/20" id="garments-container">
-                    <div id="empty-garment-state" class="py-12 text-center">
-                    <div class="inline-block">
-                        <div class="w-20 h-20 bg-theme-input rounded-full flex items-center justify-center mx-auto mb-4 border border-dashed border-theme-input">
-                            <span class="material-symbols-outlined text-4xl text-theme-muted">straighten</span>
+                <div class="p-4 sm:p-5 bg-theme-input/20 overflow-visible relative rounded-b-xl" id="furniture-container">
+                    <div id="empty-furniture-state" class="py-8 text-center">
+                        <div class="inline-block">
+                            <div class="w-14 h-14 bg-theme-input rounded-full flex items-center justify-center mx-auto mb-3 border border-dashed border-theme-input">
+                                <span class="material-symbols-outlined text-2xl text-theme-muted">straighten</span>
+                            </div>
+                            <p class="text-theme-muted font-bold uppercase tracking-[0.2em] text-xs">No items added</p>
+                            <p class="text-[10px] text-theme-muted mt-1 opacity-60">Click 'Add Item' to start entering dimensions</p>
                         </div>
-                        <p class="text-theme-muted font-bold uppercase tracking-[0.2em] text-xs">No items added</p>
-                        <p class="text-[10px] text-theme-muted mt-1 opacity-60">Click 'Add Item' to start entering dimensions</p>
                     </div>
                 </div>
             </section>
 
-            <div class="flex flex-col sm:flex-row justify-end mt-12 border-t border-theme-input pt-8 gap-4">
-                <button type="submit" name="save_garment" class="w-full sm:w-auto px-10 py-5 rounded-xl bg-theme-input text-theme-secondary font-black hover:bg-secondary/10 hover:text-secondary transition-all text-xs uppercase tracking-widest border border-theme-input">
+            <div class="flex flex-col sm:flex-row justify-end mt-6 border-t border-theme-input pt-5 gap-3">
+                <button type="submit" name="save_furniture" class="w-full sm:w-auto h-11 px-5 rounded-lg bg-theme-input text-theme-secondary font-bold hover:bg-secondary/10 hover:text-secondary transition-all text-xs uppercase tracking-wider border border-theme-input flex items-center justify-center">
                     SAVE PROFILE ONLY
                 </button>
-                <button type="submit" class="w-full sm:w-auto btn-premium !px-12 !py-5 shadow-2xl font-black flex items-center justify-center gap-3 hover:scale-[1.02] transition-all text-lg tracking-widest">
+                <button type="submit" class="w-full sm:w-auto h-11 btn-premium px-6 rounded-lg font-bold flex items-center justify-center gap-2 hover:scale-[1.01] transition-all text-xs sm:text-sm tracking-wider">
                     PROCEED TO BILLING
-                    <span class="material-symbols-outlined">arrow_forward</span>
+                    <span class="material-symbols-outlined text-base">arrow_forward</span>
                 </button>
             </div>
         </div>
@@ -150,48 +158,48 @@
 
 <!-- Custom Prompt Modal -->
 <div id="custom-prompt-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xl opacity-0 pointer-events-none transition-all duration-300">
-    <div class="bg-theme-glass backdrop-blur-2xl rounded-[24px] shadow-2xl w-full max-w-md transform scale-95 opacity-0 transition-all duration-300 overflow-hidden border border-theme-input" id="prompt-card">
+    <div class="bg-theme-glass backdrop-blur-2xl rounded-2xl shadow-2xl w-full max-w-md transform scale-95 opacity-0 transition-all duration-300 overflow-hidden border border-theme-input" id="prompt-card">
         <!-- Header -->
-        <div class="bg-theme-input p-8 text-theme-primary border-b border-theme-input">
-            <h3 class="font-serif text-2xl font-bold flex items-center gap-3">
-                <span class="material-symbols-outlined text-secondary">add_circle</span>
+        <div class="bg-theme-input p-5 text-theme-primary border-b border-theme-input">
+            <h3 class="font-serif text-lg font-bold flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-secondary text-xl">add_circle</span>
                 Add New Category
             </h3>
-            <p class="text-theme-secondary text-[10px] font-black uppercase tracking-[0.2em] mt-2">Define furniture type for dimensions</p>
+            <p class="text-theme-secondary text-[10px] font-bold uppercase tracking-wider mt-1">Define furniture type for dimensions</p>
         </div>
         
         <!-- Body -->
-        <div class="p-8 space-y-8 bg-theme-input/50">
+        <div class="p-5 space-y-4 bg-theme-input/50">
             <div>
-                <label class="text-[10px] font-black text-theme-muted uppercase tracking-[0.2em] block mb-3 pl-1">Category Name</label>
-                <input type="text" id="prompt-input" class="w-full border-theme-input rounded-[12px] p-4 bg-theme-input text-theme-primary text-xl font-bold focus:ring-4 focus:ring-secondary/10 focus:border-secondary/30 transition-all shadow-inner placeholder-theme" placeholder="e.g. Sofa">
+                <label class="text-[10px] font-bold text-theme-muted uppercase tracking-wider block mb-1.5 pl-0.5">Category Name</label>
+                <input type="text" id="prompt-input" class="w-full h-10 border-theme-input rounded-lg px-3 bg-theme-input text-theme-primary text-sm font-bold focus:ring-2 focus:ring-secondary/20 transition-all shadow-inner placeholder-theme" placeholder="e.g. Sofa">
             </div>
             
-            <div id="suggestion-container" class="space-y-4">
-                <label class="text-[10px] font-black text-theme-muted uppercase tracking-[0.2em] block pl-1">Quick Suggestions</label>
-                <div id="suggestion-chips" class="flex flex-wrap gap-2">
+            <div id="suggestion-container" class="space-y-2">
+                <label class="text-[10px] font-bold text-theme-muted uppercase tracking-wider block pl-0.5">Quick Suggestions</label>
+                <div id="suggestion-chips" class="flex flex-wrap gap-1.5">
                     <!-- Suggestions will be injected here -->
                 </div>
             </div>
         </div>
         
         <!-- Footer -->
-        <div class="p-6 bg-theme-input flex gap-4 border-t border-theme-input">
-            <button type="button" id="prompt-cancel" class="flex-1 py-4 px-4 rounded-[12px] bg-theme-input text-theme-secondary font-bold hover:bg-theme-input/80 hover:text-theme-primary transition-all text-xs uppercase tracking-widest border border-theme-input">Cancel</button>
-            <button type="button" id="prompt-submit" class="flex-1 py-4 px-4 rounded-[12px] bg-secondary text-white font-black hover:bg-secondary/80 transition-all shadow-lg shadow-secondary/20 text-xs uppercase tracking-widest">Add Category</button>
+        <div class="p-3.5 bg-theme-input flex gap-3 border-t border-theme-input">
+            <button type="button" id="prompt-cancel" class="flex-1 py-2 px-3 rounded-lg bg-theme-input text-theme-secondary font-bold hover:bg-theme-input/80 hover:text-theme-primary transition-all text-xs uppercase tracking-wider border border-theme-input">Cancel</button>
+            <button type="button" id="prompt-submit" class="flex-1 py-2 px-3 rounded-lg bg-secondary text-white font-bold hover:bg-secondary/90 transition-all shadow-sm text-xs uppercase tracking-wider">Add Category</button>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
-{{ garment_parameters|json_script:"garment-parameters-data" }}
+{{ furniture_parameters|json_script:"furniture-parameters-data" }}
 {% if initial_customer %}
 {{ initial_customer|json_script:"initial-customer-data" }}
 {% endif %}
 <script>
-    const garmentParameters = JSON.parse(document.getElementById('garment-parameters-data').textContent);
-    let garmentCounter = 0;
+    const furnitureParameters = JSON.parse(document.getElementById('furniture-parameters-data').textContent);
+    let furnitureCounter = 0;
 
     function setPhoneFields(fullPhone) {
         const dropdown = document.getElementById('customer_country_code');
@@ -258,21 +266,24 @@
         const fieldsSection = document.getElementById('section-fields');
         const resetBtn = document.getElementById('btn-reset-customer');
         const fieldsLabel = document.getElementById('fields-label');
+        const createAction = document.getElementById('create-customer-action');
 
         if (mode === 'search') {
-            searchBtn.className = "flex-1 py-3 px-4 rounded-[12px] text-[10px] font-black uppercase tracking-widest transition-all bg-secondary text-white shadow-lg shadow-secondary/20";
-            createBtn.className = "flex-1 py-3 px-4 rounded-[12px] text-[10px] font-black uppercase tracking-widest transition-all text-theme-muted hover:text-theme-primary";
+            searchBtn.className = "flex-1 py-1.5 px-3 rounded-[8px] text-[11px] font-bold uppercase tracking-wider transition-all bg-secondary text-white shadow-md shadow-secondary/20";
+            createBtn.className = "flex-1 py-1.5 px-3 rounded-[8px] text-[11px] font-bold uppercase tracking-wider transition-all text-theme-muted hover:text-theme-primary";
             searchSection.classList.remove('hidden');
             fieldsSection.classList.add('hidden');
             resetBtn.classList.add('hidden');
+            if (createAction) createAction.classList.add('hidden');
             fieldsLabel.textContent = "New Customer Details";
             document.getElementById('measurement-content').classList.add('hidden');
         } else {
-            createBtn.className = "flex-1 py-3 px-4 rounded-[12px] text-[10px] font-black uppercase tracking-widest transition-all bg-secondary text-white shadow-lg shadow-secondary/20";
-            searchBtn.className = "flex-1 py-3 px-4 rounded-[12px] text-[10px] font-black uppercase tracking-widest transition-all text-theme-muted hover:text-theme-primary";
+            createBtn.className = "flex-1 py-1.5 px-3 rounded-[8px] text-[11px] font-bold uppercase tracking-wider transition-all bg-secondary text-white shadow-md shadow-secondary/20";
+            searchBtn.className = "flex-1 py-1.5 px-3 rounded-[8px] text-[11px] font-bold uppercase tracking-wider transition-all text-theme-muted hover:text-theme-primary";
             searchSection.classList.add('hidden');
             fieldsSection.classList.remove('hidden');
             resetBtn.classList.add('hidden');
+            if (createAction) createAction.classList.remove('hidden');
             fieldsLabel.textContent = "New Customer Details";
             // Clear fields for new creation
             document.getElementById('customer_id').value = '';
@@ -280,7 +291,8 @@
             document.getElementById('customer_name').value = '';
             document.getElementById('customer_city').value = '';
             document.getElementById('search-status').classList.add('hidden');
-            document.getElementById('measurement-content').classList.remove('hidden');
+            // Crucial fix: Dimensions section remains hidden until customer is saved/exists!
+            document.getElementById('measurement-content').classList.add('hidden');
         }
     }
 
@@ -288,11 +300,12 @@
         setCustomerMode('search');
         document.getElementById('customer_id').value = '';
         document.getElementById('customer_search').value = '';
+        document.getElementById('search-status').classList.add('hidden');
         setTimeout(() => document.getElementById('customer_search').focus(), 100);
     }
 
     let globalCategories = [
-        {% for value, label in garment_categories %}
+        {% for value, label in furniture_categories %}
         { value: "{{ value|escapejs }}", label: "{{ label|escapejs }}" },
         {% endfor %}
     ];
@@ -326,83 +339,86 @@
         });
     }
 
-    function addGarmentBlock(garmentType = '', measurementData = null, measurementId = '') {
-        document.getElementById('empty-garment-state').style.display = 'none';
-        garmentCounter++;
-        const blockId = `garment-block-${garmentCounter}`;
+    function addFurnitureBlock(furnitureType = '', measurementData = null, measurementId = '') {
+        document.getElementById('empty-furniture-state').style.display = 'none';
+        furnitureCounter++;
+        const blockId = `furniture-block-${furnitureCounter}`;
 
-        const options = getOptionsHTML(garmentType);
-        const selectedLabel = globalCategories.find(cat => cat.value === garmentType)?.label || 'Select Furniture Type...';
+        const options = getOptionsHTML(furnitureType);
+        const selectedLabel = globalCategories.find(cat => cat.value === furnitureType)?.label || 'Select Furniture Type...';
         const notesValue = measurementData && measurementData.notes ? measurementData.notes : '';
         const isSample = measurementData && measurementData.is_sample_product ? true : false;
 
         const blockHTML = `
-            <div id="${blockId}" class="glass-panel p-6 mb-6 relative group transition-all duration-300 hover:border-secondary/20 border-theme-input bg-theme-input/20">
-                <input type="hidden" name="garment_block_id" value="${garmentCounter}">
-                <input type="hidden" name="measurement_id_${garmentCounter}" value="${measurementId}">
+            <div id="${blockId}" class="glass-panel p-4 sm:p-5 mb-4 relative group transition-all duration-300 hover:border-secondary/30 border-theme-input bg-theme-input/20 rounded-xl overflow-visible">
+                <input type="hidden" name="furniture_block_id" value="${furnitureCounter}">
+                <input type="hidden" name="measurement_id_${furnitureCounter}" value="${measurementId}">
                 
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-theme-input pb-5 gap-4">
-                    <div class="flex items-center gap-4 w-full lg:w-3/4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 border-b border-theme-input pb-3.5 gap-3">
+                    <div class="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full lg:w-4/5 overflow-visible">
                         <!-- Toggle to select for billing -->
                         <button type="button" onclick="toggleBill(this)" 
-                                class="bill-toggle flex items-center gap-2 px-4 py-2 rounded-[12px] border transition-all text-[10px] font-black uppercase tracking-widest bg-green-500/10 border-green-500/20 text-green-400 whitespace-nowrap shadow-xl shadow-green-500/5"
+                                class="bill-toggle flex items-center gap-1.5 h-10 px-3 py-1.5 rounded-lg border transition-all text-[10px] font-bold uppercase tracking-wider bg-green-500/10 border-green-500/20 text-green-500 dark:text-green-400 whitespace-nowrap shadow-sm"
                                 data-active="true">
                             <span class="material-symbols-outlined text-base" style="font-variation-settings:'FILL' 1;">check_circle</span>
                             <span class="bill-label">Bill This</span>
                         </button>
-                        <input type="hidden" name="bill_garment" value="${garmentCounter}" class="bill-hidden-input">
+                        <input type="hidden" name="bill_furniture" value="${furnitureCounter}" class="bill-hidden-input">
                         
-                        <span class="text-xs font-black text-theme-secondary tracking-[0.2em]">#${garmentCounter.toString().padStart(2, '0')}</span>
+                        <span class="text-xs font-bold text-theme-secondary tracking-widest">#${furnitureCounter.toString().padStart(2, '0')}</span>
                         
                         <!-- Premium Dropdown -->
-                        <div class="haf-dropdown flex-1 min-w-[200px] haf-dropdown--glass">
+                        <div class="haf-dropdown flex-1 min-w-[180px] haf-dropdown--glass">
                             <input type="checkbox" id="check-${blockId}">
-                            <input type="hidden" name="garment_type_${garmentCounter}" class="garment-type-input" value="${garmentType}">
-                            <label class="haf-dropdown__face h-14 border-theme-input bg-theme-input rounded-[12px] hover:bg-theme-input/80 transition-colors" for="check-${blockId}">
-                                <div class="haf-dropdown__text font-bold text-theme-primary text-sm">${selectedLabel}</div>
+                            <input type="hidden" name="furniture_type_${furnitureCounter}" class="furniture-type-input" value="${furnitureType}">
+                            <label class="haf-dropdown__face h-10 border-theme-input bg-theme-input rounded-lg hover:bg-theme-input/80 transition-colors px-3" for="check-${blockId}">
+                                <div class="haf-dropdown__text font-bold text-theme-primary text-xs sm:text-sm truncate">${selectedLabel}</div>
                                 <div class="haf-dropdown__arrow border-theme-secondary"></div>
                             </label>
                             <ul class="haf-dropdown__items">
                                 ${options}
                             </ul>
                         </div>
+                        
                         <!-- Toggle for Standard Size / Pre-built -->
-                        <div class="flex items-center gap-2 ml-4 self-center whitespace-nowrap">
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" name="is_sample_${garmentCounter}" class="sr-only peer" onchange="toggleSampleProduct(this, '${blockId}')" ${isSample ? 'checked' : ''}>
-                                <div class="w-9 h-5 bg-theme-input peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-secondary"></div>
-                                <span class="ml-2 text-[10px] font-black text-theme-secondary uppercase tracking-[0.1em]">Standard Size / Pre-built</span>
-                            </label>
-                        </div>
+                        <button type="button" onclick="toggleSampleButton(this, '${blockId}')"
+                                class="sample-toggle flex items-center gap-1.5 h-10 px-3 py-1.5 rounded-lg border transition-all text-[10px] font-bold uppercase tracking-wider whitespace-nowrap cursor-pointer ${isSample ? 'bg-secondary/15 border-secondary/40 text-secondary shadow-sm' : 'bg-theme-input border-theme-input text-theme-muted hover:text-theme-primary'}"
+                                data-sample="${isSample ? 'true' : 'false'}">
+                            <span class="material-symbols-outlined text-base" style="font-variation-settings:'FILL' ${isSample ? '1' : '0'};">${isSample ? 'check_box' : 'check_box_outline_blank'}</span>
+                            <span class="sample-label">Standard Size / Pre-built</span>
+                        </button>
+                        <input type="checkbox" name="is_sample_${furnitureCounter}" id="sample-input-${blockId}" class="hidden" ${isSample ? 'checked' : ''}>
                     </div>
-                    <button type="button" onclick="removeGarmentBlock('${blockId}')" class="text-theme-muted hover:text-theme-primary hover:bg-theme-input transition-all p-2 rounded-full">
-                        <span class="material-symbols-outlined text-lg">close</span>
+                    <button type="button" onclick="removeFurnitureBlock('${blockId}')" class="text-theme-muted hover:text-theme-primary hover:bg-theme-input transition-all p-1.5 rounded-lg ml-auto sm:ml-0" title="Remove item">
+                        <span class="material-symbols-outlined text-base">close</span>
                     </button>
                 </div>
                 
                 <div id="grid-${blockId}" class="w-full" style="${isSample ? 'display:none;' : ''}">
-                    <div class="text-[10px] font-black text-theme-muted uppercase tracking-[0.3em] py-8 flex flex-col items-center justify-center gap-3 bg-theme-input rounded-2xl border border-dashed border-theme-input">
-                        <span class="material-symbols-outlined text-2xl opacity-20">info</span>
+                    <div class="text-[10px] font-bold text-theme-muted uppercase tracking-widest py-5 flex flex-col items-center justify-center gap-2 bg-theme-input rounded-xl border border-dashed border-theme-input">
+                        <span class="material-symbols-outlined text-xl opacity-30">info</span>
                         Select a furniture type to start
                     </div>
                 </div>
                 
-                <div class="mt-6">
-                    <label class="text-xs font-black text-theme-primary uppercase tracking-[0.2em] pl-1 mb-2 block">Measurement Notes</label>
-                    <textarea name="notes_${garmentCounter}" 
-                              class="w-full bg-theme-input border-theme-input rounded-xl p-4 focus:border-secondary/20 focus:ring-4 focus:ring-secondary/5 focus:text-theme-primary text-theme-primary placeholder-theme text-sm font-medium transition-all shadow-inner" 
+                <div class="mt-4">
+                    <label class="text-[10px] font-bold text-theme-secondary uppercase tracking-widest pl-0.5 mb-1.5 block">Measurement Notes</label>
+                    <textarea name="notes_${furnitureCounter}" 
+                              class="w-full bg-theme-input border-theme-input rounded-lg p-2.5 focus:border-secondary/30 focus:ring-2 focus:ring-secondary/10 text-theme-primary placeholder-theme text-xs font-medium transition-all shadow-inner" 
                               rows="1" 
                               placeholder="Special dimensions or design notes...">${notesValue}</textarea>
                 </div>
             </div>
         `;
 
-        document.getElementById('garments-container').insertAdjacentHTML('beforeend', blockHTML);
+        document.getElementById('furniture-container').insertAdjacentHTML('beforeend', blockHTML);
 
-        // Auto-focus search when dropdown opens
+        // Auto-focus search when dropdown opens & elevate z-index
         const cb = document.getElementById(`check-${blockId}`);
         cb.addEventListener('change', (e) => {
+            const blockEl = document.getElementById(blockId);
             if (e.target.checked) {
+                if (blockEl) blockEl.style.zIndex = '50';
                 const searchInput = e.target.closest('.haf-dropdown').querySelector('.dropdown-search-input');
                 if (searchInput) {
                     searchInput.value = '';
@@ -410,6 +426,8 @@
                     items.forEach(item => item.style.display = 'block');
                     setTimeout(() => searchInput.focus(), 150);
                 }
+            } else {
+                if (blockEl) blockEl.style.zIndex = '';
             }
         });
 
@@ -419,62 +437,86 @@
         }
 
         // Attach listener to the hidden input for rendering grid
-        const hiddenInput = document.getElementById(blockId).querySelector('.garment-type-input');
+        const hiddenInput = document.getElementById(blockId).querySelector('.furniture-type-input');
         hiddenInput.addEventListener('change', (e) => {
-            renderMeasurementGrid(blockId, e.target.value, null, garmentCounter);
+            renderMeasurementGrid(blockId, e.target.value, null, furnitureCounter);
         });
 
         // If pre-populated, render the grid immediately
-        if (garmentType) {
-            renderMeasurementGrid(blockId, garmentType, measurementData, garmentCounter);
+        if (furnitureType) {
+            renderMeasurementGrid(blockId, furnitureType, measurementData, furnitureCounter);
         }
     }
 
-    function removeGarmentBlock(blockId) {
+    function removeFurnitureBlock(blockId) {
         document.getElementById(blockId).remove();
-        if (document.getElementById('garments-container').querySelectorAll('.glass-panel').length === 0) {
-            document.getElementById('empty-garment-state').style.display = 'block';
+        if (document.getElementById('furniture-container').querySelectorAll('.glass-panel').length === 0) {
+            document.getElementById('empty-furniture-state').style.display = 'block';
         }
     }
 
-    function renderMeasurementGrid(blockId, garmentValue, measurementData, counterId) {
+    function renderMeasurementGrid(blockId, furnitureValue, measurementData, counterId) {
         const gridContainer = document.getElementById(`grid-${blockId}`);
-        const parameters = garmentParameters[garmentValue];
+        const parameters = furnitureParameters[furnitureValue];
 
         if (!parameters) {
-            gridContainer.innerHTML = `<div class="text-[10px] font-bold text-red-400 uppercase p-4">Unknown furniture type selected.</div>`;
+            gridContainer.innerHTML = `<div class="text-[10px] font-bold text-red-400 uppercase p-3">Unknown furniture type selected.</div>`;
             return;
         }
 
-        let gridHTML = `<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mt-4 bg-theme-input p-5 sm:p-8 rounded-[20px] border border-theme-input shadow-inner">`;
+        let gridHTML = `<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 mt-3 bg-theme-input p-3.5 sm:p-4 rounded-xl border border-theme-input shadow-inner">`;
 
         parameters.forEach(param => {
             const paramSlug = param.toLowerCase().replace(/[^a-z0-9]/g, '_');
             const val = measurementData && measurementData.values && measurementData.values[param] ? measurementData.values[param] : '';
             
             gridHTML += `
-                <div class="flex flex-col space-y-2">
-                    <label class="text-xs font-black text-theme-primary uppercase tracking-[0.2em] pl-1 flex items-center justify-between">
+                <div class="flex flex-col space-y-1">
+                    <label class="text-[10px] font-bold text-theme-secondary uppercase tracking-wider pl-0.5 flex items-center justify-between">
                         <span class="truncate pr-1" title="${param}">${param}</span>
                     </label>
                     <input type="number" step="0.25" 
                            name="measure_${counterId}_${paramSlug}" 
                            value="${val}"
-                           class="w-full h-14 bg-theme-input border-theme-input rounded-[12px] px-4 focus:ring-4 focus:ring-secondary/10 font-black text-theme-primary text-base transition-all shadow-sm placeholder-theme" 
+                           class="w-full h-10 bg-theme-input border-theme-input rounded-lg px-3 focus:ring-2 focus:ring-secondary/20 font-bold text-theme-primary text-sm transition-all shadow-sm placeholder-theme" 
                            placeholder="0.0">
                 </div>
             `;
         });
 
         gridHTML += `
-            <div class="flex items-end col-span-2 sm:col-span-3 lg:col-span-4 mt-4 pt-6 border-t border-theme-input border-dashed">
-                <button type="button" onclick="promptNewParameter('${garmentValue}', '${blockId}', ${counterId})" class="text-[10px] font-black text-theme-secondary uppercase tracking-[0.2em] flex items-center gap-2 hover:text-secondary transition-colors">
-                    <span class="material-symbols-outlined text-lg">add_circle</span>
+            <div class="flex items-end col-span-2 sm:col-span-3 lg:col-span-4 mt-2 pt-3 border-t border-theme-input border-dashed">
+                <button type="button" onclick="promptNewParameter('${furnitureValue}', '${blockId}', ${counterId})" class="text-[10px] font-bold text-theme-secondary uppercase tracking-wider flex items-center gap-1.5 hover:text-secondary transition-colors">
+                    <span class="material-symbols-outlined text-base">add_circle</span>
                     New Parameter
                 </button>
             </div>
         </div>`;
         gridContainer.innerHTML = gridHTML;
+    }
+
+    function toggleSampleButton(btn, blockId) {
+        const checkbox = document.getElementById(`sample-input-${blockId}`);
+        const isCurrentSample = btn.getAttribute('data-sample') === 'true';
+        const newSample = !isCurrentSample;
+        
+        btn.setAttribute('data-sample', newSample ? 'true' : 'false');
+        checkbox.checked = newSample;
+        
+        const icon = btn.querySelector('.material-symbols-outlined');
+        if (newSample) {
+            btn.classList.remove('bg-theme-input', 'border-theme-input', 'text-theme-muted', 'hover:text-theme-primary');
+            btn.classList.add('bg-secondary/15', 'border-secondary/40', 'text-secondary', 'shadow-sm');
+            icon.style.fontVariationSettings = "'FILL' 1";
+            icon.textContent = 'check_box';
+        } else {
+            btn.classList.remove('bg-secondary/15', 'border-secondary/40', 'text-secondary', 'shadow-sm');
+            btn.classList.add('bg-theme-input', 'border-theme-input', 'text-theme-muted', 'hover:text-theme-primary');
+            icon.style.fontVariationSettings = "'FILL' 0";
+            icon.textContent = 'check_box_outline_blank';
+        }
+        
+        toggleSampleProduct(checkbox, blockId);
     }
 
     function toggleSampleProduct(checkbox, blockId) {
@@ -492,7 +534,7 @@
         
         if (isActive) {
             btn.setAttribute('data-active', 'false');
-            btn.classList.remove('bg-green-500/10', 'border-green-500/20', 'text-green-400');
+            btn.classList.remove('bg-green-500/10', 'border-green-500/20', 'text-green-500', 'dark:text-green-400');
             btn.classList.add('bg-theme-input', 'border-theme-input', 'text-theme-muted');
             btn.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 0";
             btn.querySelector('.material-symbols-outlined').textContent = 'radio_button_unchecked';
@@ -501,7 +543,7 @@
         } else {
             btn.setAttribute('data-active', 'true');
             btn.classList.remove('bg-theme-input', 'border-theme-input', 'text-theme-muted');
-            btn.classList.add('bg-green-500/10', 'border-green-500/20', 'text-green-400');
+            btn.classList.add('bg-green-500/10', 'border-green-500/20', 'text-green-500', 'dark:text-green-400');
             btn.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 1";
             btn.querySelector('.material-symbols-outlined').textContent = 'check_circle';
             btn.querySelector('.bill-label').textContent = 'BILL THIS';
@@ -538,9 +580,9 @@
 
             if (data.results.length === 0) {
                 searchResults.innerHTML = `
-                    <div class="p-8 text-center bg-theme-input/90 backdrop-blur-xl">
+                    <div class="p-5 text-center bg-theme-input/95 backdrop-blur-xl">
                         <p class="text-theme-secondary font-bold uppercase tracking-widest text-xs">No Results for "<strong>${q}</strong>"</p>
-                        <p class="text-[10px] text-theme-muted mt-2 uppercase">Fill in details to create new profile</p>
+                        <p class="text-[10px] text-theme-muted mt-1 uppercase">Switch to 'Create New' to add profile</p>
                     </div>`;
                 searchResults.classList.remove('hidden');
                 return;
@@ -548,24 +590,24 @@
 
             let html = '';
             data.results.forEach(c => {
-                const garmentTags = c.garments.length
-                    ? c.garments.map(g => `<span class="inline-block bg-secondary/10 text-secondary text-[9px] font-black px-2 py-0.5 rounded-full border border-secondary/20 uppercase tracking-tighter">${g}</span>`).join(' ')
-                    : '<span class="text-theme-muted text-[9px] font-black uppercase italic opacity-40">No history</span>';
+                const furnitureTags = (c.furniture || []).length
+                    ? c.furniture.map(g => `<span class="inline-block bg-secondary/10 text-secondary text-[9px] font-bold px-1.5 py-0.5 rounded border border-secondary/20 uppercase tracking-tight">${g}</span>`).join(' ')
+                    : '<span class="text-theme-muted text-[9px] font-medium uppercase italic opacity-40">No history</span>';
                 html += `
-                    <div class="customer-result p-6 hover:bg-theme-input cursor-pointer border-b border-theme-input last:border-b-0 transition-colors group bg-theme-input/30"
+                    <div class="customer-result p-3 sm:p-3.5 hover:bg-theme-input cursor-pointer border-b border-theme-input last:border-b-0 transition-colors group bg-theme-input/20"
                          data-customer='${JSON.stringify(c).replace(/'/g, "&#39;")}'>
                         <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-full bg-secondary text-white shadow-lg shadow-secondary/20 flex items-center justify-center font-black text-lg flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-secondary text-white shadow-sm flex items-center justify-center font-bold text-xs flex-shrink-0 group-hover:scale-105 transition-transform">
                                     ${c.full_name.charAt(0).toUpperCase()}
                                 </div>
                                 <div>
-                                    <h4 class="font-black text-theme-primary text-base group-hover:text-secondary transition-colors">${c.full_name}</h4>
-                                    <p class="text-[11px] font-bold text-theme-primary uppercase tracking-widest mt-0.5">${c.phone}${c.city ? ' · ' + c.city : ''}</p>
+                                    <h4 class="font-bold text-theme-primary text-xs sm:text-sm group-hover:text-secondary transition-colors leading-tight">${c.full_name}</h4>
+                                    <p class="text-[11px] font-medium text-theme-secondary mt-0.5">${c.phone}${c.city ? ' · ' + c.city : ''}</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="mt-3 ml-16 flex flex-wrap gap-1.5">${garmentTags}</div>
+                        <div class="mt-1.5 ml-11 flex flex-wrap gap-1">${furnitureTags}</div>
                     </div>`;
             });
             searchResults.innerHTML = html;
@@ -575,7 +617,7 @@
                 el.addEventListener('click', () => selectCustomer(JSON.parse(el.dataset.customer)));
             });
         } catch (error) {
-            searchResults.innerHTML = '<div class="p-6 text-center text-red-500 font-bold text-xs uppercase tracking-widest bg-black/40">Search Error</div>';
+            searchResults.innerHTML = '<div class="p-4 text-center text-red-500 font-bold text-xs uppercase tracking-widest bg-black/40">Search Error</div>';
             searchResults.classList.remove('hidden');
         }
     }
@@ -591,36 +633,38 @@
         // Reveal fields and measurements in "Selected" state
         document.getElementById('section-fields').classList.remove('hidden');
         document.getElementById('btn-reset-customer').classList.remove('hidden');
+        const createAction = document.getElementById('create-customer-action');
+        if (createAction) createAction.classList.add('hidden');
         document.getElementById('fields-label').textContent = "Selected Profile";
         document.getElementById('section-search').classList.add('hidden');
         document.getElementById('measurement-content').classList.remove('hidden');
 
         const statusEl = document.getElementById('search-status');
         statusEl.textContent = `✓ PROFILE "${customer.full_name.toUpperCase()}" ACTIVE`;
-        statusEl.className = 'text-xs font-black mt-4 px-4 text-green-400 tracking-[0.2em] block';
+        statusEl.className = 'text-xs font-black mt-3 px-1 text-green-500 dark:text-green-400 tracking-wider block';
         statusEl.classList.remove('hidden');
 
-        const container = document.getElementById('garments-container');
+        const container = document.getElementById('furniture-container');
         Array.from(container.children).forEach(child => {
-            if (child.id !== 'empty-garment-state') child.remove();
+            if (child.id !== 'empty-furniture-state') child.remove();
         });
 
         let hasMeasurements = false;
         const measurementsToLoad = customer.measurement_list || [];
         if (measurementsToLoad.length > 0) {
             measurementsToLoad.forEach(m => {
-                addGarmentBlock(m.category, m, m.id);
+                addFurnitureBlock(m.category, m, m.id);
                 hasMeasurements = true;
             });
         } else {
-            for (const [garmentType, m] of Object.entries(customer.measurements)) {
-                addGarmentBlock(garmentType, m, m.id || '');
+            for (const [furnitureType, m] of Object.entries(customer.measurements || {})) {
+                addFurnitureBlock(furnitureType, m, m.id || '');
                 hasMeasurements = true;
             }
         }
 
         if (!hasMeasurements) {
-            document.getElementById('empty-garment-state').style.display = 'block';
+            document.getElementById('empty-furniture-state').style.display = 'block';
         }
     }
 
@@ -749,10 +793,10 @@
                     const data = await response.json();
                     if (data.success) {
                         globalCategories.push({ value: data.slug, label: data.name });
-                        garmentParameters[data.slug] = [];
+                        furnitureParameters[data.slug] = [];
                         document.querySelectorAll('.haf-dropdown__items').forEach(itemsList => {
                             const dropdown = itemsList.closest('.haf-dropdown');
-                            const hiddenInput = dropdown.querySelector('input[name^="garment_type_"]');
+                            const hiddenInput = dropdown.querySelector('input[name^="furniture_type_"]');
                             if (hiddenInput) {
                                 itemsList.innerHTML = getOptionsHTML(hiddenInput.value);
                             }
@@ -771,8 +815,8 @@
     }
 
     async function promptNewParameter(categorySlug, blockId, counterId) {
-        const defaultParamSuggestions = ["Chest", "Shoulder", "Sleeve", "Neck", "Length", "Waist", "Hip", "Bicep", "Wrist", "Front", "Back"];
-        const existingParams = (garmentParameters[categorySlug] || []).map(p => p.toLowerCase());
+        const defaultParamSuggestions = ["Width", "Length", "Height", "Depth", "Thickness", "Seating Capacity", "Leg Height", "Cushion Density"];
+        const existingParams = (furnitureParameters[categorySlug] || []).map(p => p.toLowerCase());
         const filtered = defaultParamSuggestions.filter(s => !existingParams.includes(s.toLowerCase()));
 
         openCustomPrompt(
@@ -791,8 +835,8 @@
                     });
                     const data = await response.json();
                     if (data.success) {
-                        if(!garmentParameters[categorySlug]) garmentParameters[categorySlug] = [];
-                        garmentParameters[categorySlug].push(data.name);
+                        if(!furnitureParameters[categorySlug]) furnitureParameters[categorySlug] = [];
+                        furnitureParameters[categorySlug].push(data.name);
 
                         const currentData = {};
                         document.querySelectorAll(`#grid-${blockId} input[type=number]`).forEach(inp => {
@@ -804,7 +848,7 @@
                         });
                         
                         const savedData = {};
-                        garmentParameters[categorySlug].forEach(param => {
+                        furnitureParameters[categorySlug].forEach(param => {
                             const s = param.toLowerCase().replace(/[^a-z0-9]/g, '_');
                             if (currentData[s]) savedData[param] = currentData[s];
                         });

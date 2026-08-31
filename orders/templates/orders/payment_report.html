@@ -12,15 +12,16 @@
     }
     .pay-metric-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.25);
     }
     .pay-segmented button { transition: all 0.25s ease; }
 
-    /* Table cell screen colors — using custom classes so print can override cleanly */
-    .pay-cell-date { color: rgba(255,255,255,0.5); }
-    .pay-cell-amount { color: #34d399; }
-    .pay-cell-name { color: #ffffff; }
-    .pay-cell-phone { color: rgba(255,255,255,0.3); font-size: 10px; }
+    /* Table cell screen colors — high-contrast in both light and dark mode */
+    .pay-cell-date { color: var(--text-secondary); }
+    .pay-cell-amount { color: #3D8B5E; font-weight: 700; }
+    .dark .pay-cell-amount { color: #52aa77; }
+    .pay-cell-name { color: var(--text-primary); font-weight: 600; }
+    .pay-cell-phone { color: var(--text-muted); font-size: 10px; }
 </style>
 
 <div class="pay-page-wrap p-4 sm:p-8 max-w-[1440px] mx-auto w-full">
@@ -28,13 +29,13 @@
     <!-- ═══ Screen-Only Header ═══ -->
     <div class="pay-screen-header flex flex-col lg:flex-row lg:items-end justify-between mb-10 gap-4">
         <div>
-            <div class="flex items-center gap-2 text-white/40 text-[10px] sm:text-xs mb-1.5 uppercase tracking-widest">
+            <div class="flex items-center gap-2 text-theme-secondary text-[10px] sm:text-xs mb-1.5 uppercase tracking-widest font-bold">
                 <a href="{% url 'order_list' %}" class="hover:text-secondary transition-colors font-bold">Orders</a>
                 <span class="material-symbols-outlined text-[12px]">chevron_right</span>
                 <span class="text-secondary font-bold">Payments</span>
             </div>
-            <h2 class="font-serif text-2xl sm:text-3xl font-semibold text-white drop-shadow-md">Payments & Collection Report</h2>
-            <p class="text-white/50 text-xs sm:text-sm mt-1">Track and manage cash vs. UPI / QR collections and pending balances.</p>
+            <h2 class="font-serif text-2xl sm:text-3xl font-semibold text-theme-primary drop-shadow-md">Payments & Collection Report</h2>
+            <p class="text-theme-secondary text-xs sm:text-sm mt-1">Track and manage cash vs. UPI / QR collections and pending balances.</p>
         </div>
         <a href="{% url 'payment_report_print' %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}" target="_blank" class="btn-premium btn-premium--gold lg:w-auto text-center flex items-center justify-center gap-2 shrink-0">
             <span class="material-symbols-outlined text-base">print</span>
@@ -43,95 +44,144 @@
     </div>
 
 
-    <!-- ═══ Screen-Only Summary Cards ═══ -->
-    <div class="pay-screen-cards grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10">
-        <!-- Cash Card -->
-        <div class="pay-metric-card rounded-2xl p-5 border border-emerald-500/20 bg-emerald-500/5 relative overflow-hidden group">
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-white/50 text-[10px] sm:text-xs font-bold uppercase tracking-widest">Cash Collection</p>
-                <div class="w-9 h-9 rounded-xl bg-emerald-500/15 flex items-center justify-center border border-emerald-500/20">
-                    <span class="material-symbols-outlined text-emerald-400 text-[18px]">payments</span>
+    <!-- ═══ Screen-Only Summary Cards (Walnut Showroom Palette) ═══ -->
+    <div class="pay-screen-cards grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
+        <!-- Cash Card: Forest/Sage Status Green -->
+        <div class="pay-metric-card rounded-2xl p-4 border border-[#3D8B5E]/30 bg-[#3D8B5E]/5 dark:bg-[#3D8B5E]/10 relative overflow-hidden group shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-theme-secondary text-[10px] sm:text-xs font-bold uppercase tracking-widest">Cash</p>
+                <div class="w-8 h-8 rounded-xl bg-[#3D8B5E]/15 flex items-center justify-center border border-[#3D8B5E]/30 text-[#3D8B5E] dark:text-[#52aa77]">
+                    <span class="material-symbols-outlined text-[16px]">payments</span>
                 </div>
             </div>
-            <p class="text-2xl sm:text-3xl font-black text-white tracking-tight">₹{{ total_cash_advance|floatformat:2 }}</p>
-            <div class="mt-4">
-                <div class="flex justify-between text-[10px] font-semibold text-white/40 mb-1">
-                    <span id="cash-pct-text">0% Collected</span>
-                    <span>Pending: ₹{{ total_cash_pending|floatformat:2 }}</span>
+            <p class="text-xl sm:text-2xl font-black text-theme-primary tracking-tight">₹{{ total_cash_advance|floatformat:2 }}</p>
+            <div class="mt-3">
+                <div class="flex justify-between text-[10px] font-semibold text-theme-muted mb-1">
+                    <span id="cash-pct-text">0%</span>
+                    <span>Bal: ₹{{ total_cash_pending|floatformat:2 }}</span>
                 </div>
-                <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <div id="cash-pct-bar" class="h-full bg-emerald-400 rounded-full transition-all duration-1000" style="width: 0%;"></div>
+                <div class="w-full h-1.5 bg-theme-input rounded-full overflow-hidden">
+                    <div id="cash-pct-bar" class="h-full bg-[#3D8B5E] dark:bg-[#52aa77] rounded-full transition-all duration-1000" style="width: 0%;"></div>
                 </div>
             </div>
-            <div class="flex justify-between items-center mt-4 pt-3 border-t border-white/5 text-[11px] text-white/50">
-                <span class="flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[14px]">receipt_long</span>
+            <div class="flex justify-between items-center mt-3 pt-2.5 border-t border-theme-input text-[11px] text-theme-secondary">
+                <span class="flex items-center gap-1 text-[10px]">
                     {{ cash_count }} Order{{ cash_count|pluralize }}
                 </span>
-                <span class="text-[9px] uppercase tracking-wider font-bold bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">Cash</span>
+                <span class="text-[9px] uppercase tracking-wider font-bold bg-[#3D8B5E]/15 text-[#3D8B5E] dark:text-[#52aa77] px-2 py-0.5 rounded border border-[#3D8B5E]/30">Cash</span>
             </div>
         </div>
 
-        <!-- UPI Card -->
-        <div class="pay-metric-card rounded-2xl p-5 border border-violet-500/20 bg-violet-500/5 relative overflow-hidden group">
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-white/50 text-[10px] sm:text-xs font-bold uppercase tracking-widest">UPI / QR Collection</p>
-                <div class="w-9 h-9 rounded-xl bg-violet-500/15 flex items-center justify-center border border-violet-500/20">
-                    <span class="material-symbols-outlined text-violet-400 text-[18px]">qr_code_2</span>
+        <!-- UPI Card: Warm Showroom Brass -->
+        <div class="pay-metric-card rounded-2xl p-4 border border-secondary/30 bg-secondary/5 dark:bg-secondary/10 relative overflow-hidden group shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-theme-secondary text-[10px] sm:text-xs font-bold uppercase tracking-widest">UPI / QR</p>
+                <div class="w-8 h-8 rounded-xl bg-secondary/15 flex items-center justify-center border border-secondary/30 text-secondary dark:text-brass-light">
+                    <span class="material-symbols-outlined text-[16px]">qr_code_2</span>
                 </div>
             </div>
-            <p class="text-2xl sm:text-3xl font-black text-white tracking-tight">₹{{ total_upi_advance|floatformat:2 }}</p>
-            <div class="mt-4">
-                <div class="flex justify-between text-[10px] font-semibold text-white/40 mb-1">
-                    <span id="upi-pct-text">0% Collected</span>
-                    <span>Pending: ₹{{ total_upi_pending|floatformat:2 }}</span>
+            <p class="text-xl sm:text-2xl font-black text-theme-primary tracking-tight">₹{{ total_upi_advance|floatformat:2 }}</p>
+            <div class="mt-3">
+                <div class="flex justify-between text-[10px] font-semibold text-theme-muted mb-1">
+                    <span id="upi-pct-text">0%</span>
+                    <span>Bal: ₹{{ total_upi_pending|floatformat:2 }}</span>
                 </div>
-                <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <div id="upi-pct-bar" class="h-full bg-violet-400 rounded-full transition-all duration-1000" style="width: 0%;"></div>
+                <div class="w-full h-1.5 bg-theme-input rounded-full overflow-hidden">
+                    <div id="upi-pct-bar" class="h-full bg-secondary dark:bg-brass-light rounded-full transition-all duration-1000" style="width: 0%;"></div>
                 </div>
             </div>
-            <div class="flex justify-between items-center mt-4 pt-3 border-t border-white/5 text-[11px] text-white/50">
-                <span class="flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[14px]">receipt_long</span>
+            <div class="flex justify-between items-center mt-3 pt-2.5 border-t border-theme-input text-[11px] text-theme-secondary">
+                <span class="flex items-center gap-1 text-[10px]">
                     {{ upi_count }} Order{{ upi_count|pluralize }}
                 </span>
-                <span class="text-[9px] uppercase tracking-wider font-bold bg-violet-500/15 text-violet-400 px-2 py-0.5 rounded border border-violet-500/20">UPI / QR</span>
+                <span class="text-[9px] uppercase tracking-wider font-bold bg-secondary/15 text-secondary dark:text-brass-light px-2 py-0.5 rounded border border-secondary/30">UPI</span>
             </div>
         </div>
 
-        <!-- Total Card -->
-        <div class="pay-metric-card rounded-2xl p-5 border border-amber-500/20 bg-amber-500/5 relative overflow-hidden group">
-            <div class="flex items-center justify-between mb-3">
-                <p class="text-white/50 text-[10px] sm:text-xs font-bold uppercase tracking-widest">Total Collected</p>
-                <div class="w-9 h-9 rounded-xl bg-amber-500/15 flex items-center justify-center border border-amber-500/20">
-                    <span class="material-symbols-outlined text-amber-400 text-[18px]">account_balance_wallet</span>
+        <!-- Card Payment Card: Slate Steel Blue -->
+        <div class="pay-metric-card rounded-2xl p-4 border border-[#4A7A96]/30 bg-[#4A7A96]/5 dark:bg-[#4A7A96]/10 relative overflow-hidden group shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-theme-secondary text-[10px] sm:text-xs font-bold uppercase tracking-widest">Card</p>
+                <div class="w-8 h-8 rounded-xl bg-[#4A7A96]/15 flex items-center justify-center border border-[#4A7A96]/30 text-[#4A7A96] dark:text-[#78a4be]">
+                    <span class="material-symbols-outlined text-[16px]">credit_card</span>
                 </div>
             </div>
-            <p class="text-2xl sm:text-3xl font-black text-white tracking-tight">₹{{ total_advance|floatformat:2 }}</p>
-            <div class="mt-4">
-                <div class="flex justify-between text-[10px] font-semibold text-white/40 mb-1">
-                    <span id="total-pct-text">0% Collected</span>
-                    <span>Pending: ₹{{ total_pending|floatformat:2 }}</span>
+            <p class="text-xl sm:text-2xl font-black text-theme-primary tracking-tight">₹{{ total_card_advance|floatformat:2 }}</p>
+            <div class="mt-3">
+                <div class="flex justify-between text-[10px] font-semibold text-theme-muted mb-1">
+                    <span id="card-pct-text">0%</span>
+                    <span>Bal: ₹{{ total_card_pending|floatformat:2 }}</span>
                 </div>
-                <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <div id="total-pct-bar" class="h-full bg-amber-400 rounded-full transition-all duration-1000" style="width: 0%;"></div>
+                <div class="w-full h-1.5 bg-theme-input rounded-full overflow-hidden">
+                    <div id="card-pct-bar" class="h-full bg-[#4A7A96] dark:bg-[#78a4be] rounded-full transition-all duration-1000" style="width: 0%;"></div>
                 </div>
             </div>
-            <div class="flex justify-between items-center mt-4 pt-3 border-t border-white/5 text-[11px] text-white/50">
-                <span class="flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[14px]">monitoring</span>
-                    Combined Overview
+            <div class="flex justify-between items-center mt-3 pt-2.5 border-t border-theme-input text-[11px] text-theme-secondary">
+                <span class="flex items-center gap-1 text-[10px]">
+                    {{ card_count }} Order{{ card_count|pluralize }}
                 </span>
-                <span class="text-[9px] uppercase tracking-wider font-bold bg-amber-500/15 text-amber-400 px-2 py-0.5 rounded border border-amber-500/20">Summary</span>
+                <span class="text-[9px] uppercase tracking-wider font-bold bg-[#4A7A96]/15 text-[#4A7A96] dark:text-[#78a4be] px-2 py-0.5 rounded border border-[#4A7A96]/30">Card</span>
+            </div>
+        </div>
+
+        <!-- Bank Transfer Card: Warm Espresso -->
+        <div class="pay-metric-card rounded-2xl p-4 border border-[#7A5340]/30 bg-[#7A5340]/5 dark:bg-[#7A5340]/10 relative overflow-hidden group shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-theme-secondary text-[10px] sm:text-xs font-bold uppercase tracking-widest">Bank Transfer</p>
+                <div class="w-8 h-8 rounded-xl bg-[#7A5340]/15 flex items-center justify-center border border-[#7A5340]/30 text-[#7A5340] dark:text-[#c49882]">
+                    <span class="material-symbols-outlined text-[16px]">account_balance</span>
+                </div>
+            </div>
+            <p class="text-xl sm:text-2xl font-black text-theme-primary tracking-tight">₹{{ total_bank_advance|floatformat:2 }}</p>
+            <div class="mt-3">
+                <div class="flex justify-between text-[10px] font-semibold text-theme-muted mb-1">
+                    <span id="bank-pct-text">0%</span>
+                    <span>Bal: ₹{{ total_bank_pending|floatformat:2 }}</span>
+                </div>
+                <div class="w-full h-1.5 bg-theme-input rounded-full overflow-hidden">
+                    <div id="bank-pct-bar" class="h-full bg-[#7A5340] dark:bg-[#c49882] rounded-full transition-all duration-1000" style="width: 0%;"></div>
+                </div>
+            </div>
+            <div class="flex justify-between items-center mt-3 pt-2.5 border-t border-theme-input text-[11px] text-theme-secondary">
+                <span class="flex items-center gap-1 text-[10px]">
+                    {{ bank_count }} Order{{ bank_count|pluralize }}
+                </span>
+                <span class="text-[9px] uppercase tracking-wider font-bold bg-[#7A5340]/15 text-[#7A5340] dark:text-[#c49882] px-2 py-0.5 rounded border border-[#7A5340]/30">Bank</span>
+            </div>
+        </div>
+
+        <!-- Total Card: Walnut & Brass Accent -->
+        <div class="pay-metric-card rounded-2xl p-4 border border-secondary/40 bg-theme-input/40 dark:bg-theme-input/20 ring-1 ring-secondary/20 relative overflow-hidden group shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-theme-secondary text-[10px] sm:text-xs font-bold uppercase tracking-widest">Total Collected</p>
+                <div class="w-8 h-8 rounded-xl bg-secondary/20 flex items-center justify-center border border-secondary/40 text-secondary dark:text-brass-light">
+                    <span class="material-symbols-outlined text-[16px]">account_balance_wallet</span>
+                </div>
+            </div>
+            <p class="text-xl sm:text-2xl font-black text-theme-primary tracking-tight">₹{{ total_advance|floatformat:2 }}</p>
+            <div class="mt-3">
+                <div class="flex justify-between text-[10px] font-semibold text-theme-muted mb-1">
+                    <span id="total-pct-text">0%</span>
+                    <span>Bal: ₹{{ total_pending|floatformat:2 }}</span>
+                </div>
+                <div class="w-full h-1.5 bg-theme-input rounded-full overflow-hidden">
+                    <div id="total-pct-bar" class="h-full bg-secondary rounded-full transition-all duration-1000" style="width: 0%;"></div>
+                </div>
+            </div>
+            <div class="flex justify-between items-center mt-3 pt-2.5 border-t border-theme-input text-[11px] text-theme-secondary">
+                <span class="flex items-center gap-1 text-[10px]">
+                    Overview
+                </span>
+                <span class="text-[9px] uppercase tracking-wider font-bold bg-secondary text-white dark:text-walnut-900 px-2 py-0.5 rounded border border-secondary/40 font-black">Total</span>
             </div>
         </div>
     </div>
 
     <!-- ═══ Date Filters ═══ -->
-    <form method="GET" action="{% url 'payment_report' %}" class="pay-filters-form rounded-2xl p-4 sm:p-5 mb-10 bg-white/5 border border-white/10">
+    <form method="GET" action="{% url 'payment_report' %}" class="pay-filters-form rounded-2xl p-4 sm:p-5 mb-10 glass-panel">
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
             <div>
-                <label class="block text-[10px] font-bold text-white/50 uppercase tracking-widest mb-2 px-1">Start Date</label>
+                <label class="block text-[10px] font-bold text-theme-secondary uppercase tracking-widest mb-2 px-1">Start Date</label>
                 <div class="haf-datepicker">
                     <input type="hidden" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
                     <div class="haf-datepicker__face">
@@ -148,7 +198,7 @@
                 </div>
             </div>
             <div>
-                <label class="block text-[10px] font-bold text-white/50 uppercase tracking-widest mb-2 px-1">End Date</label>
+                <label class="block text-[10px] font-bold text-theme-secondary uppercase tracking-widest mb-2 px-1">End Date</label>
                 <div class="haf-datepicker">
                     <input type="hidden" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
                     <div class="haf-datepicker__face">
@@ -166,41 +216,49 @@
             </div>
             <div class="flex gap-2">
                 <button type="submit" class="flex-1 btn-premium text-sm !py-3">Filter</button>
-                <a href="{% url 'payment_report' %}" class="flex items-center justify-center px-4 py-2 border border-white/10 rounded-[12px] text-white/60 hover:bg-white/5 transition-all text-xs font-semibold">Reset</a>
+                <a href="{% url 'payment_report' %}" class="flex items-center justify-center px-4 py-2 border border-theme-input bg-theme-input rounded-[12px] text-theme-secondary hover:text-theme-primary hover:bg-secondary/10 transition-all text-xs font-semibold">Reset</a>
             </div>
         </div>
     </form>
 
     <!-- ═══ Segmented Pill Switcher (Screen-Only) ═══ -->
-    <div class="pay-segmented flex p-1 bg-white/5 border border-white/10 rounded-2xl mb-8 max-w-sm gap-1 select-none">
-        <button id="tab-cash-btn" onclick="switchTab('cash')" class="flex-1 py-2.5 px-4 font-bold text-xs rounded-xl flex items-center justify-center gap-2 bg-secondary text-white shadow-lg">
+    <div class="pay-segmented flex p-1 bg-theme-input border border-theme-input rounded-2xl mb-8 max-w-xl gap-1 select-none overflow-x-auto">
+        <button id="tab-cash-btn" onclick="switchTab('cash')" class="flex-1 py-2.5 px-3 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 bg-secondary text-white shadow-md whitespace-nowrap">
             <span class="material-symbols-outlined text-[16px]">payments</span>
             Cash ({{ cash_orders|length }})
         </button>
-        <button id="tab-upi-btn" onclick="switchTab('upi')" class="flex-1 py-2.5 px-4 font-bold text-xs rounded-xl flex items-center justify-center gap-2 text-white/40 hover:text-white/70">
+        <button id="tab-upi-btn" onclick="switchTab('upi')" class="flex-1 py-2.5 px-3 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 text-theme-secondary hover:text-theme-primary whitespace-nowrap">
             <span class="material-symbols-outlined text-[16px]">qr_code_2</span>
             UPI / QR ({{ upi_orders|length }})
+        </button>
+        <button id="tab-card-btn" onclick="switchTab('card')" class="flex-1 py-2.5 px-3 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 text-theme-secondary hover:text-theme-primary whitespace-nowrap">
+            <span class="material-symbols-outlined text-[16px]">credit_card</span>
+            Card ({{ card_orders|length }})
+        </button>
+        <button id="tab-bank-btn" onclick="switchTab('bank')" class="flex-1 py-2.5 px-3 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 text-theme-secondary hover:text-theme-primary whitespace-nowrap">
+            <span class="material-symbols-outlined text-[16px]">account_balance</span>
+            Bank ({{ bank_orders|length }})
         </button>
     </div>
 
     <!-- ═══ Cash Payments Table ═══ -->
     <div id="tab-cash-content" class="pay-tab-content mb-6">
-        <div class="pay-table-wrap rounded-2xl overflow-hidden border border-white/10 bg-white/[0.03]">
+        <div class="pay-table-wrap rounded-2xl overflow-hidden glass-panel">
             <div class="overflow-x-auto">
                 <table class="pay-table w-full text-left border-collapse">
                     <thead>
-                        <tr class="border-b border-white/10">
-                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/60">Date</th>
-                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/60">Order ID</th>
-                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/60">Customer</th>
-                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/60 text-right">Advance Paid</th>
-                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/60 text-right">Pending Balance</th>
-                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/60 text-center">Status</th>
+                        <tr class="border-b border-theme-input">
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary">Date</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary">Order ID</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary">Customer</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary text-right">Advance Paid</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary text-right">Pending Balance</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary text-center">Status</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-white/5">
+                    <tbody class="divide-y divide-theme-input">
                         {% for order in cash_orders %}
-                        <tr class="hover:bg-white/[0.03] transition-colors">
+                        <tr class="hover:bg-theme-input/30 transition-colors">
                             <td class="px-5 py-3.5 text-xs whitespace-nowrap pay-cell-date">{{ order.date|date:"d M Y" }}</td>
                             <td class="px-5 py-3.5 text-xs whitespace-nowrap">
                                 <a href="{% url 'order_detail' order.id %}" class="font-mono font-bold text-secondary hover:underline">{{ order.order_number }}</a>
@@ -221,25 +279,23 @@
                                 {% if order.grand_total > 0 %}
                                 <span class="pay-balance-badge pay-cell-amount">₹{{ order.grand_total }}</span>
                                 {% else %}
-                                <span class="pay-balance-badge inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 uppercase tracking-wide">Paid</span>
+                                <span class="pay-balance-badge inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#3D8B5E]/15 text-[#3D8B5E] dark:text-[#52aa77] border border-[#3D8B5E]/30 uppercase tracking-wide">Paid</span>
                                 {% endif %}
                             </td>
                             <td class="px-5 py-3.5 text-center whitespace-nowrap">
                                 <span class="pay-status-badge px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider
-                                    {% if order.status == 'delivered' %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/20
-                                    {% elif order.status == 'cutting' %}bg-orange-500/15 text-orange-400 border border-orange-500/20
-                                    {% elif order.status == 'pending' %}bg-amber-500/15 text-amber-400 border border-amber-500/20
-                                    {% elif order.status == 'in_progress' %}bg-sky-500/15 text-sky-400 border border-sky-500/20
-                                    {% elif order.status == 'processing' %}bg-indigo-500/15 text-indigo-400 border border-indigo-500/20
-                                    {% elif order.status == 'cancelled' %}bg-rose-500/15 text-rose-400 border border-rose-500/20
-                                    {% else %}bg-white/10 text-white/50 border border-white/10{% endif %}">
+                                    {% if order.status == 'delivered' %}bg-[#3D8B5E]/15 text-[#3D8B5E] dark:text-[#52aa77] border border-[#3D8B5E]/30
+                                    {% elif order.status == 'in_progress' %}bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-500/25
+                                    {% elif order.status == 'pending' %}bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/25
+                                    {% elif order.status == 'cancelled' %}bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/25
+                                    {% else %}bg-theme-input text-theme-secondary border border-theme-input{% endif %}">
                                     {{ order.get_status_display }}
                                 </span>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6" class="px-5 py-10 text-center text-white/30 italic text-sm">No cash payment orders found in this date range.</td>
+                            <td colspan="6" class="px-5 py-10 text-center text-theme-secondary italic text-sm">No cash payment orders found in this date range.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -250,22 +306,22 @@
 
     <!-- ═══ UPI / QR Payments Table ═══ -->
     <div id="tab-upi-content" class="pay-tab-content hidden mb-6">
-        <div class="pay-table-wrap rounded-2xl overflow-hidden border border-white/10 bg-white/[0.03]">
+        <div class="pay-table-wrap rounded-2xl overflow-hidden glass-panel">
             <div class="overflow-x-auto">
                 <table class="pay-table w-full text-left border-collapse">
                     <thead>
-                        <tr class="border-b border-white/10">
-                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/60">Date</th>
-                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/60">Order ID</th>
-                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/60">Customer</th>
-                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/60 text-right">Advance Paid</th>
-                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/60 text-right">Pending Balance</th>
-                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/60 text-center">Status</th>
+                        <tr class="border-b border-theme-input">
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary">Date</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary">Order ID</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary">Customer</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary text-right">Advance Paid</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary text-right">Pending Balance</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary text-center">Status</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-white/5">
+                    <tbody class="divide-y divide-theme-input">
                         {% for order in upi_orders %}
-                        <tr class="hover:bg-white/[0.03] transition-colors">
+                        <tr class="hover:bg-theme-input/30 transition-colors">
                             <td class="px-5 py-3.5 text-xs whitespace-nowrap pay-cell-date">{{ order.date|date:"d M Y" }}</td>
                             <td class="px-5 py-3.5 text-xs whitespace-nowrap">
                                 <a href="{% url 'order_detail' order.id %}" class="font-mono font-bold text-secondary hover:underline">{{ order.order_number }}</a>
@@ -286,25 +342,149 @@
                                 {% if order.grand_total > 0 %}
                                 <span class="pay-balance-badge pay-cell-amount">₹{{ order.grand_total }}</span>
                                 {% else %}
-                                <span class="pay-balance-badge inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 uppercase tracking-wide">Paid</span>
+                                <span class="pay-balance-badge inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#3D8B5E]/15 text-[#3D8B5E] dark:text-[#52aa77] border border-[#3D8B5E]/30 uppercase tracking-wide">Paid</span>
                                 {% endif %}
                             </td>
                             <td class="px-5 py-3.5 text-center whitespace-nowrap">
                                 <span class="pay-status-badge px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider
-                                    {% if order.status == 'delivered' %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/20
-                                    {% elif order.status == 'cutting' %}bg-orange-500/15 text-orange-400 border border-orange-500/20
-                                    {% elif order.status == 'pending' %}bg-amber-500/15 text-amber-400 border border-amber-500/20
-                                    {% elif order.status == 'in_progress' %}bg-sky-500/15 text-sky-400 border border-sky-500/20
-                                    {% elif order.status == 'processing' %}bg-indigo-500/15 text-indigo-400 border border-indigo-500/20
-                                    {% elif order.status == 'cancelled' %}bg-rose-500/15 text-rose-400 border border-rose-500/20
-                                    {% else %}bg-white/10 text-white/50 border border-white/10{% endif %}">
+                                    {% if order.status == 'delivered' %}bg-[#3D8B5E]/15 text-[#3D8B5E] dark:text-[#52aa77] border border-[#3D8B5E]/30
+                                    {% elif order.status == 'in_progress' %}bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-500/25
+                                    {% elif order.status == 'pending' %}bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/25
+                                    {% elif order.status == 'cancelled' %}bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/25
+                                    {% else %}bg-theme-input text-theme-secondary border border-theme-input{% endif %}">
                                     {{ order.get_status_display }}
                                 </span>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6" class="px-5 py-10 text-center text-white/30 italic text-sm">No UPI / QR payment orders found in this date range.</td>
+                            <td colspan="6" class="px-5 py-10 text-center text-theme-secondary italic text-sm">No UPI / QR payment orders found in this date range.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ Card Payments Table ═══ -->
+    <div id="tab-card-content" class="pay-tab-content hidden mb-6">
+        <div class="pay-table-wrap rounded-2xl overflow-hidden glass-panel">
+            <div class="overflow-x-auto">
+                <table class="pay-table w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-theme-input">
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary">Date</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary">Order ID</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary">Customer</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary text-right">Advance Paid</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary text-right">Pending Balance</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-theme-input">
+                        {% for order in card_orders %}
+                        <tr class="hover:bg-theme-input/30 transition-colors">
+                            <td class="px-5 py-3.5 text-xs whitespace-nowrap pay-cell-date">{{ order.date|date:"d M Y" }}</td>
+                            <td class="px-5 py-3.5 text-xs whitespace-nowrap">
+                                <a href="{% url 'order_detail' order.id %}" class="font-mono font-bold text-secondary hover:underline">{{ order.order_number }}</a>
+                            </td>
+                            <td class="px-5 py-3.5 text-xs">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="pay-avatar w-7 h-7 rounded-full bg-secondary/20 text-secondary border border-secondary/30 flex items-center justify-center text-[10px] font-bold shrink-0">
+                                        {{ order.customer.full_name|slice:":1"|upper }}
+                                    </div>
+                                    <div>
+                                        <div class="font-semibold pay-cell-name">{{ order.customer.full_name }}</div>
+                                        <div class="pay-cell-phone">{{ order.customer.phone }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-5 py-3.5 text-right text-xs font-bold whitespace-nowrap pay-cell-amount">₹{{ order.advance_paid }}</td>
+                            <td class="px-5 py-3.5 text-right text-xs font-bold whitespace-nowrap">
+                                {% if order.grand_total > 0 %}
+                                <span class="pay-balance-badge pay-cell-amount">₹{{ order.grand_total }}</span>
+                                {% else %}
+                                <span class="pay-balance-badge inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#3D8B5E]/15 text-[#3D8B5E] dark:text-[#52aa77] border border-[#3D8B5E]/30 uppercase tracking-wide">Paid</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-5 py-3.5 text-center whitespace-nowrap">
+                                <span class="pay-status-badge px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider
+                                    {% if order.status == 'delivered' %}bg-[#3D8B5E]/15 text-[#3D8B5E] dark:text-[#52aa77] border border-[#3D8B5E]/30
+                                    {% elif order.status == 'in_progress' %}bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-500/25
+                                    {% elif order.status == 'pending' %}bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/25
+                                    {% elif order.status == 'cancelled' %}bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/25
+                                    {% else %}bg-theme-input text-theme-secondary border border-theme-input{% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="px-5 py-10 text-center text-theme-secondary italic text-sm">No card payment orders found in this date range.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ Bank Transfer Payments Table ═══ -->
+    <div id="tab-bank-content" class="pay-tab-content hidden mb-6">
+        <div class="pay-table-wrap rounded-2xl overflow-hidden glass-panel">
+            <div class="overflow-x-auto">
+                <table class="pay-table w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-theme-input">
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary">Date</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary">Order ID</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary">Customer</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary text-right">Advance Paid</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary text-right">Pending Balance</th>
+                            <th class="px-5 py-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-theme-secondary text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-theme-input">
+                        {% for order in bank_orders %}
+                        <tr class="hover:bg-theme-input/30 transition-colors">
+                            <td class="px-5 py-3.5 text-xs whitespace-nowrap pay-cell-date">{{ order.date|date:"d M Y" }}</td>
+                            <td class="px-5 py-3.5 text-xs whitespace-nowrap">
+                                <a href="{% url 'order_detail' order.id %}" class="font-mono font-bold text-secondary hover:underline">{{ order.order_number }}</a>
+                            </td>
+                            <td class="px-5 py-3.5 text-xs">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="pay-avatar w-7 h-7 rounded-full bg-secondary/20 text-secondary border border-secondary/30 flex items-center justify-center text-[10px] font-bold shrink-0">
+                                        {{ order.customer.full_name|slice:":1"|upper }}
+                                    </div>
+                                    <div>
+                                        <div class="font-semibold pay-cell-name">{{ order.customer.full_name }}</div>
+                                        <div class="pay-cell-phone">{{ order.customer.phone }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-5 py-3.5 text-right text-xs font-bold whitespace-nowrap pay-cell-amount">₹{{ order.advance_paid }}</td>
+                            <td class="px-5 py-3.5 text-right text-xs font-bold whitespace-nowrap">
+                                {% if order.grand_total > 0 %}
+                                <span class="pay-balance-badge pay-cell-amount">₹{{ order.grand_total }}</span>
+                                {% else %}
+                                <span class="pay-balance-badge inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#3D8B5E]/15 text-[#3D8B5E] dark:text-[#52aa77] border border-[#3D8B5E]/30 uppercase tracking-wide">Paid</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-5 py-3.5 text-center whitespace-nowrap">
+                                <span class="pay-status-badge px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider
+                                    {% if order.status == 'delivered' %}bg-[#3D8B5E]/15 text-[#3D8B5E] dark:text-[#52aa77] border border-[#3D8B5E]/30
+                                    {% elif order.status == 'in_progress' %}bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-500/25
+                                    {% elif order.status == 'pending' %}bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/25
+                                    {% elif order.status == 'cancelled' %}bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/25
+                                    {% else %}bg-theme-input text-theme-secondary border border-theme-input{% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="px-5 py-10 text-center text-theme-secondary italic text-sm">No bank transfer payment orders found in this date range.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -314,52 +494,45 @@
     </div>
 
 </div>
+{% endblock %}
 
 {% block extra_scripts %}
 <script>
     function switchTab(mode) {
-        const cashBtn = document.getElementById('tab-cash-btn');
-        const upiBtn = document.getElementById('tab-upi-btn');
-        const cashContent = document.getElementById('tab-cash-content');
-        const upiContent = document.getElementById('tab-upi-content');
-        const activeClass = "flex-1 py-2.5 px-4 font-bold text-xs rounded-xl flex items-center justify-center gap-2 bg-secondary text-white shadow-lg";
-        const inactiveClass = "flex-1 py-2.5 px-4 font-bold text-xs rounded-xl flex items-center justify-center gap-2 text-white/40 hover:text-white/70";
+        const tabs = ['cash', 'upi', 'card', 'bank'];
+        const activeClass = "flex-1 py-2.5 px-3 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 bg-secondary text-white shadow-md whitespace-nowrap";
+        const inactiveClass = "flex-1 py-2.5 px-3 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 text-theme-secondary hover:text-theme-primary whitespace-nowrap";
 
-        if (mode === 'cash') {
-            cashBtn.className = activeClass;
-            upiBtn.className = inactiveClass;
-            cashContent.classList.remove('hidden');
-            upiContent.classList.add('hidden');
-        } else {
-            upiBtn.className = activeClass;
-            cashBtn.className = inactiveClass;
-            upiContent.classList.remove('hidden');
-            cashContent.classList.add('hidden');
-        }
+        tabs.forEach(t => {
+            const btn = document.getElementById(`tab-${t}-btn`);
+            const content = document.getElementById(`tab-${t}-content`);
+            if (btn && content) {
+                if (t === mode) {
+                    btn.className = activeClass;
+                    content.classList.remove('hidden');
+                } else {
+                    btn.className = inactiveClass;
+                    content.classList.add('hidden');
+                }
+            }
+        });
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        const cashAdv = parseFloat("{{ total_cash_advance }}") || 0;
-        const cashPend = parseFloat("{{ total_cash_pending }}") || 0;
-        const upiAdv = parseFloat("{{ total_upi_advance }}") || 0;
-        const upiPend = parseFloat("{{ total_upi_pending }}") || 0;
-        const totalAdv = parseFloat("{{ total_advance }}") || 0;
-        const totalPend = parseFloat("{{ total_pending }}") || 0;
-
         const setBar = (adv, pend, barId, pctId) => {
             const sum = adv + pend;
             const pct = sum > 0 ? Math.round((adv / sum) * 100) : 0;
             const bar = document.getElementById(barId);
             const txt = document.getElementById(pctId);
             if (bar) bar.style.width = pct + '%';
-            if (txt) txt.textContent = pct + '% Collected';
+            if (txt) txt.textContent = pct + '%';
         };
 
-        setBar(cashAdv, cashPend, 'cash-pct-bar', 'cash-pct-text');
-        setBar(upiAdv, upiPend, 'upi-pct-bar', 'upi-pct-text');
-        setBar(totalAdv, totalPend, 'total-pct-bar', 'total-pct-text');
+        setBar(parseFloat("{{ total_cash_advance }}") || 0, parseFloat("{{ total_cash_pending }}") || 0, 'cash-pct-bar', 'cash-pct-text');
+        setBar(parseFloat("{{ total_upi_advance }}") || 0, parseFloat("{{ total_upi_pending }}") || 0, 'upi-pct-bar', 'upi-pct-text');
+        setBar(parseFloat("{{ total_card_advance }}") || 0, parseFloat("{{ total_card_pending }}") || 0, 'card-pct-bar', 'card-pct-text');
+        setBar(parseFloat("{{ total_bank_advance }}") || 0, parseFloat("{{ total_bank_pending }}") || 0, 'bank-pct-bar', 'bank-pct-text');
+        setBar(parseFloat("{{ total_advance }}") || 0, parseFloat("{{ total_pending }}") || 0, 'total-pct-bar', 'total-pct-text');
     });
 </script>
-{% endblock %}
-
 {% endblock %}

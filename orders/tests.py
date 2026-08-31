@@ -3,10 +3,11 @@ from decimal import Decimal
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from customers.models import Customer
 from measurements.models import FurnitureDimension
-from .models import Order, OrderItem
+from .models import Order, OrderItem, OrderStatus
 from .services import create_order_from_post
 
 
@@ -76,6 +77,7 @@ class OrderServiceTests(TestCase):
 class OrderViewTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='admin', password='pass')
+        self.client.force_login(self.user)
         self.customer = Customer.objects.create(full_name='Amit Shah', phone='9999999999')
 
     def test_order_post_creates_items_and_redirects_to_print(self):
@@ -405,5 +407,212 @@ class OrderViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'HAF-PUBLIC-01')
         self.assertContains(response, self.customer.full_name)
+
+    def test_canonical_order_print_url_and_old_pattern_removed(self):
+        order = Order.objects.create(
+            order_number='HAF-PRINT-01',
+            customer=self.customer,
+            date='2026-06-01',
+            final_amount=Decimal('2000.00'),
+            grand_total=Decimal('2000.00'),
+        )
+        canonical_url = reverse('order_print', args=[order.id])
+        self.assertEqual(canonical_url, f'/orders/{order.id}/print/')
+        response = self.client.get(canonical_url)
+        self.assertEqual(response.status_code, 200)
+
+        # Confirm old duplicate pattern is removed and returns 404
+        old_url = f'/orders/print/{order.id}/'
+        response_old = self.client.get(old_url)
+        self.assertEqual(response_old.status_code, 404)
+
+    def test_explicit_grand_total_calculation_on_payment(self):
+        order = Order.objects.create(
+            order_number='HAF-PAY-01',
+            customer=self.customer,
+            date='2026-06-01',
+            subtotal=Decimal('2000.00'),
+            final_amount=Decimal('2000.00'),
+            advance_paid=Decimal('500.00'),
+            grand_total=Decimal('1500.00'),
+        )
+        from .services import update_order_from_post
+        post_data = {
+            'additional_payment': '500.00',
+            'payment_method': 'card',
+        }
+        update_order_from_post(order, post_data)
+        order.refresh_from_db()
+        self.assertEqual(order.advance_paid, Decimal('1000.00'))
+        # Must match explicit formula: final_amount - advance_paid
+        expected_grand_total = (order.final_amount - order.advance_paid).quantize(Decimal('0.01'))
+        self.assertEqual(order.grand_total, Decimal('1000.00'))
+        self.assertEqual(order.grand_total, expected_grand_total)
+
+    def test_order_list_pagination(self):
+        # Create 25 orders
+        orders = [
+            Order(
+                order_number=f'HAF-PAGE-{i:03d}',
+                customer=self.customer,
+                date='2026-06-01',
+                final_amount=Decimal('100.00'),
+                grand_total=Decimal('100.00'),
+            )
+            for i in range(1, 26)
+        ]
+        Order.objects.bulk_create(orders)
+
+        response = self.client.get(reverse('order_list'))
+        self.assertEqual(response.status_code, 200)
+        page_obj = response.context['orders']
+        self.assertEqual(page_obj.paginator.count, 25)
+        self.assertEqual(len(page_obj), 10)
+        self.assertTrue(page_obj.has_next())
+        self.assertContains(response, 'Showing 1-10 of 25 Orders')
+        self.assertContains(response, 'page=2')
+
+        # Test page 2
+        response_p2 = self.client.get(reverse('order_list'), {'page': 2})
+        self.assertEqual(response_p2.status_code, 200)
+        self.assertEqual(len(response_p2.context['orders']), 10)
+
+        # Test page 3
+        response_p3 = self.client.get(reverse('order_list'), {'page': 3})
+        self.assertEqual(response_p3.status_code, 200)
+        self.assertEqual(len(response_p3.context['orders']), 5)
+        self.assertFalse(response_p3.context['orders'].has_next())
+
+    def test_delivery_schedule_pagination(self):
+        # Create 25 orders with dates
+        orders = [
+            Order(
+                order_number=f'HAF-DELIV-{i:03d}',
+                customer=self.customer,
+                date='2026-06-15',
+                final_amount=Decimal('200.00'),
+                grand_total=Decimal('200.00'),
+            )
+            for i in range(1, 26)
+        ]
+        Order.objects.bulk_create(orders)
+
+        response = self.client.get(reverse('delivery_schedule'), {'date': '2026-06-15'})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('page_obj', response.context)
+        page_obj = response.context['page_obj']
+        self.assertEqual(page_obj.paginator.count, 25)
+        self.assertEqual(len(page_obj), 10)
+        self.assertTrue(page_obj.has_next())
+        self.assertContains(response, 'Showing 1-10 of 25 Orders')
+
+    def test_payment_report_card_and_bank_transfer(self):
+        Order.objects.create(
+            order_number='HAF-CARD-01',
+            customer=self.customer,
+            date='2026-06-02',
+            payment_method='card',
+            final_amount=Decimal('1000.00'),
+            advance_paid=Decimal('400.00'),
+            grand_total=Decimal('600.00'),
+        )
+        Order.objects.create(
+            order_number='HAF-BANK-01',
+            customer=self.customer,
+            date='2026-06-02',
+            payment_method='bank_transfer',
+            final_amount=Decimal('2000.00'),
+            advance_paid=Decimal('1500.00'),
+            grand_total=Decimal('500.00'),
+        )
+
+        response = self.client.get(reverse('payment_report'), {
+            'start_date': '2026-06-01',
+            'end_date': '2026-06-03'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['total_card_advance'], Decimal('400.00'))
+        self.assertEqual(response.context['total_bank_advance'], Decimal('1500.00'))
+        self.assertContains(response, 'HAF-CARD-01')
+        self.assertContains(response, 'HAF-BANK-01')
+        self.assertContains(response, 'Card (1)')
+        self.assertContains(response, 'Bank (1)')
+
+        # Also test print view
+        response_print = self.client.get(reverse('payment_report_print'), {
+            'start_date': '2026-06-01',
+            'end_date': '2026-06-03'
+        })
+        self.assertEqual(response_print.status_code, 200)
+        self.assertContains(response_print, 'Credit / Debit Card Collections')
+        self.assertContains(response_print, 'Bank Transfer Collections')
+        self.assertContains(response_print, 'HAF-CARD-01')
+        self.assertContains(response_print, 'HAF-BANK-01')
+
+    def test_num2words_rupees_and_paise(self):
+        from .views import num2words
+        # Whole rupee amount
+        self.assertEqual(num2words(15000), "Fifteen Thousand Only")
+        # Amount with two-digit paise
+        self.assertEqual(
+            num2words(Decimal('15999.50')),
+            "Fifteen Thousand Nine Hundred and Ninety Nine Rupees and Fifty Paise Only"
+        )
+        # Amount with single-digit paise (.05 -> Five Paise)
+        self.assertEqual(
+            num2words(Decimal('100.05')),
+            "One Hundred Rupees and Five Paise Only"
+        )
+        # Fractional only
+        self.assertEqual(num2words(Decimal('0.75')), "Seventy Five Paise Only")
+        # Zero
+        self.assertEqual(num2words(0), "Zero Only")
+
+    def test_excessive_payment_logs_warning(self):
+        order = Order.objects.create(
+            order_number='HAF-LOG-01',
+            customer=self.customer,
+            date='2026-06-01',
+            subtotal=Decimal('1000.00'),
+            final_amount=Decimal('1000.00'),
+            advance_paid=Decimal('200.00'),
+            grand_total=Decimal('800.00'),
+        )
+        from .services import update_order_from_post
+        from django.core.exceptions import ValidationError
+        with self.assertLogs('homeartfurniture', level='WARNING') as cm:
+            with self.assertRaises(ValidationError):
+                update_order_from_post(order, {'additional_payment': '900.00'})
+            self.assertTrue(any('Payment rejected' in log for log in cm.output))
+
+    def test_delivery_schedule_database_level_total_balance_aggregation(self):
+        Order.objects.all().delete()
+        today = timezone.localdate()
+        Order.objects.create(
+            order_number='HAF-AGG-01',
+            customer=self.customer,
+            date=today,
+            subtotal=Decimal('5000.00'),
+            final_amount=Decimal('5000.00'),
+            advance_paid=Decimal('2000.00'),
+            grand_total=Decimal('3000.00'),
+            status=OrderStatus.PENDING,
+        )
+        Order.objects.create(
+            order_number='HAF-AGG-02',
+            customer=self.customer,
+            date=today,
+            subtotal=Decimal('3500.00'),
+            final_amount=Decimal('3000.00'),
+            advance_paid=Decimal('1000.00'),
+            grand_total=Decimal('2000.00'),
+            status=OrderStatus.IN_PROGRESS,
+        )
+        response = self.client.get(reverse('delivery_schedule'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['total_balance'], Decimal('5000.00'))
+
+
+
 
 

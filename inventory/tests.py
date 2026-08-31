@@ -138,3 +138,49 @@ class InventoryViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Inventory Report")
         self.assertContains(response, "Glue")
+
+    def test_material_list_stock_filtering_and_db_metrics(self):
+        # self.material has min_stock=10, current_stock=0 (out of stock)
+        # Create adequate stock material
+        mat_ok = Material.objects.create(
+            name="Steel Screws",
+            sku="TEST-SCR-01",
+            category=MaterialCategory.HARDWARE,
+            unit=UnitOfMeasure.PIECES,
+            min_stock=50,
+            current_stock=100,
+            cost_per_unit=5,
+        )
+        # Create low stock material (current_stock <= min_stock and > 0)
+        mat_low = Material.objects.create(
+            name="Varnish Can",
+            sku="TEST-VAR-01",
+            category=MaterialCategory.PAINT,
+            unit=UnitOfMeasure.LITERS,
+            min_stock=20,
+            current_stock=10,
+            cost_per_unit=200,
+        )
+
+        # Test low stock filter
+        response_low = self.client.get(reverse('material_list'), {'stock': 'low'})
+        self.assertEqual(response_low.status_code, 200)
+        low_names = [m.name for m in response_low.context['materials']]
+        self.assertIn("Varnish Can", low_names)
+        self.assertNotIn("Steel Screws", low_names)
+        self.assertNotIn("Glue", low_names)
+
+        # Test out of stock filter
+        response_out = self.client.get(reverse('material_list'), {'stock': 'out'})
+        self.assertEqual(response_out.status_code, 200)
+        out_names = [m.name for m in response_out.context['materials']]
+        self.assertIn("Glue", out_names)
+        self.assertNotIn("Steel Screws", out_names)
+        self.assertNotIn("Varnish Can", out_names)
+
+        # Test metrics calculated at DB level
+        self.assertEqual(response_low.context['total_count'], 3)
+        self.assertEqual(response_low.context['low_stock_count'], 1)
+        self.assertEqual(response_low.context['out_of_stock_count'], 1)
+        # total_value = (100 * 5) + (10 * 200) + (0 * 50) = 500 + 2000 = 2500
+        self.assertEqual(response_low.context['total_value'], Decimal('2500.00'))

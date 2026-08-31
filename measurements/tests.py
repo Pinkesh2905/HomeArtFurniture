@@ -29,11 +29,11 @@ class MeasurementTests(TestCase):
             'customer_phone': '+91 98765 43210',
             'customer_name': 'Rajesh Kumar',
             'customer_city': 'Jaipur',
-            'garment_block_id': ['1'],
-            'garment_type_1': 'sofa',
+            'furniture_block_id': ['1'],
+            'furniture_type_1': 'sofa',
             'measure_1_width': '40',
             'measure_1_length': '38',
-            'bill_garment': ['1'],
+            'bill_furniture': ['1'],
             'notes_1': 'Slim fit sofa',
         })
         customer = Customer.objects.get(phone='+919876543210')
@@ -75,10 +75,10 @@ class MeasurementTests(TestCase):
             'customer_phone_local': '2025550143',
             'customer_name': 'US Customer',
             'customer_city': 'New York',
-            'garment_block_id': ['1'],
-            'garment_type_1': 'dining_table',
+            'furniture_block_id': ['1'],
+            'furniture_type_1': 'dining_table',
             'measure_1_width': '32',
-            'bill_garment': ['1'],
+            'bill_furniture': ['1'],
         })
         customer = Customer.objects.get(phone='+12025550143')
         self.assertEqual(customer.full_name, 'US Customer')
@@ -89,3 +89,41 @@ class MeasurementTests(TestCase):
             f"{reverse('order_create')}?customer_id={customer.id}&measurements={measurement.id}",
             fetch_redirect_response=False,
         )
+
+    def test_furniture_dimension_str_caching_avoids_n_plus_one_queries(self):
+        from django.test.utils import CaptureQueriesContext
+        from django.db import connection
+        from .models import CustomFurnitureType
+
+        CustomFurnitureType.objects.create(name='Recliner')
+        customer = Customer.objects.create(full_name='Test User', phone='+91 99999 11111')
+        for _ in range(10):
+            FurnitureDimension.objects.create(customer=customer, furniture_type='sofa')
+
+        loaded_dims = list(FurnitureDimension.objects.filter(customer=customer).select_related('customer'))
+        # Warm the cache
+        str(loaded_dims[0])
+
+        with CaptureQueriesContext(connection) as ctx:
+            for dim in loaded_dims:
+                _ = str(dim)
+        self.assertEqual(len(ctx.captured_queries), 0)
+
+    def test_get_all_furniture_parameters_caching_and_invalidation(self):
+        from django.core.cache import cache
+        from .models import CustomFurnitureParameter, get_all_furniture_parameters
+
+        cache.delete('all_furniture_parameters')
+        params1 = get_all_furniture_parameters()
+        self.assertIsNotNone(cache.get('all_furniture_parameters'))
+
+        cp = CustomFurnitureParameter.objects.create(category_name='sofa', name='Cushion Thickness')
+        self.assertIsNone(cache.get('all_furniture_parameters'))
+
+        params2 = get_all_furniture_parameters()
+        self.assertIn('Cushion Thickness', params2.get('sofa', []))
+
+        cp.delete()
+        self.assertIsNone(cache.get('all_furniture_parameters'))
+
+

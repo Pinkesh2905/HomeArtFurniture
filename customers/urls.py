@@ -5,6 +5,10 @@ urlpatterns = [
     path('', views.customer_list, name='customer_list'),
     path('new/', views.customer_create, name='customer_create'),
     path('<int:customer_id>/', views.customer_detail, name='customer_detail'),
+    path('<int:customer_id>/edit/', views.customer_edit, name='customer_edit'),
+    path('<int:customer_id>/delete/', views.customer_delete, name='customer_delete'),
+    path('<int:customer_id>/archive/', views.customer_archive, name='customer_archive'),
+    path('<int:customer_id>/unarchive/', views.customer_unarchive, name='customer_unarchive'),
     path('api/by-phone/<str:phone>/', views.api_get_customer_by_phone, name='api_get_customer_by_phone'),
     path('api/search/', views.api_search_customers, name='api_search_customers'),
 ]

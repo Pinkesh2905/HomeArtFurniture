@@ -7,6 +7,13 @@ Django app for local/LAN customer, measurement, order, billing, and print workfl
 ```powershell
 python -m venv venv
 venv\Scripts\python.exe -m pip install -r requirements.txt
+npm install
+npm run build:css
+```
+
+For frontend development with auto-recompiling styles:
+```powershell
+npm run watch:css
 ```
 
 Create a PostgreSQL database named `homeartfurniture`, then set environment variables if your local values differ:

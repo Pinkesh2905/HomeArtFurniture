@@ -7,10 +7,11 @@
     /* Form Input & Textarea Premium Styling */
     .form-input-custom {
         width: 100%;
-        padding: 12px 16px;
-        border-radius: 12px;
-        font-size: 14px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 38px;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         outline: none;
         background-color: #ffffff !important;
         border: 1px solid rgba(0, 0, 0, 0.15) !important;
@@ -87,6 +88,32 @@
     <!-- Form Card -->
     <form method="POST" action="{% url 'customer_create' %}">
         {% csrf_token %}
+        {% if confirm_prompt %}
+        <input type="hidden" name="confirm_create" value="true">
+        <div class="mb-6 p-5 rounded-2xl border border-amber-500/40 bg-amber-500/10 backdrop-blur-md">
+            <div class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-amber-500 text-2xl mt-0.5">warning</span>
+                <div class="flex-1">
+                    <h4 class="font-bold text-sm text-slate-900 dark:text-white">Customer with this phone number already exists</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 mt-1">
+                        A customer with phone <strong>{{ existing_customer.phone }}</strong> already exists: 
+                        <strong>{{ existing_customer.full_name }}</strong>{% if existing_customer.city %} ({{ existing_customer.city }}){% endif %}.
+                        Do you want to create a new separate customer for <strong>{{ form_data.full_name }}</strong>?
+                    </p>
+                    <div class="mt-4 flex flex-wrap items-center gap-3">
+                        <button type="submit" class="btn-premium btn-premium--gold !py-1.5 !px-4 !text-xs !rounded-lg flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[16px]">person_add</span>
+                            <span class="btn-premium__label">Create Separate Customer</span>
+                        </button>
+                        <a href="{% url 'customer_detail' existing_customer.id %}" class="btn-premium !bg-slate-700 hover:!bg-slate-600 !py-1.5 !px-4 !text-xs !rounded-lg flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[16px]">visibility</span>
+                            <span class="btn-premium__label">View Existing Customer</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
 
         <div class="glass-panel p-6 sm:p-8 mb-6">
             <h3 class="form-section-title flex items-center gap-2">
@@ -106,17 +133,25 @@
 
                 <!-- Phone Number -->
                 <div>
-                    <label class="form-label-custom" for="phone">Phone Number *</label>
+                    <div class="flex items-center justify-between">
+                        <label class="form-label-custom" for="phone">Phone Number *</label>
+                        <span id="phone_counter" class="text-[11px] font-bold text-slate-400 dark:text-white/40">0 / 10 digits</span>
+                    </div>
                     <div class="flex gap-2">
                         <input type="text" name="country_code"
-                            class="form-input-custom !w-[80px] text-center"
+                            class="form-input-custom !w-[80px] text-center font-medium"
                             value="{{ form_data.country_code|default:'+91' }}"
                             placeholder="+91">
                         <input type="tel" id="phone" name="phone" required
-                            class="form-input-custom flex-1"
-                            placeholder="e.g. 9876543210"
+                            maxlength="10" minlength="10" pattern="[0-9]{10}" inputmode="numeric"
+                            class="form-input-custom flex-1 font-mono tracking-wider"
+                            placeholder="10-digit mobile number"
                             value="{{ form_data.phone|default:'' }}">
                     </div>
+                    <p id="phone_error" class="text-[11px] text-red-500 font-semibold mt-1.5 hidden flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[14px]">error</span>
+                        <span id="phone_error_text">Must be exactly 10 numeric digits</span>
+                    </p>
                 </div>
 
                 <!-- City -->
@@ -139,7 +174,7 @@
                 <a href="{% url 'customer_list' %}" class="btn-premium flex-1 sm:flex-initial flex items-center justify-center gap-2">
                     <span class="btn-premium__label">Cancel</span>
                 </a>
-                <button type="submit" class="btn-premium btn-premium--gold flex-1 sm:flex-initial flex items-center justify-center gap-2">
+                <button type="submit" id="submitCustomerBtn" class="btn-premium btn-premium--gold flex-1 sm:flex-initial flex items-center justify-center gap-2">
                     <span class="btn-premium__label flex items-center gap-2">
                         <span class="material-symbols-outlined text-[18px]">person_add</span>
                         Save Customer
@@ -149,4 +184,89 @@
         </div>
     </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const phoneInput = document.getElementById('phone');
+    const phoneCounter = document.getElementById('phone_counter');
+    const phoneError = document.getElementById('phone_error');
+    const phoneErrorText = document.getElementById('phone_error_text');
+    const form = phoneInput ? phoneInput.closest('form') : null;
+
+    function sanitizeAndValidatePhone() {
+        if (!phoneInput) return;
+        // Strip non-numeric characters and cap at 10 digits
+        const raw = phoneInput.value;
+        const digits = raw.replace(/\D/g, '').slice(0, 10);
+        if (raw !== digits) {
+            phoneInput.value = digits;
+        }
+
+        const len = digits.length;
+        if (phoneCounter) {
+            phoneCounter.textContent = `${len} / 10 digits`;
+            if (len === 10) {
+                phoneCounter.className = 'text-[11px] font-bold text-emerald-600 dark:text-emerald-400';
+            } else if (len > 0) {
+                phoneCounter.className = 'text-[11px] font-bold text-amber-600 dark:text-amber-400';
+            } else {
+                phoneCounter.className = 'text-[11px] font-bold text-slate-400 dark:text-white/40';
+            }
+        }
+
+        if (len > 0 && len < 10) {
+            phoneError.classList.remove('hidden');
+            phoneErrorText.textContent = `Phone number must be exactly 10 digits (${len}/10 entered)`;
+            phoneInput.classList.add('!border-red-500');
+        } else {
+            phoneError.classList.add('hidden');
+            phoneInput.classList.remove('!border-red-500');
+        }
+    }
+
+    if (phoneInput) {
+        // Prevent typing non-numeric characters as they are pressed
+        phoneInput.addEventListener('keypress', (e) => {
+            if (!/[0-9]/.test(e.key)) {
+                e.preventDefault();
+                phoneError.classList.remove('hidden');
+                phoneErrorText.textContent = 'Only numbers (0-9) are allowed';
+                setTimeout(() => {
+                    if (phoneInput.value.length === 10 || phoneInput.value.length === 0) {
+                        phoneError.classList.add('hidden');
+                    }
+                }, 1500);
+            }
+        });
+
+        // Real-time input handling (typing, deleting)
+        phoneInput.addEventListener('input', sanitizeAndValidatePhone);
+
+        // Handle paste events safely
+        phoneInput.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text');
+            const cleanDigits = text.replace(/\D/g, '').slice(0, 10);
+            phoneInput.value = cleanDigits;
+            sanitizeAndValidatePhone();
+        });
+
+        // Run initial check if pre-filled
+        sanitizeAndValidatePhone();
+    }
+
+    if (form) {
+        form.addEventListener('submit', (e) => {
+            const digits = phoneInput.value.replace(/\D/g, '');
+            if (digits.length !== 10) {
+                e.preventDefault();
+                phoneError.classList.remove('hidden');
+                phoneErrorText.textContent = `Please enter a valid 10-digit mobile number (${digits.length}/10 entered)`;
+                phoneInput.classList.add('!border-red-500');
+                phoneInput.focus();
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

@@ -33,15 +33,6 @@
         </div>
     </div>
 
-    {% if messages %}
-    <div class="mb-6 space-y-2">
-        {% for message in messages %}
-        <div class="p-4 rounded-xl text-sm font-medium border {% if message.tags == 'error' %}bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20 text-red-700 dark:text-red-400{% else %}bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400{% endif %}">
-            {{ message }}
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
 
     <div class="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-6 items-start">
         <!-- Details Card -->
@@ -131,11 +122,11 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="border-b border-theme-border bg-slate-100/50 dark:bg-white/[0.02]">
-                            <th class="py-3 px-4 text-[10px] font-bold text-slate-500 dark:text-white/40 uppercase tracking-widest whitespace-nowrap">Date</th>
-                            <th class="py-3 px-4 text-[10px] font-bold text-slate-500 dark:text-white/40 uppercase tracking-widest whitespace-nowrap">Type</th>
-                            <th class="py-3 px-4 text-[10px] font-bold text-slate-500 dark:text-white/40 uppercase tracking-widest whitespace-nowrap text-right">Qty</th>
-                            <th class="py-3 px-4 text-[10px] font-bold text-slate-500 dark:text-white/40 uppercase tracking-widest whitespace-nowrap">Details</th>
-                            <th class="py-3 px-4 text-[10px] font-bold text-slate-500 dark:text-white/40 uppercase tracking-widest whitespace-nowrap text-right">Cost</th>
+                            <th class="py-3 px-4 text-[10px] font-bold text-[#FFFDF7] uppercase tracking-widest whitespace-nowrap">Date</th>
+                            <th class="py-3 px-4 text-[10px] font-bold text-[#FFFDF7] uppercase tracking-widest whitespace-nowrap">Type</th>
+                            <th class="py-3 px-4 text-[10px] font-bold text-[#FFFDF7] uppercase tracking-widest whitespace-nowrap text-right">Qty</th>
+                            <th class="py-3 px-4 text-[10px] font-bold text-[#FFFDF7] uppercase tracking-widest whitespace-nowrap">Details</th>
+                            <th class="py-3 px-4 text-[10px] font-bold text-[#FFFDF7] uppercase tracking-widest whitespace-nowrap text-right">Cost</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-theme-border">

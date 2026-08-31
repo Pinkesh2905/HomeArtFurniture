@@ -1,0 +1,14 @@
+{
+  "name": "homeartfurniture",
+  "version": "1.0.0",
+  "description": "Home Art Furniture Admin Tailwind CSS Build",
+  "scripts": {
+    "build:css": "tailwindcss -i ./static/css/input.css -o ./static/core/css/tailwind.css --minify",
+    "watch:css": "tailwindcss -i ./static/css/input.css -o ./static/core/css/tailwind.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/container-queries": "^0.1.1",
+    "@tailwindcss/forms": "^0.5.10",
+    "tailwindcss": "^3.4.17"
+  }
+}

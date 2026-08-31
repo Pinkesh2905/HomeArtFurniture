@@ -59,13 +59,13 @@ def measurement_profile(request):
                     customer.save(update_fields=['city'])
 
         # 2. Extract selected items to bill
-        selected_to_bill = request.POST.getlist('bill_garment') # list of block IDs like "1", "2"
-        garments_to_bill = []
+        selected_to_bill = request.POST.getlist('bill_furniture') # list of block IDs like "1", "2"
+        furniture_to_bill = []
 
         # 3. Process all furniture blocks submitted
-        block_ids = request.POST.getlist('garment_block_id')
+        block_ids = request.POST.getlist('furniture_block_id')
         for block_id in block_ids:
-            furniture_type = request.POST.get(f'garment_type_{block_id}')
+            furniture_type = request.POST.get(f'furniture_type_{block_id}')
             if not furniture_type:
                 continue
                 
@@ -107,16 +107,16 @@ def measurement_profile(request):
                 
             # If this block was selected for billing, add its ID
             if block_id in selected_to_bill and dimension:
-                garments_to_bill.append(str(dimension.id))
+                furniture_to_bill.append(str(dimension.id))
 
         # 4. Redirect to Billing or stay on profile
-        if 'save_garment' in request.POST:
+        if 'save_furniture' in request.POST:
             messages.success(request, 'Dimensions saved successfully.')
             url = reverse('measurement_profile') + f"?customer_id={customer.id}"
             return redirect(url)
 
         # Redirect to Billing
-        measurements_qs = ",".join(garments_to_bill)
+        measurements_qs = ",".join(furniture_to_bill)
         url = reverse('order_create') + f"?customer_id={customer.id}&measurements={urllib.parse.quote(measurements_qs)}"
         return redirect(url)
 
@@ -164,8 +164,8 @@ def measurement_profile(request):
         }
 
     context = {
-        'garment_categories': get_all_furniture_types(),
-        'garment_parameters': get_all_furniture_parameters(),
+        'furniture_categories': get_all_furniture_types(),
+        'furniture_parameters': get_all_furniture_parameters(),
         'initial_phone': initial_phone,
         'initial_customer': initial_customer_data,
     }

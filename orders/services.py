@@ -1,3 +1,4 @@
+import logging
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from datetime import timedelta
 from uuid import uuid4
@@ -9,6 +10,8 @@ from django.utils.dateparse import parse_date
 
 from measurements.models import FurnitureDimension, get_all_furniture_types
 from .models import Order, OrderItem, OrderStatus, OrderType, PaymentMethod
+
+logger = logging.getLogger('homeartfurniture')
 
 
 MONEY = Decimal('0.01')
@@ -55,7 +58,7 @@ def parse_items(post_data, customer):
         furniture_type = categories[index] if index < len(categories) else ''
         all_categories = dict(get_all_furniture_types()).keys()
         if furniture_type and furniture_type not in all_categories:
-            raise ValidationError('Invalid garment category selected.')
+            raise ValidationError('Invalid furniture category selected.')
 
         dimension_id = dimension_ids[index] if index < len(dimension_ids) else ''
         dimension = None
@@ -155,6 +158,7 @@ def create_order_from_post(post_data, customer):
     for index, item in enumerate(items):
         order_item = OrderItem.objects.create(order=order, **item)
 
+    logger.info('Order %s created for customer %s (amount: ₹%s)', order.order_number, customer.full_name, order.final_amount)
     return order
 
 
@@ -212,6 +216,7 @@ def update_order_from_post(order, post_data):
         if payment <= 0:
             raise ValidationError('Payment must be greater than 0.')
         if payment > order.balance_due:
+            logger.warning('Payment rejected: amount ₹%s exceeds balance due ₹%s for order %s', payment, order.balance_due, order.order_number)
             raise ValidationError('Payment cannot be greater than the balance due.')
         
         new_payment_method = post_data.get('payment_method')
@@ -222,11 +227,12 @@ def update_order_from_post(order, post_data):
             changed.append('payment_method')
 
         order.advance_paid = (order.advance_paid + payment).quantize(MONEY)
-        order.grand_total = order.balance_due
+        order.grand_total = (order.final_amount - order.advance_paid).quantize(MONEY)
         changed.extend(['advance_paid', 'grand_total'])
 
     if changed:
         order.save(update_fields=list(dict.fromkeys(changed + ['updated_at'])))
+        logger.info('Order %s updated: advance_paid=₹%s, grand_total=₹%s', order.order_number, order.advance_paid, order.grand_total)
     return order
 
 @transaction.atomic

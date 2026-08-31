@@ -1,9 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orders List Print | Home Art Furniture</title>
+    <link rel="icon" type="image/svg+xml" href="{% static 'core/img/favicon.svg' %}">
     <style>
         @page {
             size: A4 landscape;
@@ -238,7 +240,7 @@
                     <th>Customer</th>
                     <th style="width: 115px;">Phone</th>
                     <th style="width: 115px;">Date</th>
-                    <th style="width: 105px;" class="right">Amount</th>
+                    <th style="width: 105px;" class="right">Balance Due</th>
                     <th style="width: 120px;" class="center">Status</th>
                     <th style="width: 70px;" class="center">Flag</th>
                 </tr>

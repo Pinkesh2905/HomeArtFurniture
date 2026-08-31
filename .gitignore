@@ -9,3 +9,7 @@ __pycache__/
 production.env
 staticfiles/
 media/
+logs/*.log
+!logs/.gitkeep
+node_modules/
+/*.png

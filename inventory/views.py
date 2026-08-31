@@ -1,7 +1,8 @@
+from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, F, Count
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -36,18 +37,21 @@ def material_list(request):
     # Stock status filter
     stock_filter = request.GET.get('stock', '')
     if stock_filter == 'low':
-        materials = [m for m in materials if m.is_low_stock and not m.is_out_of_stock]
+        materials = materials.filter(current_stock__lte=F('min_stock'), current_stock__gt=0)
     elif stock_filter == 'out':
-        materials = [m for m in materials if m.is_out_of_stock]
-    else:
-        materials = list(materials)
+        materials = materials.filter(current_stock__lte=0)
 
     # Summary metrics
-    all_materials = Material.objects.filter(is_active=True)
-    total_count = all_materials.count()
-    low_stock_count = sum(1 for m in all_materials if m.is_low_stock and m.current_stock > 0)
-    out_of_stock_count = sum(1 for m in all_materials if m.is_out_of_stock)
-    total_value = sum(m.stock_value for m in all_materials)
+    metrics = Material.objects.filter(is_active=True).aggregate(
+        total_count=Count('id'),
+        low_stock_count=Count('id', filter=Q(current_stock__lte=F('min_stock'), current_stock__gt=0)),
+        out_of_stock_count=Count('id', filter=Q(current_stock__lte=0)),
+        total_value=Sum(F('current_stock') * F('cost_per_unit')),
+    )
+    total_count = metrics['total_count'] or 0
+    low_stock_count = metrics['low_stock_count'] or 0
+    out_of_stock_count = metrics['out_of_stock_count'] or 0
+    total_value = metrics['total_value'] or 0
 
     context = {
         'materials': materials,
@@ -238,8 +242,12 @@ def inventory_print(request):
     materials = Material.objects.filter(is_active=True).select_related('supplier').order_by('category', 'name')
     generated_at = timezone.localtime()
 
-    total_value = sum(m.stock_value for m in materials)
-    low_stock_count = sum(1 for m in materials if m.is_low_stock)
+    aggr = materials.aggregate(
+        total_value=Sum(F('current_stock') * F('cost_per_unit')),
+        low_stock_count=Count('id', filter=Q(current_stock__lte=F('min_stock'))),
+    )
+    total_value = aggr['total_value'] or Decimal('0.00')
+    low_stock_count = aggr['low_stock_count'] or 0
 
     context = {
         'materials': materials,

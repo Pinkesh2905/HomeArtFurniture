@@ -42,21 +42,41 @@ class CustomFurnitureParameter(models.Model):
     def __str__(self):
         return f"{self.category_name} - {self.name}"
 
+from django.core.cache import cache
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+
 def get_all_furniture_types():
+    cached = cache.get('all_furniture_types')
+    if cached is not None:
+        return cached
     base_choices = list(FurnitureType.choices)
     custom_categories = CustomFurnitureType.objects.all()
     for cat in custom_categories:
         slug = cat.name.lower().replace(' ', '_')
         base_choices.append((slug, cat.name))
+    cache.set('all_furniture_types', base_choices, timeout=300)
     return base_choices
 
+@receiver([post_save, post_delete], sender=CustomFurnitureType)
+def invalidate_furniture_types_cache(sender, **kwargs):
+    cache.delete('all_furniture_types')
+
 def get_all_furniture_parameters():
+    cached = cache.get('all_furniture_parameters')
+    if cached is not None:
+        return cached
     params = copy.deepcopy(FURNITURE_PARAMETERS)
     for cp in CustomFurnitureParameter.objects.all():
         if cp.category_name not in params:
             params[cp.category_name] = []
         params[cp.category_name].append(cp.name)
+    cache.set('all_furniture_parameters', params, timeout=300)
     return params
+
+@receiver([post_save, post_delete], sender=CustomFurnitureParameter)
+def invalidate_furniture_parameters_cache(sender, **kwargs):
+    cache.delete('all_furniture_parameters')
 
 
 class FurnitureDimension(models.Model):

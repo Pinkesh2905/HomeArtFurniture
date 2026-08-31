@@ -1,7 +1,9 @@
+from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
-from django.db.models import Q
+from django.core.paginator import Paginator
+from django.db.models import Q, F, Sum, Count
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
@@ -22,13 +24,13 @@ def order_create(request):
             order = create_order_from_post(request.POST, customer)
         except ValidationError as exc:
             messages.error(request, '; '.join(exc.messages))
-            garments = ','.join(request.POST.getlist('item_furniture_type[]'))
+            furniture = ','.join(request.POST.getlist('item_furniture_type[]'))
             FurnitureDimensions = ','.join(request.POST.getlist('item_FurnitureDimension_id[]'))
-            return redirect(f"{reverse('order_create')}?customer_id={customer.id}&garments={garments}&FurnitureDimensions={FurnitureDimensions}")
+            return redirect(f"{reverse('order_create')}?customer_id={customer.id}&furniture={furniture}&FurnitureDimensions={FurnitureDimensions}")
         return redirect(reverse('order_print', args=[order.id]))
 
     customer_id = request.GET.get('customer_id')
-    garments_qs = request.GET.get('garments', '')
+    furniture_qs = request.GET.get('furniture', '')
     FurnitureDimensions_qs = request.GET.get('FurnitureDimensions') or request.GET.get('measurements') or request.GET.get('dimensions') or ''
     
     if not customer_id:
@@ -66,12 +68,12 @@ def order_create(request):
             except (FurnitureDimension.DoesNotExist, ValueError):
                 continue
     else:
-        garment_types = garments_qs.split(',') if garments_qs else []
-        for gtype in garment_types:
-            if not gtype: continue
-            label = all_cats.get(gtype, gtype.title())
+        furniture_types = furniture_qs.split(',') if furniture_qs else []
+        for ftype in furniture_types:
+            if not ftype: continue
+            label = all_cats.get(ftype, ftype.title())
             selected_items.append({
-                'type': gtype,
+                'type': ftype,
                 'label': label,
                 'qty': 1,
                 'rate': '',
@@ -93,9 +95,9 @@ def num2words(num):
     under_20 = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen']
     tens = ['Zero', 'Ten', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety']
 
-    if num == 0: return under_20[0]
-    
     def convert(n):
+        if n == 0:
+            return under_20[0]
         if n < 20:
             return under_20[n]
         if n < 100:
@@ -107,8 +109,29 @@ def num2words(num):
         if n < 10000000:
             return convert(n // 100000) + ' Lakh' + ('' if n % 100000 == 0 else ' ' + convert(n % 100000))
         return convert(n // 10000000) + ' Crore' + ('' if n % 10000000 == 0 else ' ' + convert(n % 10000000))
-    
-    return convert(int(num)) + ' Only'
+
+    from decimal import Decimal, ROUND_HALF_UP
+    try:
+        val = Decimal(str(num)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    except Exception:
+        return 'Zero Only'
+
+    rupees = int(val)
+    paise = int(round((val - Decimal(rupees)) * 100))
+
+    if rupees == 0 and paise == 0:
+        return 'Zero Only'
+
+    rupees_str = convert(rupees) if rupees > 0 else ''
+
+    if paise > 0:
+        paise_str = convert(paise)
+        if rupees > 0:
+            return f"{rupees_str} Rupees and {paise_str} Paise Only"
+        else:
+            return f"{paise_str} Paise Only"
+
+    return f"{rupees_str} Only"
 
 @login_required
 def order_print(request, order_id):
@@ -224,8 +247,15 @@ def filtered_orders_from_request(request):
 def order_list(request):
     orders, filters_context = filtered_orders_from_request(request)
 
+    paginator = Paginator(orders, 10)  # Show 10 orders per page (matching customer_list)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'orders': orders,
+        'orders': page_obj,
+        'page_obj': page_obj,
+        'paginator': paginator,
+        'is_paginated': page_obj.has_other_pages(),
         **filters_context,
     }
     return render(request, 'orders/order_list.html', context)
@@ -235,7 +265,7 @@ def order_list(request):
 def order_list_print(request):
     orders, filters_context = filtered_orders_from_request(request)
     generated_at = timezone.localtime()
-    total_amount = sum(order.final_amount for order in orders)
+    total_amount = orders.aggregate(total=Sum('final_amount'))['total'] or Decimal('0.00')
 
     context = {
         'orders': orders,
@@ -290,7 +320,7 @@ def order_detail(request, order_id):
         'items': items,
         'statuses': OrderStatus.choices,
         'balance_due': order.balance_due,
-        'garment_parameters': get_all_furniture_parameters(),
+        'furniture_parameters': get_all_furniture_parameters(),
         'whatsapp_link': whatsapp_link,
     }
     return render(request, 'orders/order_detail.html', context)
@@ -298,7 +328,7 @@ def order_detail(request, order_id):
 
 @login_required
 def delivery_schedule(request):
-    from django.db.models import Sum, Count
+    from django.db.models import Sum, F
     today = timezone.localdate()
 
     from django.utils.dateparse import parse_date
@@ -336,10 +366,22 @@ def delivery_schedule(request):
                 | Q(customer__phone__icontains=q)
             )
 
-    # Group orders by date
+    # Summary stats (computed across all matching orders)
+    total_orders = orders.count()
+    overdue_count = orders.filter(date__lt=today).exclude(status__in=[OrderStatus.DELIVERED, OrderStatus.CANCELLED]).count()
+    due_today_count = orders.filter(date=today).exclude(status__in=[OrderStatus.DELIVERED, OrderStatus.CANCELLED]).count()
+    balance_aggr = orders.aggregate(total=Sum(F('final_amount') - F('advance_paid')))
+    total_balance = (balance_aggr['total'] or Decimal('0.00')).quantize(Decimal('0.01'))
+
+    # Paginate orders (10 per page)
+    paginator = Paginator(orders, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Group orders by date (for the current paginated page)
     from collections import defaultdict
     grouped = defaultdict(list)
-    for order in orders:
+    for order in page_obj:
         grouped[order.date].append(order)
 
     # Sort groups: overdue first, then ascending
@@ -348,21 +390,17 @@ def delivery_schedule(request):
 
     grouped_sorted = sorted(grouped.items(), key=lambda x: sort_key(x[0]))
 
-    # Summary stats
-    total_orders = orders.count()
-    overdue_count = orders.filter(date__lt=today).exclude(status__in=[OrderStatus.DELIVERED, OrderStatus.CANCELLED]).count()
-    due_today_count = orders.filter(date=today).exclude(status__in=[OrderStatus.DELIVERED, OrderStatus.CANCELLED]).count()
-    total_balance = sum(o.balance_due for o in orders)
-
     context = {
         'grouped_orders': grouped_sorted,
+        'page_obj': page_obj,
+        'paginator': paginator,
         'today': today,
         'filter_date': filter_date,
         'filter_from': filter_from,
         'filter_to': filter_to,
         'filter_status': filter_status,
-        'statuses': OrderStatus.choices,
         'q': q,
+        'statuses': OrderStatus.choices,
         'total_orders': total_orders,
         'overdue_count': overdue_count,
         'due_today_count': due_today_count,
@@ -471,29 +509,57 @@ def payment_report(request):
     # Categorize
     cash_orders = orders.filter(payment_method=PaymentMethod.CASH).order_by('-date')
     upi_orders = orders.filter(payment_method=PaymentMethod.UPI).order_by('-date')
+    card_orders = orders.filter(payment_method=PaymentMethod.CARD).order_by('-date')
+    bank_orders = orders.filter(payment_method=PaymentMethod.BANK_TRANSFER).order_by('-date')
     
-    # Metrics
-    total_cash_advance = sum(o.advance_paid for o in cash_orders)
-    total_upi_advance = sum(o.advance_paid for o in upi_orders)
-    total_advance = total_cash_advance + total_upi_advance
+    # Metrics (DB-level aggregation)
+    metrics = orders.aggregate(
+        cash_adv=Sum('advance_paid', filter=Q(payment_method=PaymentMethod.CASH)),
+        upi_adv=Sum('advance_paid', filter=Q(payment_method=PaymentMethod.UPI)),
+        card_adv=Sum('advance_paid', filter=Q(payment_method=PaymentMethod.CARD)),
+        bank_adv=Sum('advance_paid', filter=Q(payment_method=PaymentMethod.BANK_TRANSFER)),
+        cash_pend=Sum('grand_total', filter=Q(payment_method=PaymentMethod.CASH)),
+        upi_pend=Sum('grand_total', filter=Q(payment_method=PaymentMethod.UPI)),
+        card_pend=Sum('grand_total', filter=Q(payment_method=PaymentMethod.CARD)),
+        bank_pend=Sum('grand_total', filter=Q(payment_method=PaymentMethod.BANK_TRANSFER)),
+        cash_cnt=Count('id', filter=Q(payment_method=PaymentMethod.CASH)),
+        upi_cnt=Count('id', filter=Q(payment_method=PaymentMethod.UPI)),
+        card_cnt=Count('id', filter=Q(payment_method=PaymentMethod.CARD)),
+        bank_cnt=Count('id', filter=Q(payment_method=PaymentMethod.BANK_TRANSFER)),
+    )
+    total_cash_advance = metrics['cash_adv'] or Decimal('0.00')
+    total_upi_advance = metrics['upi_adv'] or Decimal('0.00')
+    total_card_advance = metrics['card_adv'] or Decimal('0.00')
+    total_bank_advance = metrics['bank_adv'] or Decimal('0.00')
+    total_advance = total_cash_advance + total_upi_advance + total_card_advance + total_bank_advance
     
-    total_cash_pending = sum(o.grand_total for o in cash_orders)
-    total_upi_pending = sum(o.grand_total for o in upi_orders)
-    total_pending = total_cash_pending + total_upi_pending
+    total_cash_pending = metrics['cash_pend'] or Decimal('0.00')
+    total_upi_pending = metrics['upi_pend'] or Decimal('0.00')
+    total_card_pending = metrics['card_pend'] or Decimal('0.00')
+    total_bank_pending = metrics['bank_pend'] or Decimal('0.00')
+    total_pending = total_cash_pending + total_upi_pending + total_card_pending + total_bank_pending
     
     context = {
         'cash_orders': cash_orders,
         'upi_orders': upi_orders,
+        'card_orders': card_orders,
+        'bank_orders': bank_orders,
         'start_date': start_date,
         'end_date': end_date,
         'total_cash_advance': total_cash_advance,
         'total_upi_advance': total_upi_advance,
+        'total_card_advance': total_card_advance,
+        'total_bank_advance': total_bank_advance,
         'total_advance': total_advance,
         'total_cash_pending': total_cash_pending,
         'total_upi_pending': total_upi_pending,
+        'total_card_pending': total_card_pending,
+        'total_bank_pending': total_bank_pending,
         'total_pending': total_pending,
-        'cash_count': cash_orders.count(),
-        'upi_count': upi_orders.count(),
+        'cash_count': metrics['cash_cnt'] or 0,
+        'upi_count': metrics['upi_cnt'] or 0,
+        'card_count': metrics['card_cnt'] or 0,
+        'bank_count': metrics['bank_cnt'] or 0,
     }
     return render(request, 'orders/payment_report.html', context)
 
@@ -522,31 +588,55 @@ def payment_report_print(request):
     # Categorize
     cash_orders = orders.filter(payment_method=PaymentMethod.CASH).order_by('-date')
     upi_orders = orders.filter(payment_method=PaymentMethod.UPI).order_by('-date')
+    card_orders = orders.filter(payment_method=PaymentMethod.CARD).order_by('-date')
+    bank_orders = orders.filter(payment_method=PaymentMethod.BANK_TRANSFER).order_by('-date')
     
-    # Metrics
-    total_cash_advance = sum(o.advance_paid for o in cash_orders)
-    total_upi_advance = sum(o.advance_paid for o in upi_orders)
-    total_advance = total_cash_advance + total_upi_advance
+    # Metrics (DB-level aggregation)
+    print_metrics = orders.aggregate(
+        cash_adv=Sum('advance_paid', filter=Q(payment_method=PaymentMethod.CASH)),
+        upi_adv=Sum('advance_paid', filter=Q(payment_method=PaymentMethod.UPI)),
+        card_adv=Sum('advance_paid', filter=Q(payment_method=PaymentMethod.CARD)),
+        bank_adv=Sum('advance_paid', filter=Q(payment_method=PaymentMethod.BANK_TRANSFER)),
+        cash_pend=Sum('grand_total', filter=Q(payment_method=PaymentMethod.CASH)),
+        upi_pend=Sum('grand_total', filter=Q(payment_method=PaymentMethod.UPI)),
+        card_pend=Sum('grand_total', filter=Q(payment_method=PaymentMethod.CARD)),
+        bank_pend=Sum('grand_total', filter=Q(payment_method=PaymentMethod.BANK_TRANSFER)),
+    )
+    total_cash_advance = print_metrics['cash_adv'] or Decimal('0.00')
+    total_upi_advance = print_metrics['upi_adv'] or Decimal('0.00')
+    total_card_advance = print_metrics['card_adv'] or Decimal('0.00')
+    total_bank_advance = print_metrics['bank_adv'] or Decimal('0.00')
+    total_advance = total_cash_advance + total_upi_advance + total_card_advance + total_bank_advance
     
-    total_cash_pending = sum(o.grand_total for o in cash_orders)
-    total_upi_pending = sum(o.grand_total for o in upi_orders)
-    total_pending = total_cash_pending + total_upi_pending
+    total_cash_pending = print_metrics['cash_pend'] or Decimal('0.00')
+    total_upi_pending = print_metrics['upi_pend'] or Decimal('0.00')
+    total_card_pending = print_metrics['card_pend'] or Decimal('0.00')
+    total_bank_pending = print_metrics['bank_pend'] or Decimal('0.00')
+    total_pending = total_cash_pending + total_upi_pending + total_card_pending + total_bank_pending
     
     generated_at = timezone.localtime()
     
     context = {
         'cash_orders': cash_orders,
         'upi_orders': upi_orders,
+        'card_orders': card_orders,
+        'bank_orders': bank_orders,
         'start_date': start_date,
         'end_date': end_date,
         'total_cash_advance': total_cash_advance,
         'total_upi_advance': total_upi_advance,
+        'total_card_advance': total_card_advance,
+        'total_bank_advance': total_bank_advance,
         'total_advance': total_advance,
         'total_cash_pending': total_cash_pending,
         'total_upi_pending': total_upi_pending,
+        'total_card_pending': total_card_pending,
+        'total_bank_pending': total_bank_pending,
         'total_pending': total_pending,
         'cash_count': cash_orders.count(),
         'upi_count': upi_orders.count(),
+        'card_count': card_orders.count(),
+        'bank_count': bank_orders.count(),
         'generated_at': generated_at,
     }
     return render(request, 'orders/payment_report_print.html', context)

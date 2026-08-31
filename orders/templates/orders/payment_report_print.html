@@ -1,9 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payments Report Print | Home Art Furniture</title>
+    <link rel="icon" type="image/svg+xml" href="{% static 'core/img/favicon.svg' %}">
     <style>
         @page {
             size: A4 landscape;
@@ -177,6 +179,16 @@
                 <div class="metric-sub">Orders: {{ upi_count }} | Pending: ₹{{ total_upi_pending|floatformat:2 }}</div>
             </div>
             <div class="metric-card">
+                <div class="metric-title">Card Collection</div>
+                <div class="metric-val">₹{{ total_card_advance|floatformat:2 }}</div>
+                <div class="metric-sub">Orders: {{ card_count }} | Pending: ₹{{ total_card_pending|floatformat:2 }}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Bank Transfer</div>
+                <div class="metric-val">₹{{ total_bank_advance|floatformat:2 }}</div>
+                <div class="metric-sub">Orders: {{ bank_count }} | Pending: ₹{{ total_bank_pending|floatformat:2 }}</div>
+            </div>
+            <div class="metric-card">
                 <div class="metric-title">Total Collected</div>
                 <div class="metric-val">₹{{ total_advance|floatformat:2 }}</div>
                 <div class="metric-sub">Combined | Total Pending: ₹{{ total_pending|floatformat:2 }}</div>
@@ -262,6 +274,90 @@
                 {% empty %}
                 <tr>
                     <td colspan="6" class="text-center">No UPI / QR collections in this period.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Card Collections -->
+        <h2>Credit / Debit Card Collections</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th class="text-right">Advance Paid</th>
+                    <th class="text-right">Pending Balance</th>
+                    <th class="text-center">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in card_orders %}
+                <tr>
+                    <td>{{ order.date|date:"d M Y" }}</td>
+                    <td><strong>{{ order.order_number }}</strong></td>
+                    <td>
+                        <strong>{{ order.customer.full_name }}</strong><br>
+                        {{ order.customer.phone }}
+                    </td>
+                    <td class="text-right"><strong>₹{{ order.advance_paid }}</strong></td>
+                    <td class="text-right">
+                        {% if order.grand_total > 0 %}
+                            <span class="badge">₹{{ order.grand_total }}</span>
+                        {% else %}
+                            <span class="badge">Paid</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <span class="badge">{{ order.get_status_display }}</span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No card collections in this period.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Bank Transfer Collections -->
+        <h2>Bank Transfer Collections</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th class="text-right">Advance Paid</th>
+                    <th class="text-right">Pending Balance</th>
+                    <th class="text-center">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in bank_orders %}
+                <tr>
+                    <td>{{ order.date|date:"d M Y" }}</td>
+                    <td><strong>{{ order.order_number }}</strong></td>
+                    <td>
+                        <strong>{{ order.customer.full_name }}</strong><br>
+                        {{ order.customer.phone }}
+                    </td>
+                    <td class="text-right"><strong>₹{{ order.advance_paid }}</strong></td>
+                    <td class="text-right">
+                        {% if order.grand_total > 0 %}
+                            <span class="badge">₹{{ order.grand_total }}</span>
+                        {% else %}
+                            <span class="badge">Paid</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <span class="badge">{{ order.get_status_display }}</span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No bank transfer collections in this period.</td>
                 </tr>
                 {% endfor %}
             </tbody>

@@ -114,7 +114,7 @@
                             <th class="px-3 py-3 font-serif font-semibold text-sm uppercase tracking-wider">Order ID</th>
                             <th class="px-3 py-3 font-serif font-semibold text-sm uppercase tracking-wider">Customer</th>
                             <th class="px-3 py-3 font-serif font-semibold text-sm uppercase tracking-wider text-center text-amber-700 dark:text-amber-400">Date</th>
-                            <th class="px-3 py-3 font-serif font-semibold text-sm uppercase tracking-wider">Amount</th>
+                            <th class="px-3 py-3 font-serif font-semibold text-sm uppercase tracking-wider">Balance Due</th>
                             <th class="px-3 py-3 font-serif font-semibold text-sm uppercase tracking-wider">Quick Pay</th>
                             <th class="px-3 py-3 font-serif font-semibold text-sm uppercase tracking-wider">Status</th>
                             <th class="px-3 py-3 font-serif font-semibold text-sm uppercase tracking-wider text-right">Actions</th>
@@ -186,18 +186,15 @@
                             <td class="px-3 py-3">
                                 <div class="relative inline-block text-left status-dropdown-container" id="status-container-{{ order.id }}">
                                     <button type="button" onclick="toggleStatusDropdown(event, {{ order.id }})" 
-                                            class="inline-flex items-center gap-1.5 focus:outline-none hover:opacity-85 transition-all"
-                                            id="status-badge-btn-{{ order.id }}">
+                                            class="inline-flex items-center gap-1.5 focus:outline-none hover:opacity-85 transitio                                             id="status-badge-btn-{{ order.id }}">
                                         <span id="status-badge-{{ order.id }}" class="inline-flex px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider cursor-pointer
-                                            {% if order.status == 'delivered' %}bg-emerald-500/20 text-emerald-400 border border-emerald-500/30
-                                            {% elif order.status == 'cutting' %}bg-orange-500/20 text-orange-400 border border-orange-500/30
-                                            {% elif order.status == 'pending' %}bg-amber-500/20 text-amber-400 border border-amber-500/30
-                                            {% elif order.status == 'in_progress' %}bg-zinc-500/15 text-zinc-700 dark:text-zinc-300 border border-zinc-500/30
-                                            {% elif order.status == 'processing' %}bg-indigo-500/20 text-indigo-400 border border-indigo-500/30
-                                            {% elif order.status == 'cancelled' %}bg-rose-500/20 text-rose-400 border border-rose-500/30
+                                            {% if order.status == 'delivered' %}bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30
+                                            {% elif order.status == 'in_progress' %}bg-blue-500/20 text-blue-700 dark:text-blue-400 border border-blue-500/30
+                                            {% elif order.status == 'pending' %}bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30
+                                            {% elif order.status == 'cancelled' %}bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-500/30
                                             {% else %}bg-zinc-500/15 text-zinc-700 dark:text-zinc-300 border border-zinc-500/30{% endif %}">
                                             {{ order.get_status_display }}
-                                        </span>
+                                        </span> </span>
                                         <span class="material-symbols-outlined text-[14px] text-slate-500 dark:text-white/30">expand_more</span>
                                     </button>
                                     
@@ -268,12 +265,10 @@
                                 class="inline-flex items-center gap-1 focus:outline-none hover:opacity-85 transition-all"
                                 id="status-badge-btn-mobile-{{ order.id }}">
                             <span id="status-badge-mobile-{{ order.id }}" class="shrink-0 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider
-                                {% if order.status == 'delivered' %}bg-emerald-500/20 text-emerald-400 border border-emerald-500/30
-                                {% elif order.status == 'cutting' %}bg-orange-500/20 text-orange-400 border border-orange-500/30
-                                {% elif order.status == 'pending' %}bg-amber-500/20 text-amber-400 border border-amber-500/30
-                                {% elif order.status == 'in_progress' %}bg-zinc-500/15 text-zinc-700 dark:text-zinc-300 border border-zinc-500/30
-                                {% elif order.status == 'processing' %}bg-indigo-500/20 text-indigo-400 border border-indigo-500/30
-                                {% elif order.status == 'cancelled' %}bg-rose-500/20 text-rose-400 border border-rose-500/30
+                                {% if order.status == 'delivered' %}bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30
+                                {% elif order.status == 'in_progress' %}bg-blue-500/20 text-blue-700 dark:text-blue-400 border border-blue-500/30
+                                {% elif order.status == 'pending' %}bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30
+                                {% elif order.status == 'cancelled' %}bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-500/30
                                 {% else %}bg-zinc-500/15 text-zinc-700 dark:text-zinc-300 border border-zinc-500/30{% endif %}">
                                 {{ order.get_status_display }}
                             </span>
@@ -306,6 +301,7 @@
                         </div>
                         <div class="flex items-center justify-between w-full mt-1.5 gap-2">
                             <div>
+                                <div class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">Balance Due</div>
                                 <div class="font-bold text-lg text-slate-900 dark:text-white" id="order-amount-mobile-{{ order.id }}">₹{{ order.grand_total }}</div>
                             </div>
                             
@@ -350,20 +346,35 @@
         </div>
     </div>
         
-    <!-- Pagination if needed -->
-    {% if is_paginated %}
-    <div class="glass-panel mt-6 px-8 py-4 flex items-center justify-between">
-        <span class="text-xs font-bold text-theme-secondary uppercase tracking-widest">Page {{ page_obj.number }} of {{ paginator.num_pages }}</span>
-        <div class="flex gap-2">
-            {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}" class="p-2 rounded-[12px] border border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white hover:bg-white/10 transition-colors">
-                <span class="material-symbols-outlined text-lg">chevron_left</span>
+    <!-- Pagination -->
+    {% if orders.has_other_pages %}
+    <div class="glass-panel mt-6 p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="text-xs font-bold text-slate-500 dark:text-white/60 uppercase tracking-widest">
+            Showing {{ orders.start_index }}-{{ orders.end_index }} of {{ orders.paginator.count }} Orders
+        </div>
+        <div class="flex items-center gap-2">
+            {% if orders.has_previous %}
+            <a href="?page={{ orders.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="h-9 px-4 flex items-center justify-center bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg text-xs font-bold text-slate-900 dark:text-white hover:bg-white/10 transition-all">
+                <span class="material-symbols-outlined text-[18px] mr-1">chevron_left</span> Previous
             </a>
+            {% else %}
+            <div class="h-9 px-4 flex items-center justify-center bg-slate-100/50 dark:bg-white/[0.02] border border-slate-300 dark:border-white/5 rounded-lg text-xs font-bold text-slate-400 dark:text-white/30 cursor-not-allowed">
+                <span class="material-symbols-outlined text-[18px] mr-1">chevron_left</span> Previous
+            </div>
             {% endif %}
-            {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}" class="p-2 rounded-[12px] border border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white hover:bg-white/10 transition-colors">
-                <span class="material-symbols-outlined text-lg">chevron_right</span>
+
+            <div class="h-9 px-4 flex items-center justify-center bg-secondary/10 border border-secondary/30 rounded-lg text-xs font-bold text-secondary">
+                {{ orders.number }} / {{ orders.paginator.num_pages }}
+            </div>
+
+            {% if orders.has_next %}
+            <a href="?page={{ orders.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="h-9 px-4 flex items-center justify-center bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg text-xs font-bold text-slate-900 dark:text-white hover:bg-white/10 transition-all">
+                Next <span class="material-symbols-outlined text-[18px] ml-1">chevron_right</span>
             </a>
+            {% else %}
+            <div class="h-9 px-4 flex items-center justify-center bg-slate-100/50 dark:bg-white/[0.02] border border-slate-300 dark:border-white/5 rounded-lg text-xs font-bold text-slate-400 dark:text-white/30 cursor-not-allowed">
+                Next <span class="material-symbols-outlined text-[18px] ml-1">chevron_right</span>
+            </div>
             {% endif %}
         </div>
     </div>
@@ -384,20 +395,20 @@
             </div>
         </div>
         <div class="bg-red-500/10 border border-red-500/20 rounded-[14px] p-4 mb-6">
-            <p class="text-sm text-red-300 leading-relaxed">
+            <p class="text-sm text-red-800 dark:text-red-200 leading-relaxed">
                 Permanently delete order
-                <span id="modalOrderNumber" class="font-bold text-red-200"></span>
-                for <span id="modalCustomerName" class="font-bold text-red-200"></span>?
+                <span id="modalOrderNumber" class="font-bold text-red-900 dark:text-red-100"></span>
+                for <span id="modalCustomerName" class="font-bold text-red-900 dark:text-red-100"></span>?
                 All items and billing records will be removed.
             </p>
         </div>
         <div class="flex gap-3">
-            <button type="button" onclick="closeListDeleteModal()" class="flex-1 px-6 py-3 rounded-[12px] font-bold text-sm text-slate-600 dark:text-white/70 border border-slate-300 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 transition-all">
+            <button type="button" onclick="closeListDeleteModal()" class="flex-1 px-6 py-3 rounded-[12px] font-bold text-sm text-slate-700 dark:text-white/80 border border-slate-300 dark:border-white/20 hover:bg-slate-100 dark:hover:bg-white/10 transition-all cursor-pointer">
                 Cancel
             </button>
             <form id="listDeleteForm" method="POST" action="" class="flex-1">
                 {% csrf_token %}
-                <button type="submit" class="w-full px-6 py-3 rounded-[12px] font-bold text-sm bg-red-500/20 text-red-300 border border-red-500/40 hover:bg-red-500/30 hover:text-red-200 transition-all">
+                <button type="submit" class="btn-dialog-delete w-full !py-3 !rounded-[12px] text-sm">
                     Yes, Delete Permanently
                 </button>
             </form>
@@ -644,12 +655,10 @@ function updateStatusBadgeUI(orderId, status, display) {
     const badgeMobile = document.getElementById(`status-badge-mobile-${orderId}`);
     
     const statusClasses = {
-        'delivered': ['bg-emerald-500/20', 'text-emerald-400', 'border', 'border-emerald-500/30'],
-        'cutting': ['bg-orange-500/20', 'text-orange-400', 'border', 'border-orange-500/30'],
-        'pending': ['bg-amber-500/20', 'text-amber-400', 'border', 'border-amber-500/30'],
-        'in_progress': ['bg-zinc-500/15', 'text-zinc-700', 'dark:text-zinc-300', 'border', 'border-zinc-500/30'],
-        'processing': ['bg-indigo-500/20', 'text-indigo-400', 'border', 'border-indigo-500/30'],
-        'cancelled': ['bg-rose-500/20', 'text-rose-400', 'border', 'border-rose-500/30']
+        'delivered': ['bg-emerald-500/20', 'text-emerald-700', 'dark:text-emerald-400', 'border', 'border-emerald-500/30'],
+        'pending': ['bg-amber-500/20', 'text-amber-700', 'dark:text-amber-400', 'border', 'border-amber-500/30'],
+        'in_progress': ['bg-blue-500/20', 'text-blue-700', 'dark:text-blue-400', 'border', 'border-blue-500/30'],
+        'cancelled': ['bg-rose-500/20', 'text-rose-700', 'dark:text-rose-400', 'border', 'border-rose-500/30']
     };
     
     const defaultClasses = ['bg-zinc-500/15', 'text-zinc-700', 'dark:text-zinc-300', 'border', 'border-zinc-500/30'];

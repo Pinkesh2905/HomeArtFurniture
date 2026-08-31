@@ -1,13 +1,21 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Customers | Home Art Furniture Admin{% endblock %}
+{% block title %}{% if show_archived %}Archived Customers{% else %}Customers{% endif %} | Home Art Furniture Admin{% endblock %}
 
 {% block content %}
 <div class="p-4 sm:p-8 max-w-[1440px] mx-auto w-full">
-    <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-4">
         <div>
-            <h2 class="font-h2 text-2xl sm:text-3xl font-semibold text-theme-primary mb-1 sm:mb-2 drop-shadow-md">Customer Directory</h2>
-            <p class="text-theme-secondary text-sm sm:text-base font-body-md">Manage your clients and their measurement profiles.</p>
+            <h2 class="font-h2 text-2xl sm:text-3xl font-semibold text-theme-primary mb-1 sm:mb-2 drop-shadow-md">
+                {% if show_archived %}Archived Customers{% else %}Customer Directory{% endif %}
+            </h2>
+            <p class="text-theme-secondary text-sm sm:text-base font-body-md">
+                {% if show_archived %}
+                    View archived clients. Their orders, payments, and dimension history remain preserved.
+                {% else %}
+                    Manage your clients and their measurement profiles.
+                {% endif %}
+            </p>
         </div>
         <a href="{% url 'customer_create' %}" class="btn-premium btn-premium--gold w-full sm:w-auto">
             <span class="btn-premium__label flex items-center justify-center gap-2">
@@ -17,17 +25,34 @@
         </a>
     </div>
 
+    <!-- Directory Filter Tabs -->
+    <div class="flex items-center gap-2 mb-4">
+        <a href="{% url 'customer_list' %}" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 {% if not show_archived %}bg-secondary text-primary shadow-sm font-black{% else %}bg-theme-input/60 text-theme-secondary hover:text-theme-primary border border-theme-input{% endif %}">
+            <span class="material-symbols-outlined text-[16px]">groups</span>
+            Active Clients
+            <span class="px-2 py-0.5 rounded-full text-[10px] {% if not show_archived %}bg-primary/20 text-primary{% else %}bg-theme-input text-theme-muted{% endif %}">{{ active_count }}</span>
+        </a>
+        <a href="{% url 'customer_list' %}?archived=true" class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 {% if show_archived %}tab-btn-archived-active font-black{% else %}bg-theme-input/60 text-theme-secondary hover:text-theme-primary border border-theme-input{% endif %}">
+            <span class="material-symbols-outlined text-[16px]">archive</span>
+            Archived
+            <span class="px-2 py-0.5 rounded-full text-[10px] {% if show_archived %}bg-white/20 text-white{% else %}bg-theme-input text-theme-muted{% endif %}">{{ archived_count }}</span>
+        </a>
+    </div>
+
     <!-- Compact Search Bar -->
     <div class="glass-panel p-3 mb-6">
         <form method="GET" action="{% url 'customer_list' %}" class="flex flex-col sm:flex-row gap-3">
+            {% if show_archived %}
+            <input type="hidden" name="archived" value="true">
+            {% endif %}
             <div class="relative flex-1">
                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-theme-muted text-[18px]">search</span>
-                <input name="q" value="{{ q|default:'' }}" class="w-full h-11 pl-10 pr-4 bg-theme-input border border-theme-input rounded-[12px] text-sm text-theme-primary placeholder-theme focus:outline-none focus:border-secondary/50 transition-all" placeholder="Search directory by name or phone..." type="text"/>
+                <input name="q" value="{{ q|default:'' }}" class="w-full h-11 pl-10 pr-4 bg-theme-input border border-theme-input rounded-[12px] text-sm text-theme-primary placeholder-theme focus:outline-none focus:border-secondary/50 transition-all" placeholder="Search {% if show_archived %}archived {% endif %}directory by name or phone..." type="text"/>
             </div>
             <div class="flex gap-2">
                 <button type="submit" class="h-11 px-8 bg-secondary text-primary rounded-[12px] font-bold text-sm hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-secondary/10">Search</button>
                 {% if q %}
-                <a href="{% url 'customer_list' %}" class="h-11 flex items-center justify-center px-4 text-xs font-bold text-theme-secondary hover:text-theme-primary border border-theme-input rounded-[12px] uppercase tracking-widest transition-colors">Clear Filter</a>
+                <a href="{% url 'customer_list' %}{% if show_archived %}?archived=true{% endif %}" class="h-11 flex items-center justify-center px-4 text-xs font-bold text-theme-secondary hover:text-theme-primary border border-theme-input rounded-[12px] uppercase tracking-widest transition-colors">Clear Filter</a>
                 {% endif %}
             </div>
         </form>
@@ -55,20 +80,72 @@
                                 <div class="w-8 h-8 rounded-full bg-secondary/20 text-secondary border border-secondary/30 flex items-center justify-center text-xs font-bold">
                                     {{ customer.full_name|slice:":1"|upper }}
                                 </div>
-                                <span class="font-bold text-theme-primary">{{ customer.full_name|title }}</span>
+                                <div>
+                                    <span class="font-bold text-theme-primary block">{{ customer.full_name|title }}</span>
+                                    {% if customer.is_archived %}
+                                    <span class="inline-block px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30">ARCHIVED</span>
+                                    {% endif %}
+                                </div>
                             </div>
                         </td>
                         <td class="px-8 py-5 text-theme-secondary text-sm font-medium">{{ customer.phone }}</td>
-                        <td class="px-8 py-5 text-theme-secondary text-sm font-medium">{{ customer.num_orders }} Orders</td>
+                        <td class="px-8 py-5 text-theme-secondary text-sm font-medium">
+                            <span class="inline-flex items-center gap-1.5 font-bold {% if customer.num_orders > 0 %}text-secondary{% else %}text-theme-muted{% endif %}">
+                                {{ customer.num_orders }} Orders
+                            </span>
+                        </td>
                         <td class="px-8 py-5 text-theme-muted text-sm">{{ customer.created_at|date:"M d, Y" }}</td>
                         <td class="px-8 py-5 text-right">
-                            <div class="flex justify-end gap-3">
-                                <a href="{% url 'customer_detail' customer.id %}" class="text-theme-secondary hover:text-theme-primary transition-colors" title="View Profile">
-                                    <span class="material-symbols-outlined text-xl">visibility</span>
+                            <div class="flex justify-end gap-2.5 items-center">
+                                <a href="{% url 'customer_detail' customer.id %}" class="p-1.5 text-theme-secondary hover:text-theme-primary transition-colors rounded-lg hover:bg-theme-input" title="View Profile">
+                                    <span class="material-symbols-outlined text-[19px]">visibility</span>
                                 </a>
-                                <a href="{% url 'measurement_profile' %}?customer_id={{ customer.id }}" class="text-theme-secondary hover:text-theme-primary transition-colors" title="New Measurement / Order">
-                                    <span class="material-symbols-outlined text-xl">straighten</span>
+                                <a href="{% url 'measurement_profile' %}?customer_id={{ customer.id }}" class="p-1.5 text-theme-secondary hover:text-theme-primary transition-colors rounded-lg hover:bg-theme-input" title="New Measurement / Order">
+                                    <span class="material-symbols-outlined text-[19px]">straighten</span>
                                 </a>
+                                
+                                {% if customer.is_archived %}
+                                    <!-- Unarchive Action -->
+                                    <form method="POST" action="{% url 'customer_unarchive' customer.id %}" class="inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                        <button type="submit" class="p-1.5 text-amber-500 hover:text-amber-400 transition-colors rounded-lg hover:bg-amber-500/10 cursor-pointer" title="Unarchive Customer">
+                                            <span class="material-symbols-outlined text-[19px]">unarchive</span>
+                                        </button>
+                                    </form>
+                                    <!-- Delete Action (if 0 orders) -->
+                                    {% if customer.num_orders == 0 %}
+                                    <button type="button" class="btn-customer-action p-1.5 text-theme-muted hover:text-rose-500 transition-colors rounded-lg hover:bg-rose-500/10 cursor-pointer"
+                                        data-id="{{ customer.id }}"
+                                        data-name="{{ customer.full_name }}"
+                                        data-orders="0"
+                                        data-action="delete"
+                                        title="Delete Customer">
+                                        <span class="material-symbols-outlined text-[19px]">delete_forever</span>
+                                    </button>
+                                    {% endif %}
+                                {% else %}
+                                    <!-- Active Customer: Archive or Delete depending on orders -->
+                                    {% if customer.num_orders > 0 %}
+                                    <button type="button" class="btn-customer-action p-1.5 text-theme-muted hover:text-amber-500 transition-colors rounded-lg hover:bg-amber-500/10 cursor-pointer"
+                                        data-id="{{ customer.id }}"
+                                        data-name="{{ customer.full_name }}"
+                                        data-orders="{{ customer.num_orders }}"
+                                        data-action="archive"
+                                        title="Archive Customer">
+                                        <span class="material-symbols-outlined text-[19px]">archive</span>
+                                    </button>
+                                    {% else %}
+                                    <button type="button" class="btn-customer-action p-1.5 text-theme-muted hover:text-rose-500 transition-colors rounded-lg hover:bg-rose-500/10 cursor-pointer"
+                                        data-id="{{ customer.id }}"
+                                        data-name="{{ customer.full_name }}"
+                                        data-orders="0"
+                                        data-action="delete"
+                                        title="Delete Customer">
+                                        <span class="material-symbols-outlined text-[19px]">delete_forever</span>
+                                    </button>
+                                    {% endif %}
+                                {% endif %}
                             </div>
                         </td>
                     </tr>
@@ -76,7 +153,7 @@
                     <tr>
                         <td colspan="5" class="px-8 py-12 text-center text-theme-muted italic">
                             <span class="material-symbols-outlined text-4xl mb-2 opacity-20">group_off</span>
-                            <p>No customers found matching your criteria.</p>
+                            <p>No {% if show_archived %}archived {% endif %}customers found matching your criteria.</p>
                         </td>
                     </tr>
                     {% endfor %}
@@ -96,6 +173,9 @@
                         <div>
                             <span class="font-bold text-theme-primary block">{{ customer.full_name|title }}</span>
                             <span class="text-theme-muted text-xs font-medium">{{ customer.phone }}</span>
+                            {% if customer.is_archived %}
+                            <span class="inline-block px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30">ARCHIVED</span>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="text-right">
@@ -112,18 +192,56 @@
                         <a href="{% url 'customer_detail' customer.id %}" class="p-2 text-theme-secondary border border-theme-input rounded-[12px] hover:bg-theme-input hover:text-theme-primary transition-colors">
                             <span class="material-symbols-outlined text-xl">visibility</span>
                         </a>
-                        <a href="{% url 'measurement_profile' %}?customer_id={{ customer.id }}" class="btn-premium !py-2 !px-4 text-xs">
-                            <span class="material-symbols-outlined text-[16px]">straighten</span>
-                            Measure
-                        </a>
+                        
+                        {% if customer.is_archived %}
+                            <form method="POST" action="{% url 'customer_unarchive' customer.id %}" class="inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                <button type="submit" class="p-2 text-amber-500 border border-amber-500/30 rounded-[12px] hover:bg-amber-500/10 transition-colors cursor-pointer" title="Unarchive Customer">
+                                    <span class="material-symbols-outlined text-xl">unarchive</span>
+                                </button>
+                            </form>
+                            {% if customer.num_orders == 0 %}
+                            <button type="button" class="btn-customer-action p-2 text-rose-500 border border-rose-500/30 rounded-[12px] hover:bg-rose-500/10 transition-colors cursor-pointer"
+                                data-id="{{ customer.id }}"
+                                data-name="{{ customer.full_name }}"
+                                data-orders="0"
+                                data-action="delete"
+                                title="Delete Customer">
+                                <span class="material-symbols-outlined text-xl">delete_forever</span>
+                            </button>
+                            {% endif %}
+                        {% else %}
+                            {% if customer.num_orders > 0 %}
+                            <button type="button" class="btn-customer-action p-2 text-amber-600 border border-amber-500/30 rounded-[12px] hover:bg-amber-500/10 transition-colors cursor-pointer"
+                                data-id="{{ customer.id }}"
+                                data-name="{{ customer.full_name }}"
+                                data-orders="{{ customer.num_orders }}"
+                                data-action="archive"
+                                title="Archive Customer">
+                                <span class="material-symbols-outlined text-xl">archive</span>
+                            </button>
+                            {% else %}
+                            <button type="button" class="btn-customer-action p-2 text-rose-500 border border-rose-500/30 rounded-[12px] hover:bg-rose-500/10 transition-colors cursor-pointer"
+                                data-id="{{ customer.id }}"
+                                data-name="{{ customer.full_name }}"
+                                data-orders="0"
+                                data-action="delete"
+                                title="Delete Customer">
+                                <span class="material-symbols-outlined text-xl">delete_forever</span>
+                            </button>
+                            {% endif %}
+                        {% endif %}
                     </div>
                 </div>
             </div>
             {% empty %}
             <div class="p-12 text-center text-theme-muted italic text-sm">
-                No customers found matching your criteria.
+                No {% if show_archived %}archived {% endif %}customers found matching your criteria.
             </div>
             {% endfor %}
+        </div>
+
         <!-- Pagination -->
         {% if customers.has_other_pages %}
         <div class="p-4 bg-theme-input/20 border-t border-theme-input flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -132,7 +250,7 @@
             </div>
             <div class="flex items-center gap-2">
                 {% if customers.has_previous %}
-                <a href="?page={{ customers.previous_page_number }}{% if q %}&q={{ q }}{% endif %}" class="h-9 px-4 flex items-center justify-center bg-theme-input border border-theme-input rounded-lg text-xs font-bold text-theme-primary hover:bg-theme-input/80 transition-all">
+                <a href="?page={{ customers.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if show_archived %}&archived=true{% endif %}" class="h-9 px-4 flex items-center justify-center bg-theme-input border border-theme-input rounded-lg text-xs font-bold text-theme-primary hover:bg-theme-input/80 transition-all">
                     <span class="material-symbols-outlined text-[18px] mr-1">chevron_left</span> Previous
                 </a>
                 {% else %}
@@ -146,7 +264,7 @@
                 </div>
 
                 {% if customers.has_next %}
-                <a href="?page={{ customers.next_page_number }}{% if q %}&q={{ q }}{% endif %}" class="h-9 px-4 flex items-center justify-center bg-theme-input border border-theme-input rounded-lg text-xs font-bold text-theme-primary hover:bg-theme-input/80 transition-all">
+                <a href="?page={{ customers.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if show_archived %}&archived=true{% endif %}" class="h-9 px-4 flex items-center justify-center bg-theme-input border border-theme-input rounded-lg text-xs font-bold text-theme-primary hover:bg-theme-input/80 transition-all">
                     Next <span class="material-symbols-outlined text-[18px] ml-1">chevron_right</span>
                 </a>
                 {% else %}
@@ -159,4 +277,125 @@
         {% endif %}
     </div>
 </div>
+
+<!-- Delete / Archive Confirmation Modal (Walnut Showroom) -->
+<div id="customerActionModal" class="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200">
+    <div id="customerActionModalCard" class="modal-card-solid rounded-2xl max-w-md w-full p-6 shadow-2xl transform scale-95 transition-transform duration-200">
+        <div class="flex items-start gap-4 mb-4">
+            <div id="modalIconContainer" class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0">
+                <span id="modalIcon" class="material-symbols-outlined text-2xl"></span>
+            </div>
+            <div>
+                <h3 id="modalTitle" class="font-serif text-lg font-bold mb-1 modal-title-text"></h3>
+                <p id="modalDescription" class="text-xs modal-body-text leading-relaxed"></p>
+            </div>
+        </div>
+        
+        <div id="modalExtraWarning" class="mb-4 p-3.5 rounded-xl text-xs flex items-start gap-2.5">
+            <span class="material-symbols-outlined text-[18px] shrink-0" id="modalWarningIcon"></span>
+            <span id="modalWarningText" class="leading-relaxed font-medium"></span>
+        </div>
+
+        <form id="modalActionForm" method="POST" action="">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <div class="flex justify-end gap-3 pt-2">
+                <button type="button" id="closeActionModalBtn" class="btn-dialog-cancel cursor-pointer">Cancel</button>
+                <button type="submit" id="confirmActionBtn"></button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const modal = document.getElementById('customerActionModal');
+    const modalCard = document.getElementById('customerActionModalCard');
+    const closeBtn = document.getElementById('closeActionModalBtn');
+    const form = document.getElementById('modalActionForm');
+    const iconContainer = document.getElementById('modalIconContainer');
+    const modalIcon = document.getElementById('modalIcon');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalDesc = document.getElementById('modalDescription');
+    const warningBox = document.getElementById('modalExtraWarning');
+    const warningIcon = document.getElementById('modalWarningIcon');
+    const warningText = document.getElementById('modalWarningText');
+    const confirmBtn = document.getElementById('confirmActionBtn');
+
+    function openActionModal(id, name, orders, action) {
+        if (action === 'archive') {
+            form.action = `/customers/${id}/archive/`;
+            modalTitle.textContent = `Archive ${name}?`;
+            modalDesc.textContent = `This customer has ${orders} recorded order(s). To protect invoice and financial integrity, this customer cannot be deleted.`;
+            
+            iconContainer.className = 'w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30';
+            modalIcon.textContent = 'archive';
+            
+            warningBox.className = 'mb-4 p-3.5 rounded-xl text-xs flex items-start gap-2.5 dialog-alert-archive';
+            warningIcon.textContent = 'shield_lock';
+            warningIcon.className = 'material-symbols-outlined text-[18px] shrink-0 text-amber-700 dark:text-amber-400';
+            warningText.textContent = `All orders, invoices, payments, and dimension records remain 100% intact. ${name} will only be hidden from active directory lists and quick searches. You can unarchive them at any time.`;
+
+            confirmBtn.className = 'btn-dialog-archive cursor-pointer';
+            confirmBtn.textContent = 'Archive Customer';
+        } else {
+            form.action = `/customers/${id}/delete/`;
+            modalTitle.textContent = `Delete ${name}?`;
+            modalDesc.textContent = `This customer has 0 orders. Confirming will permanently remove this customer from the database.`;
+            
+            iconContainer.className = 'w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30';
+            modalIcon.textContent = 'delete_forever';
+            
+            warningBox.className = 'mb-4 p-3.5 rounded-xl text-xs flex items-start gap-2.5 dialog-alert-delete';
+            warningIcon.textContent = 'warning';
+            warningIcon.className = 'material-symbols-outlined text-[18px] shrink-0 text-rose-700 dark:text-rose-400';
+            warningText.textContent = 'This action cannot be undone. All personal details and notes for this customer will be permanently removed.';
+
+            confirmBtn.className = 'btn-dialog-delete cursor-pointer';
+            confirmBtn.textContent = 'Delete Customer';
+        }
+
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            modalCard.classList.remove('scale-95');
+            modalCard.classList.add('scale-100');
+        }, 10);
+    }
+
+    function closeActionModal() {
+        modal.classList.add('opacity-0');
+        modalCard.classList.remove('scale-100');
+        modalCard.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 200);
+    }
+
+    document.querySelectorAll('.btn-customer-action').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const id = btn.dataset.id;
+            const name = btn.dataset.name;
+            const orders = parseInt(btn.dataset.orders || '0', 10);
+            const action = btn.dataset.action;
+            openActionModal(id, name, orders, action);
+        });
+    });
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeActionModal);
+    }
+
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeActionModal();
+        });
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+            closeActionModal();
+        }
+    });
+</script>
 {% endblock %}

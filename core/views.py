@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.db.models import Sum, Count, Avg, F
+from django.db.models import Sum, Count, Avg, F, Q
 from django.db.models.functions import TruncDate
 from datetime import timedelta, datetime
 from django.urls import reverse
@@ -154,10 +154,17 @@ def dashboard(request):
     slow_moving = list(reversed(all_prods[-3:])) if len(all_prods) > 3 else []
 
     # ─── INVENTORY ALERTS ───
-    all_materials = Material.objects.filter(is_active=True)
-    low_stock_materials = [m for m in all_materials if m.is_low_stock and not m.is_out_of_stock]
-    out_of_stock_materials = [m for m in all_materials if m.is_out_of_stock]
-    total_stock_value = sum(m.stock_value for m in all_materials)
+    active_materials = Material.objects.filter(is_active=True)
+    low_stock_materials = list(active_materials.filter(current_stock__lte=F('min_stock'), current_stock__gt=0)[:5])
+    out_of_stock_materials = list(active_materials.filter(current_stock__lte=0)[:5])
+
+    inventory_metrics = active_materials.aggregate(
+        low_count=Count('id', filter=Q(current_stock__lte=F('min_stock'), current_stock__gt=0)),
+        out_count=Count('id', filter=Q(current_stock__lte=0)),
+        total_val=Sum(F('current_stock') * F('cost_per_unit')),
+    )
+    low_stock_count = (inventory_metrics['low_count'] or 0) + (inventory_metrics['out_count'] or 0)
+    total_stock_value = inventory_metrics['total_val'] or 0
 
     context = {
         'time_filter': time_filter,
@@ -196,9 +203,9 @@ def dashboard(request):
         'fast_moving': fast_moving,
         'slow_moving': slow_moving,
         # Inventory
-        'low_stock_materials': low_stock_materials[:5],  # top 5 for widget
-        'out_of_stock_materials': out_of_stock_materials[:5],
-        'low_stock_count': len(low_stock_materials) + len(out_of_stock_materials),
+        'low_stock_materials': low_stock_materials,
+        'out_of_stock_materials': out_of_stock_materials,
+        'low_stock_count': low_stock_count,
         'total_stock_value': total_stock_value,
     }
     return render(request, 'core/dashboard.html', context)

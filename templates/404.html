@@ -1,0 +1,54 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Page Not Found | Home Art Furniture</title>
+    <link rel="icon" type="image/svg+xml" href="{% static 'core/img/favicon.svg' %}"/>
+    <link rel="stylesheet" href="{% static 'core/css/tailwind.css' %}"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+        }
+        body {
+            background: radial-gradient(circle at 50% 15%, #FAF7F2 0%, #F5F0E8 100%), #F5F0E8;
+            font-family: "DM Sans", ui-sans-serif, system-ui;
+            color: #2C2421;
+        }
+        h1 {
+            font-family: "DM Serif Display", serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full text-center bg-parchment p-8 sm:p-10 rounded-2xl border border-walnut/15 shadow-xl shadow-walnut/5">
+        <!-- Logo / Icon -->
+        <div class="w-20 h-20 mx-auto mb-5 rounded-2xl bg-brass/15 border border-brass/30 flex items-center justify-center text-brass">
+            <span class="material-symbols-outlined text-4xl">search_off</span>
+        </div>
+
+        <!-- Error Code -->
+        <p class="text-xs font-bold uppercase tracking-[0.25em] text-brass mb-2">Error 404</p>
+        <h1 class="text-3xl font-bold text-charcoal mb-2 tracking-tight">Page Not Found</h1>
+        <p class="text-sm text-charcoal-muted mb-8 leading-relaxed">
+            The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.
+        </p>
+
+        <!-- CTA -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="/" class="w-full sm:w-auto px-6 py-3 rounded-lg bg-walnut hover:bg-espresso text-parchment font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-walnut/10 flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-base">home</span>
+                Back to Dashboard
+            </a>
+            <button onclick="history.back()" class="w-full sm:w-auto px-5 py-3 rounded-lg bg-white hover:bg-linen text-charcoal font-bold text-xs uppercase tracking-wider transition-all border border-walnut/20">
+                Go Back
+            </button>
+        </div>
+
+        <p class="text-[11px] text-charcoal-light mt-10 font-medium">Home Art Furniture Management System</p>
+    </div>
+</body>
+</html>
