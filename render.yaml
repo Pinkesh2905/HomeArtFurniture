@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: homeartfurniture
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn homeartfurniture.wsgi:application"
+    envVars:
+      - key: DJANGO_DEBUG
+        value: "false"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_ALLOWED_HOSTS
+        value: ".onrender.com,localhost,127.0.0.1"
