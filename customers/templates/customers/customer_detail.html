@@ -218,7 +218,7 @@
                     </div>
                     <div class="flex gap-2">
                         <!-- Custom Dropdown for Country Code with Nation Flags -->
-                        <div class="haf-dropdown w-[110px] relative z-30">
+                        <div class="haf-dropdown !w-[115px] min-w-[115px] shrink-0 relative z-30">
                             <input type="checkbox" id="edit-country-code-checkbox" class="sr-only">
                             <input type="hidden" id="edit_country_code" name="country_code" value="+91">
                             <label class="haf-dropdown__face !h-10 !rounded-lg border-theme-input bg-theme-input hover:bg-theme-input/80 transition-colors cursor-pointer !px-2.5 !flex items-center justify-between" for="edit-country-code-checkbox">
@@ -243,7 +243,7 @@
                         </div>
                         <input type="tel" id="edit_phone_local" name="phone" required
                             maxlength="10" minlength="10" pattern="[0-9]{10}" inputmode="numeric"
-                            class="flex-1 h-10 px-3 font-mono tracking-wider rounded-lg border border-theme-input bg-theme-input text-theme-primary text-sm focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all"
+                            class="flex-1 min-w-0 h-10 px-3 font-mono tracking-wider rounded-lg border border-theme-input bg-theme-input text-theme-primary text-sm focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all"
                             placeholder="10-digit mobile"
                             value="">
                     </div>

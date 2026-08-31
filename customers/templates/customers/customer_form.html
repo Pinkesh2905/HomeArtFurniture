@@ -139,7 +139,7 @@
                     </div>
                     <div class="flex gap-2">
                         <!-- Custom Dropdown for Country Code with Nation Flags -->
-                        <div class="haf-dropdown w-[110px] relative z-30">
+                        <div class="haf-dropdown !w-[115px] min-w-[115px] shrink-0 relative z-30">
                             <input type="checkbox" id="country-code-checkbox" class="sr-only">
                             <input type="hidden" id="country_code" name="country_code" value="{{ form_data.country_code|default:'+91' }}">
                             <label class="haf-dropdown__face !h-[38px] !rounded-lg border-theme-input bg-theme-input hover:bg-theme-input/80 transition-colors cursor-pointer !px-2.5 !flex items-center justify-between" for="country-code-checkbox">
@@ -178,7 +178,7 @@
                         </div>
                         <input type="tel" id="phone" name="phone" required
                             maxlength="10" minlength="10" pattern="[0-9]{10}" inputmode="numeric"
-                            class="form-input-custom flex-1 font-mono tracking-wider"
+                            class="form-input-custom !w-auto flex-1 min-w-0 font-mono tracking-wider"
                             placeholder="10-digit mobile number"
                             value="{{ form_data.phone|default:'' }}">
                     </div>
