@@ -159,6 +159,17 @@ class CoreViewTests(TestCase):
         self.assertNotEqual(response.headers.get('Pragma'), 'no-cache')
         self.assertNotEqual(response.headers.get('Expires'), '0')
 
+    def test_healthz_and_ping_endpoints(self):
+        self.client.logout()
+        r1 = self.client.get(reverse('healthz'))
+        self.assertEqual(r1.status_code, 200)
+        self.assertEqual(r1.content, b"OK")
+        self.assertEqual(r1.headers.get('Content-Type'), 'text/plain')
+
+        r2 = self.client.get(reverse('ping'))
+        self.assertEqual(r2.status_code, 200)
+        self.assertEqual(r2.content, b"OK")
+
 
 
 

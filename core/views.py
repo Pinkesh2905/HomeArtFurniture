@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Sum, Count, Avg, F, Q
@@ -232,6 +233,11 @@ def global_search(request):
         return redirect('customer_detail', customer_id=customer.id)
 
     return redirect(f"{reverse('order_list')}?q={q}")
+
+
+def healthz(request):
+    """Ultra-lightweight ping endpoint for uptime monitors and keep-alive cron jobs."""
+    return HttpResponse("OK", content_type="text/plain")
 
 
 
