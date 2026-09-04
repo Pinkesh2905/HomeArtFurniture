@@ -250,6 +250,14 @@ def help_center(request):
     return render(request, 'core/help.html')
 
 
+def privacy_policy(request):
+    return render(request, 'core/privacy_policy.html')
+
+
+def terms_conditions(request):
+    return render(request, 'core/terms_conditions.html')
+
+
 def healthz(request):
     """Ultra-lightweight ping endpoint for uptime monitors and keep-alive cron jobs."""
     return HttpResponse("OK", content_type="text/plain")

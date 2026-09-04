@@ -1,0 +1,70 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Privacy Policy | Home Art Furniture Admin{% endblock %}
+
+{% block content %}
+<div class="p-4 sm:p-8 max-w-[800px] mx-auto w-full">
+
+    <div class="mb-6">
+        <h2 class="font-h2 text-2xl sm:text-3xl font-semibold text-theme-primary mb-1 sm:mb-2 drop-shadow-md">Privacy Policy</h2>
+        <p class="text-theme-secondary text-sm">Last updated: September 2026</p>
+    </div>
+
+    <div class="glass-panel p-5 sm:p-6 space-y-6 text-sm leading-relaxed text-theme-primary">
+
+        <p>
+            This system was built and is maintained by <b>Pinkesh</b> ("the developer") for Home Art
+            Furniture ("the business"). This page explains, for the business owner and staff using
+            this system, what data is stored, who can access it, and how the developer handles it.
+            It is not addressed to the business's furniture customers, who never log in to or interact
+            directly with this system.
+        </p>
+
+        <div>
+            <h3 class="font-h3 text-base text-theme-primary mb-2">What data this system stores</h3>
+            <ul class="list-disc pl-5 space-y-1 text-theme-secondary">
+                <li>Customer records: name, phone number, city, and order/measurement history</li>
+                <li>Order and billing details: items, prices, discounts, and payment records</li>
+                <li>Inventory and supplier records</li>
+                <li>Staff login accounts (username and password) used to access the system</li>
+            </ul>
+            <p class="mt-2 text-theme-secondary">This is <b>your business's data</b> — you own it. The developer stores it on your behalf, purely so the software can function.</p>
+        </div>
+
+        <div>
+            <h3 class="font-h3 text-base text-theme-primary mb-2">Who can access it</h3>
+            <ul class="list-disc pl-5 space-y-1 text-theme-secondary">
+                <li>Your own staff, via the individual logins you create for them</li>
+                <li>The developer, who — as the person hosting and maintaining the system — technically has the ability to access the underlying database when needed for support, debugging, or maintenance</li>
+            </ul>
+            <p class="mt-2 text-theme-secondary">The developer will not view, use, sell, or share your business or customer data for any purpose other than building, fixing, or maintaining this system for you. Access for support is only ever to help you, never to repurpose your data.</p>
+        </div>
+
+        <div>
+            <h3 class="font-h3 text-base text-theme-primary mb-2">Where it's hosted</h3>
+            <p class="text-theme-secondary">The database runs on Supabase (PostgreSQL hosting), and the application itself runs on Render. Both are third-party infrastructure providers — they host the servers but have no independent access to or use of your business data beyond that.</p>
+        </div>
+
+        <div>
+            <h3 class="font-h3 text-base text-theme-primary mb-2">Security</h3>
+            <p class="text-theme-secondary">The system requires a login for every staff user, encrypts traffic (HTTPS) in production, and follows reasonable security practices for a system of this size. That said, no system can be guaranteed 100% secure — please keep staff passwords private and report anything that looks wrong immediately.</p>
+        </div>
+
+        <div>
+            <h3 class="font-h3 text-base text-theme-primary mb-2">If you stop using this system</h3>
+            <p class="text-theme-secondary">Your data remains yours. If you ever want to stop using this system, you can request a full export of your business data, and/or its deletion from the hosting infrastructure, at any time.</p>
+        </div>
+
+        <div>
+            <h3 class="font-h3 text-base text-theme-primary mb-2">Questions</h3>
+            <p class="text-theme-secondary">For any question about this policy or your data, contact:</p>
+            <p class="mt-2 font-bold text-theme-primary">Pinkesh (Developer)<br>Phone: <a href="tel:+919875034836" class="text-secondary hover:underline">+91 98750 34836</a></p>
+        </div>
+
+        <p class="text-xs text-theme-muted pt-2 border-t border-theme-input">
+            This is a plain-language summary, not a formal legal document, and hasn't been reviewed by a lawyer. See also the <a href="{% url 'terms_conditions' %}" class="underline hover:text-secondary">Terms &amp; Conditions</a>.
+        </p>
+
+    </div>
+</div>
+{% endblock %}

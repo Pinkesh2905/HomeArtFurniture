@@ -1,0 +1,76 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Terms &amp; Conditions | Home Art Furniture Admin{% endblock %}
+
+{% block content %}
+<div class="p-4 sm:p-8 max-w-[800px] mx-auto w-full">
+
+    <div class="mb-6">
+        <h2 class="font-h2 text-2xl sm:text-3xl font-semibold text-theme-primary mb-1 sm:mb-2 drop-shadow-md">Terms &amp; Conditions</h2>
+        <p class="text-theme-secondary text-sm">Last updated: September 2026</p>
+    </div>
+
+    <div class="glass-panel p-5 sm:p-6 space-y-6 text-sm leading-relaxed text-theme-primary">
+
+        <p>
+            These terms describe the arrangement between <b>Pinkesh</b> ("the developer"), who built
+            and maintains this system, and Home Art Furniture ("the business"), who uses it. They
+            cover this software platform only — not any furniture sale, order, or transaction between
+            the business and its own customers, which are entirely separate from this agreement.
+        </p>
+
+        <div>
+            <h3 class="font-h3 text-base text-theme-primary mb-2">What's provided</h3>
+            <p class="text-theme-secondary">A store-management system for handling customers, measurements, orders, billing, and inventory — built specifically for this business, hosted online, and accessible to staff via login.</p>
+        </div>
+
+        <div>
+            <h3 class="font-h3 text-base text-theme-primary mb-2">The business's responsibilities</h3>
+            <ul class="list-disc pl-5 space-y-1 text-theme-secondary">
+                <li>Keep staff login credentials private, and let the developer know promptly if a login may be compromised</li>
+                <li>Enter customer and order information accurately — the system relies on what's typed in</li>
+                <li>Use the system only for legitimate business purposes</li>
+            </ul>
+        </div>
+
+        <div>
+            <h3 class="font-h3 text-base text-theme-primary mb-2">The developer's responsibilities</h3>
+            <ul class="list-disc pl-5 space-y-1 text-theme-secondary">
+                <li>Keep the system running and reasonably maintained</li>
+                <li>Fix genuine bugs and provide support as agreed between both parties</li>
+                <li>Not access, use, or share the business's data except as described in the <a href="{% url 'privacy_policy' %}" class="underline hover:text-secondary">Privacy Policy</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <h3 class="font-h3 text-base text-theme-primary mb-2">Availability &amp; limitations</h3>
+            <p class="text-theme-secondary">The developer makes reasonable efforts to keep this system available and working correctly, but — like any software — cannot guarantee it will be error-free or available without interruption at all times (for example, during hosting provider outages or maintenance). The developer is not liable for business losses arising from downtime, bugs, or data entry mistakes, beyond making reasonable efforts to fix issues promptly once reported.</p>
+        </div>
+
+        <div>
+            <h3 class="font-h3 text-base text-theme-primary mb-2">Fees &amp; support arrangement</h3>
+            <p class="text-theme-secondary">Any fees, payment schedule, or ongoing support arrangement for this system are as separately agreed between the business and the developer, outside of this page.</p>
+        </div>
+
+        <div>
+            <h3 class="font-h3 text-base text-theme-primary mb-2">Ownership</h3>
+            <p class="text-theme-secondary">All business and customer data entered into the system belongs to the business. The underlying software (code, design, and system itself) is the developer's work, built for this business's use.</p>
+        </div>
+
+        <div>
+            <h3 class="font-h3 text-base text-theme-primary mb-2">Ending this arrangement</h3>
+            <p class="text-theme-secondary">Either party may choose to end this arrangement at any time. If so, the business's data will be exported and/or deleted as requested — see the <a href="{% url 'privacy_policy' %}" class="underline hover:text-secondary">Privacy Policy</a>.</p>
+        </div>
+
+        <div>
+            <h3 class="font-h3 text-base text-theme-primary mb-2">Questions</h3>
+            <p class="mt-2 font-bold text-theme-primary">Pinkesh (Developer)<br>Phone: <a href="tel:+919875034836" class="text-secondary hover:underline">+91 98750 34836</a></p>
+        </div>
+
+        <p class="text-xs text-theme-muted pt-2 border-t border-theme-input">
+            This is a plain-language summary written between two parties who know and trust each other, not a formal legal document, and hasn't been reviewed by a lawyer. If either party wants an enforceable written contract, it's worth having this reviewed and formalized properly.
+        </p>
+
+    </div>
+</div>
+{% endblock %}
