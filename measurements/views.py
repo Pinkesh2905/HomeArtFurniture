@@ -48,11 +48,19 @@ def measurement_profile(request):
         else:
             customer = Customer.objects.filter(phone=customer_phone, full_name=customer_name).first()
             if not customer:
+                existing_by_phone = Customer.objects.filter(phone=customer_phone).first()
                 customer = Customer.objects.create(
                     phone=customer_phone,
                     full_name=customer_name,
                     city=customer_city
                 )
+                if existing_by_phone:
+                    messages.warning(
+                        request,
+                        f'Heads up: phone {customer_phone} is already linked to customer '
+                        f'"{existing_by_phone.full_name}". A new customer "{customer.full_name}" was '
+                        f'created for this booking — please check this isn’t a duplicate.'
+                    )
             else:
                 if customer_city:
                     customer.city = customer_city
