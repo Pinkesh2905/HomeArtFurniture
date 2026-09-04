@@ -94,42 +94,53 @@ def dashboard(request):
     total_advance = float(adv['total'] or 0)
     avg_advance = float(adv['avg'] or 0)
 
+    # Breakdown panels are capped so a long-running "All Time" filter
+    # doesn't embed unbounded rows into the page; summary totals below
+    # are still computed from the full (uncapped) querysets.
+    BREAKDOWN_LIMIT = 200
+
     cash_adv_qs = period_qs.filter(payment_method='cash', advance_paid__gt=0)
     cash_adv = float(cash_adv_qs.aggregate(t=Sum('advance_paid'))['t'] or 0)
     cash_orders_list = [
         {'id': o['order_number'], 'name': o['customer__full_name'], 'amount': float(o['advance_paid'])}
-        for o in cash_adv_qs.values('order_number', 'customer__full_name', 'advance_paid').order_by('-created_at')
+        for o in cash_adv_qs.values('order_number', 'customer__full_name', 'advance_paid').order_by('-created_at')[:BREAKDOWN_LIMIT]
     ]
 
     online_adv_qs = period_qs.exclude(payment_method='cash').filter(advance_paid__gt=0)
     online_adv = float(online_adv_qs.aggregate(t=Sum('advance_paid'))['t'] or 0)
     online_orders_list = [
         {'id': o['order_number'], 'name': o['customer__full_name'], 'amount': float(o['advance_paid'])}
-        for o in online_adv_qs.values('order_number', 'customer__full_name', 'advance_paid').order_by('-created_at')
+        for o in online_adv_qs.values('order_number', 'customer__full_name', 'advance_paid').order_by('-created_at')[:BREAKDOWN_LIMIT]
     ]
 
     pending_qs = period_qs.annotate(
         bal=F('final_amount') - F('advance_paid')
     ).filter(bal__gt=0)
-    
+
     pend_agg = pending_qs.aggregate(total=Sum('bal'), avg=Avg('bal'))
     total_pending = float(pend_agg['total'] or 0)
     avg_pending = float(pend_agg['avg'] or 0)
-    
+
     pending_orders_list = [
         {'id': o['order_number'], 'name': o['customer__full_name'], 'amount': float(o['bal'])}
-        for o in pending_qs.values('order_number', 'customer__full_name', 'bal').order_by('-created_at')
+        for o in pending_qs.values('order_number', 'customer__full_name', 'bal').order_by('-created_at')[:BREAKDOWN_LIMIT]
     ]
 
     # ─── REVENUE TREND ───
+    # Cap the daily-trend series to the most recent 90 days of the period so
+    # wide ranges (e.g. "All Time", which spans a 100-year window) don't
+    # generate tens of thousands of mostly-empty data points.
     daily_qs = period_qs.annotate(
         day_date=TruncDate('created_at')
     ).values('day_date').annotate(rev=Sum('final_amount')).order_by('day_date')
     daily_map = {r['day_date']: float(r['rev'] or 0) for r in daily_qs}
 
+    MAX_TREND_DAYS = 90
+    trend_start_date = max(start_date, end_date - timedelta(days=MAX_TREND_DAYS - 1))
+
     trend_labels, trend_data = [], []
-    for i in range((end_date - start_date).days + 1):
-        d = start_date + timedelta(days=i)
+    for i in range((end_date - trend_start_date).days + 1):
+        d = trend_start_date + timedelta(days=i)
         trend_labels.append(d.strftime('%d %b %y'))
         trend_data.append(daily_map.get(d, 0))
 
