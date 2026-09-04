@@ -1,0 +1,486 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Help / મદદ | Home Art Furniture Admin{% endblock %}
+
+{% block content %}
+<style>
+    #help-content .help-lang-gu { display: none; }
+    body.help-gu-active #help-content .help-lang-en { display: none; }
+    body.help-gu-active #help-content .help-lang-gu { display: block; }
+    body.help-gu-active #help-content li.help-lang-gu,
+    body.help-gu-active #help-content span.help-lang-gu { display: inline; }
+
+    .help-section summary {
+        cursor: pointer;
+        list-style: none;
+    }
+    .help-section summary::-webkit-details-marker { display: none; }
+    .help-section .help-chevron { transition: transform 0.2s ease; }
+    .help-section[open] .help-chevron { transform: rotate(180deg); }
+
+    .help-steps { counter-reset: help-step; list-style: none; padding-left: 0; margin: 0; }
+    .help-steps > li {
+        counter-increment: help-step;
+        position: relative;
+        padding-left: 2.25rem;
+        margin-bottom: 0.65rem;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    .help-steps > li::before {
+        content: counter(help-step);
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 1.6rem;
+        height: 1.6rem;
+        border-radius: 999px;
+        background: var(--walnut);
+        color: #FFFDF7;
+        font-size: 0.75rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .help-note {
+        font-size: 0.82rem;
+        border-left: 3px solid var(--secondary, #A0845E);
+        padding: 0.6rem 0.9rem;
+        border-radius: 8px;
+        background: rgba(160, 132, 94, 0.08);
+        margin-top: 0.75rem;
+    }
+    .help-kbd {
+        font-family: monospace;
+        font-weight: 700;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 5px;
+        padding: 1px 6px;
+        font-size: 0.82em;
+    }
+</style>
+
+<div id="help-content" class="p-4 sm:p-8 max-w-[900px] mx-auto w-full">
+
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-4">
+        <div>
+            <h2 class="font-h2 text-2xl sm:text-3xl font-semibold text-theme-primary mb-1 sm:mb-2 drop-shadow-md">
+                <span class="help-lang-en">Help &amp; How-To Guide</span>
+                <span class="help-lang-gu">મદદ અને ઉપયોગ કરવાની રીત</span>
+            </h2>
+            <p class="text-theme-secondary text-sm sm:text-base font-body-md">
+                <span class="help-lang-en">Step-by-step guide for using this app. If you get stuck anywhere, come back to this page.</span>
+                <span class="help-lang-gu">આ એપ વાપરવા માટેની સ્ટેપ-બાય-સ્ટેપ માર્ગદર્શિકા. જો ક્યાંય અટકી જાવ, તો આ પેજ પર પાછા આવો.</span>
+            </p>
+        </div>
+        <div class="flex items-center gap-1 p-1 rounded-xl bg-theme-input/60 border border-theme-input self-start sm:self-auto shrink-0">
+            <button type="button" id="helpLangEnBtn" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all">English</button>
+            <button type="button" id="helpLangGuBtn" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all">ગુજરાતી</button>
+        </div>
+    </div>
+
+    <!-- Quick menu guide -->
+    <div class="glass-panel p-5 mb-6">
+        <h3 class="font-h3 text-base text-theme-primary mb-3 flex items-center gap-2">
+            <span class="material-symbols-outlined text-[20px]">explore</span>
+            <span class="help-lang-en">What each menu button does</span>
+            <span class="help-lang-gu">ડાબી બાજુના મેનુમાં દરેક બટન શું કરે છે</span>
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-sm text-theme-primary">
+            <div class="flex items-start gap-2.5"><span class="material-symbols-outlined text-[18px] text-secondary mt-0.5">dashboard</span><div><b>Home</b><span class="help-lang-en"> — summary of sales, payments &amp; alerts</span><span class="help-lang-gu"> — વેચાણ, પેમેન્ટ અને એલર્ટની ટૂંકી માહિતી</span></div></div>
+            <div class="flex items-start gap-2.5"><span class="material-symbols-outlined text-[18px] text-secondary mt-0.5">group</span><div><b>Customers</b><span class="help-lang-en"> — list of all customers</span><span class="help-lang-gu"> — બધા ગ્રાહકોની યાદી</span></div></div>
+            <div class="flex items-start gap-2.5"><span class="material-symbols-outlined text-[18px] text-secondary mt-0.5">straighten</span><div><b>Dimensions</b><span class="help-lang-en"> — take measurements / start a new booking</span><span class="help-lang-gu"> — માપ લેવા / નવું બુકિંગ શરૂ કરવા</span></div></div>
+            <div class="flex items-start gap-2.5"><span class="material-symbols-outlined text-[18px] text-secondary mt-0.5">receipt_long</span><div><b>Orders</b><span class="help-lang-en"> — all bills/orders, their status &amp; payments</span><span class="help-lang-gu"> — બધા બિલ/ઓર્ડર, તેમની સ્થિતિ અને પેમેન્ટ</span></div></div>
+            <div class="flex items-start gap-2.5"><span class="material-symbols-outlined text-[18px] text-secondary mt-0.5">local_shipping</span><div><b>Deliveries</b><span class="help-lang-en"> — what needs to be delivered today/overdue</span><span class="help-lang-gu"> — આજે અથવા મોડી થયેલી ડિલિવરી</span></div></div>
+            <div class="flex items-start gap-2.5"><span class="material-symbols-outlined text-[18px] text-secondary mt-0.5">inventory_2</span><div><b>Inventory</b><span class="help-lang-en"> — raw material stock (fabric, wood, etc.)</span><span class="help-lang-gu"> — કાચા માલનો સ્ટોક (કાપડ, લાકડું, વગેરે)</span></div></div>
+            <div class="flex items-start gap-2.5"><span class="material-symbols-outlined text-[18px] text-secondary mt-0.5">factory</span><div><b>Suppliers</b><span class="help-lang-en"> — vendors you buy materials from</span><span class="help-lang-gu"> — જ્યાંથી માલ ખરીદો છો તે વેપારીઓ</span></div></div>
+            <div class="flex items-start gap-2.5"><span class="material-symbols-outlined text-[18px] text-secondary mt-0.5">payments</span><div><b>Payments</b><span class="help-lang-en"> — payment reports by date range</span><span class="help-lang-gu"> — તારીખ પ્રમાણે પેમેન્ટ રિપોર્ટ</span></div></div>
+        </div>
+    </div>
+
+    <div class="space-y-3">
+
+        <!-- 1. Login -->
+        <details class="help-section glass-panel p-5" open>
+            <summary class="flex items-center justify-between gap-3">
+                <span class="flex items-center gap-2.5 font-h3 text-base text-theme-primary">
+                    <span class="material-symbols-outlined text-[20px] text-secondary">login</span>
+                    <span class="help-lang-en">1. Logging In</span>
+                    <span class="help-lang-gu">1. લોગિન કરવું</span>
+                </span>
+                <span class="material-symbols-outlined help-chevron text-theme-muted">expand_more</span>
+            </summary>
+            <div class="pt-4">
+                <ol class="help-steps help-lang-en">
+                    <li>Open the app link in your browser.</li>
+                    <li>Type your <b>Username</b> and <b>Password</b>.</li>
+                    <li>Click the <b>Sign In</b> button.</li>
+                    <li>You will land on the Home screen.</li>
+                </ol>
+                <ol class="help-steps help-lang-gu">
+                    <li>બ્રાઉઝરમાં એપની લિંક ખોલો.</li>
+                    <li>તમારું <b>Username</b> અને <b>Password</b> નાખો.</li>
+                    <li><b>Sign In</b> બટન દબાવો.</li>
+                    <li>તમે હોમ સ્ક્રીન પર પહોંચી જશો.</li>
+                </ol>
+                <div class="help-note text-theme-secondary">
+                    <span class="help-lang-en">Forgotten your password? Don't try to guess it — ask whoever manages this app to reset it for you. Never share your password with anyone.</span>
+                    <span class="help-lang-gu">પાસવર્ડ ભૂલી ગયા? અંદાજ ન લગાવો — જે વ્યક્તિ આ એપ સંભાળે છે તેને પાસવર્ડ રીસેટ કરવા કહો. તમારો પાસવર્ડ કોઈની સાથે શેર ન કરો.</span>
+                </div>
+            </div>
+        </details>
+
+        <!-- 2. New Customer -->
+        <details class="help-section glass-panel p-5">
+            <summary class="flex items-center justify-between gap-3">
+                <span class="flex items-center gap-2.5 font-h3 text-base text-theme-primary">
+                    <span class="material-symbols-outlined text-[20px] text-secondary">person_add</span>
+                    <span class="help-lang-en">2. Adding a New Customer</span>
+                    <span class="help-lang-gu">2. નવો ગ્રાહક ઉમેરવો</span>
+                </span>
+                <span class="material-symbols-outlined help-chevron text-theme-muted">expand_more</span>
+            </summary>
+            <div class="pt-4">
+                <ol class="help-steps help-lang-en">
+                    <li>Click <b>Customers</b> in the left menu.</li>
+                    <li>Click the <b>NEW CUSTOMER</b> button (top right).</li>
+                    <li>Enter Phone Number, Full Name, and City.</li>
+                    <li>Click <b>Save Customer</b>.</li>
+                </ol>
+                <ol class="help-steps help-lang-gu">
+                    <li>ડાબા મેનુમાં <b>Customers</b> પર ક્લિક કરો.</li>
+                    <li>ઉપર જમણી બાજુ <b>NEW CUSTOMER</b> બટન દબાવો.</li>
+                    <li>ફોન નંબર, પૂરું નામ, અને શહેર ભરો.</li>
+                    <li><b>Save Customer</b> દબાવો.</li>
+                </ol>
+                <div class="help-note text-theme-secondary">
+                    <span class="help-lang-en">If that phone number already belongs to a customer with the exact same name, the app takes you straight to their existing profile instead of making a duplicate. If the name is different, it will ask you to confirm before creating a separate customer — check carefully, this may be the same person spelled differently, or a family member.</span>
+                    <span class="help-lang-gu">જો એ ફોન નંબર પર પહેલેથી જ બરાબર એ જ નામનો ગ્રાહક હોય, તો એપ સીધા એ ગ્રાહકની જૂની પ્રોફાઇલ પર લઈ જશે, નવો ડુપ્લિકેટ નહીં બનાવે. જો નામ અલગ હોય, તો નવો અલગ ગ્રાહક બનાવતા પહેલા એપ પુષ્ટિ (confirm) માંગશે — ધ્યાનથી ચેક કરો, કદાચ એ જ વ્યક્તિનું નામ અલગ રીતે લખાયું હોય, અથવા ઘરના બીજા સભ્ય હોય.</span>
+                </div>
+            </div>
+        </details>
+
+        <!-- 3. Measurements / Booking -->
+        <details class="help-section glass-panel p-5">
+            <summary class="flex items-center justify-between gap-3">
+                <span class="flex items-center gap-2.5 font-h3 text-base text-theme-primary">
+                    <span class="material-symbols-outlined text-[20px] text-secondary">straighten</span>
+                    <span class="help-lang-en">3. Taking Measurements &amp; Starting a Booking</span>
+                    <span class="help-lang-gu">3. માપ લેવા અને બુકિંગ શરૂ કરવું</span>
+                </span>
+                <span class="material-symbols-outlined help-chevron text-theme-muted">expand_more</span>
+            </summary>
+            <div class="pt-4">
+                <ol class="help-steps help-lang-en">
+                    <li>Click <b>Dimensions</b> in the left menu.</li>
+                    <li>If the customer already exists: click <b>Search Profile</b> and type their name or phone number, then pick them from the list.</li>
+                    <li>If it's a brand-new customer: click <b>Create New</b>, fill in their phone, name, and city, then click <b>Save Customer &amp; Continue</b>.</li>
+                    <li>Click <b>Add Item</b>, choose a furniture category (e.g. Sofa, Dining Table), and fill in its measurements. Repeat for each item.</li>
+                    <li>Tick the checkbox next to any item you want to bill right now.</li>
+                    <li>Click <b>PROCEED TO BILLING</b> to move to the order screen, or <b>SAVE PROFILE ONLY</b> if you're just recording measurements for now, without billing.</li>
+                </ol>
+                <ol class="help-steps help-lang-gu">
+                    <li>ડાબા મેનુમાં <b>Dimensions</b> પર ક્લિક કરો.</li>
+                    <li>જો ગ્રાહક પહેલેથી છે: <b>Search Profile</b> પર ક્લિક કરી નામ અથવા ફોન નંબર ટાઈપ કરો, અને યાદીમાંથી પસંદ કરો.</li>
+                    <li>જો એકદમ નવો ગ્રાહક હોય: <b>Create New</b> પર ક્લિક કરી ફોન, નામ અને શહેર ભરો, પછી <b>Save Customer &amp; Continue</b> દબાવો.</li>
+                    <li><b>Add Item</b> દબાવી ફર્નિચરનો પ્રકાર પસંદ કરો (દા.ત. સોફા, ડાઈનિંગ ટેબલ) અને તેના માપ ભરો. દરેક વસ્તુ માટે આ પગલું ફરી કરો.</li>
+                    <li>જે વસ્તુનું બિલ હમણાં બનાવવું હોય તેની બાજુમાં ✓ (ટીક) કરો.</li>
+                    <li>બિલ સ્ક્રીન પર જવા <b>PROCEED TO BILLING</b> દબાવો, અથવા હમણાં ફક્ત માપ જ નોંધવા હોય (બિલ વગર) તો <b>SAVE PROFILE ONLY</b> દબાવો.</li>
+                </ol>
+                <div class="help-note text-theme-secondary">
+                    <span class="help-lang-en">Always search for the customer first before creating a new one — this avoids creating two separate records for the same person.</span>
+                    <span class="help-lang-gu">નવો ગ્રાહક બનાવતા પહેલા હંમેશા સર્ચ કરી લો — આનાથી એક જ વ્યક્તિના બે અલગ રેકોર્ડ બનતા અટકે છે.</span>
+                </div>
+            </div>
+        </details>
+
+        <!-- 4. Orders / Bill -->
+        <details class="help-section glass-panel p-5">
+            <summary class="flex items-center justify-between gap-3">
+                <span class="flex items-center gap-2.5 font-h3 text-base text-theme-primary">
+                    <span class="material-symbols-outlined text-[20px] text-secondary">receipt_long</span>
+                    <span class="help-lang-en">4. Creating the Bill / Order</span>
+                    <span class="help-lang-gu">4. બિલ / ઓર્ડર બનાવવું</span>
+                </span>
+                <span class="material-symbols-outlined help-chevron text-theme-muted">expand_more</span>
+            </summary>
+            <div class="pt-4">
+                <ol class="help-steps help-lang-en">
+                    <li>After saving measurements, you land on the billing screen with those items already listed.</li>
+                    <li>Set the rate (price) for each item — the total is calculated automatically.</li>
+                    <li>Enter any advance payment received and choose the payment method (Cash, UPI, Card, Bank Transfer).</li>
+                    <li>Click <b>Confirm &amp; Generate Invoice</b> to create the bill — you'll be taken to the printable invoice.</li>
+                </ol>
+                <ol class="help-steps help-lang-gu">
+                    <li>માપ સેવ કર્યા પછી, બિલિંગ સ્ક્રીન પર એ વસ્તુઓ પહેલેથી લિસ્ટ થયેલી દેખાશે.</li>
+                    <li>દરેક વસ્તુનો ભાવ (rate) નાખો — કુલ રકમ આપોઆપ ગણાઈ જશે.</li>
+                    <li>જો એડવાન્સ પેમેન્ટ મળ્યું હોય તો તે નાખો અને પેમેન્ટ પદ્ધતિ પસંદ કરો (Cash, UPI, Card, Bank Transfer).</li>
+                    <li>બિલ બનાવવા <b>Confirm &amp; Generate Invoice</b> દબાવો — પ્રિન્ટ કરી શકાય એવું બિલ ખુલશે.</li>
+                </ol>
+            </div>
+        </details>
+
+        <!-- 5. Order detail: status, payment, print -->
+        <details class="help-section glass-panel p-5">
+            <summary class="flex items-center justify-between gap-3">
+                <span class="flex items-center gap-2.5 font-h3 text-base text-theme-primary">
+                    <span class="material-symbols-outlined text-[20px] text-secondary">receipt</span>
+                    <span class="help-lang-en">5. Managing an Existing Order (Payment, Status, Printing)</span>
+                    <span class="help-lang-gu">5. જૂના ઓર્ડરનું સંચાલન (પેમેન્ટ, સ્થિતિ, પ્રિન્ટ)</span>
+                </span>
+                <span class="material-symbols-outlined help-chevron text-theme-muted">expand_more</span>
+            </summary>
+            <div class="pt-4">
+                <ol class="help-steps help-lang-en">
+                    <li>Go to <b>Orders</b> in the left menu, then click the order you want (or search for the order number/customer at the top).</li>
+                    <li><b>To collect a payment:</b> scroll to the Payment section, enter the Amount, choose the Method, and click <b>Record Payment</b>. Balance Due updates automatically.</li>
+                    <li><b>To give a discount:</b> use the "Apply Discount" box in the same section.</li>
+                    <li><b>To change status</b> (Pending → In Progress → Delivered): use the Order Status dropdown and click <b>Update Status</b>.</li>
+                    <li><b>To print:</b> use <b>Original Bill</b> for the customer-facing invoice, or <b>Print Full</b> for the detailed internal copy.</li>
+                    <li><b>To send on WhatsApp:</b> click the <b>WhatsApp</b> button — it opens a shareable bill link for that customer.</li>
+                </ol>
+                <ol class="help-steps help-lang-gu">
+                    <li>ડાબા મેનુમાં <b>Orders</b> પર જાવ, પછી જોઈતો ઓર્ડર ક્લિક કરો (અથવા ઉપર ઓર્ડર નંબર/ગ્રાહકનું નામ સર્ચ કરો).</li>
+                    <li><b>પેમેન્ટ લેવા માટે:</b> Payment સેક્શનમાં જાવ, Amount નાખો, પદ્ધતિ પસંદ કરો, અને <b>Record Payment</b> દબાવો. બાકી રકમ (Balance Due) આપોઆપ અપડેટ થશે.</li>
+                    <li><b>ડિસ્કાઉન્ટ આપવા માટે:</b> એ જ સેક્શનમાં "Apply Discount" બોક્સ વાપરો.</li>
+                    <li><b>સ્થિતિ બદલવા માટે</b> (Pending → In Progress → Delivered): Order Status ડ્રોપડાઉનમાંથી પસંદ કરી <b>Update Status</b> દબાવો.</li>
+                    <li><b>પ્રિન્ટ કરવા માટે:</b> ગ્રાહકને આપવાનું બિલ <b>Original Bill</b> માંથી, અને વિગતવાર આંતરિક કોપી <b>Print Full</b> માંથી પ્રિન્ટ કરો.</li>
+                    <li><b>WhatsApp પર મોકલવા માટે:</b> <b>WhatsApp</b> બટન દબાવો — તે ગ્રાહકના બિલની શેર કરી શકાય એવી લિંક ખોલશે.</li>
+                </ol>
+                <div class="help-note text-theme-secondary">
+                    <span class="help-lang-en">Entered the wrong payment amount by mistake? You currently can't undo a payment from the screen — contact whoever manages the app/database to correct it. Be careful before clicking Record Payment.</span>
+                    <span class="help-lang-gu">ભૂલથી ખોટી પેમેન્ટ રકમ નાખાઈ ગઈ? સ્ક્રીન પરથી પેમેન્ટ પાછી લેવાનો કોઈ રસ્તો હાલમાં નથી — સુધારવા માટે એપ/ડેટાબેઝ સંભાળનારનો સંપર્ક કરો. Record Payment દબાવતા પહેલા ધ્યાનથી ચેક કરી લો.</span>
+                </div>
+            </div>
+        </details>
+
+        <!-- 6. Deliveries -->
+        <details class="help-section glass-panel p-5">
+            <summary class="flex items-center justify-between gap-3">
+                <span class="flex items-center gap-2.5 font-h3 text-base text-theme-primary">
+                    <span class="material-symbols-outlined text-[20px] text-secondary">local_shipping</span>
+                    <span class="help-lang-en">6. Checking Today's Deliveries</span>
+                    <span class="help-lang-gu">6. આજની ડિલિવરી જોવી</span>
+                </span>
+                <span class="material-symbols-outlined help-chevron text-theme-muted">expand_more</span>
+            </summary>
+            <div class="pt-4">
+                <ol class="help-steps help-lang-en">
+                    <li>Click <b>Deliveries</b> in the left menu.</li>
+                    <li>You'll see orders due today and any overdue ones, sorted by date.</li>
+                    <li>Use the filters at the top to check a specific date or status.</li>
+                    <li>Click an order to open it, collect any remaining payment, and mark it Delivered.</li>
+                </ol>
+                <ol class="help-steps help-lang-gu">
+                    <li>ડાબા મેનુમાં <b>Deliveries</b> પર ક્લિક કરો.</li>
+                    <li>આજે ડિલિવર કરવાના અને મોડા થયેલા ઓર્ડર તારીખ પ્રમાણે દેખાશે.</li>
+                    <li>ચોક્કસ તારીખ કે સ્થિતિ જોવા ઉપરના ફિલ્ટર વાપરો.</li>
+                    <li>ઓર્ડર ખોલી, બાકી પેમેન્ટ લો, અને Delivered તરીકે માર્ક કરો.</li>
+                </ol>
+            </div>
+        </details>
+
+        <!-- 7. Inventory -->
+        <details class="help-section glass-panel p-5">
+            <summary class="flex items-center justify-between gap-3">
+                <span class="flex items-center gap-2.5 font-h3 text-base text-theme-primary">
+                    <span class="material-symbols-outlined text-[20px] text-secondary">inventory_2</span>
+                    <span class="help-lang-en">7. Managing Stock (Inventory)</span>
+                    <span class="help-lang-gu">7. સ્ટોક મેનેજ કરવો (ઇન્વેન્ટરી)</span>
+                </span>
+                <span class="material-symbols-outlined help-chevron text-theme-muted">expand_more</span>
+            </summary>
+            <div class="pt-4">
+                <ol class="help-steps help-lang-en">
+                    <li>Click <b>Inventory</b> in the left menu to see all materials (fabric, wood, etc.) and current stock.</li>
+                    <li><b>New material:</b> click <b>NEW MATERIAL</b> and fill in its name, unit, and low-stock alert level.</li>
+                    <li>Open a material and click <b>Update Stock</b> to record a transaction:
+                        <ul class="mt-1.5 ml-1 space-y-0.5" style="list-style: disc; padding-left: 1.1rem;">
+                            <li><b>Stock In</b> — new material received from a supplier</li>
+                            <li><b>Stock Out</b> — material used up for an order</li>
+                            <li><b>Adjustment</b> — correct the count after a physical stock check</li>
+                            <li><b>Damaged / Wastage</b> — material spoiled or wasted</li>
+                        </ul>
+                    </li>
+                </ol>
+                <ol class="help-steps help-lang-gu">
+                    <li>ડાબા મેનુમાં <b>Inventory</b> પર ક્લિક કરી બધા મટીરીયલ (કાપડ, લાકડું, વગેરે) અને હાલનો સ્ટોક જુઓ.</li>
+                    <li><b>નવો મટીરીયલ ઉમેરવો:</b> <b>NEW MATERIAL</b> દબાવી નામ, એકમ (unit), અને ઓછા-સ્ટોકની ચેતવણી લેવલ ભરો.</li>
+                    <li>મટીરીયલ ખોલી <b>Update Stock</b> દબાવી ટ્રાન્ઝેક્શન નોંધો:
+                        <ul class="mt-1.5 ml-1 space-y-0.5" style="list-style: disc; padding-left: 1.1rem;">
+                            <li><b>Stock In</b> — સપ્લાયર પાસેથી નવો માલ આવ્યો</li>
+                            <li><b>Stock Out</b> — ઓર્ડર માટે માલ વપરાયો</li>
+                            <li><b>Adjustment</b> — હાથે ગણતરી કર્યા પછી કાઉન્ટ સુધારવું</li>
+                            <li><b>Damaged / Wastage</b> — માલ બગડ્યો કે વેડફાયો</li>
+                        </ul>
+                    </li>
+                </ol>
+                <div class="help-note text-theme-secondary">
+                    <span class="help-lang-en">The app will not let stock go below zero — if "Stock Out" is rejected, it means there isn't enough recorded stock. Double-check the material's current quantity first.</span>
+                    <span class="help-lang-gu">સ્ટોક ક્યારેય શૂન્યથી નીચે નહીં જાય — જો "Stock Out" રિજેક્ટ થાય, તો એટલો સ્ટોક નોંધાયેલો નથી. પહેલા મટીરીયલનો હાલનો જથ્થો ચેક કરી લો.</span>
+                </div>
+            </div>
+        </details>
+
+        <!-- 8. Suppliers -->
+        <details class="help-section glass-panel p-5">
+            <summary class="flex items-center justify-between gap-3">
+                <span class="flex items-center gap-2.5 font-h3 text-base text-theme-primary">
+                    <span class="material-symbols-outlined text-[20px] text-secondary">factory</span>
+                    <span class="help-lang-en">8. Adding a Supplier</span>
+                    <span class="help-lang-gu">8. સપ્લાયર ઉમેરવો</span>
+                </span>
+                <span class="material-symbols-outlined help-chevron text-theme-muted">expand_more</span>
+            </summary>
+            <div class="pt-4">
+                <ol class="help-steps help-lang-en">
+                    <li>Click <b>Suppliers</b> in the left menu.</li>
+                    <li>Click <b>NEW SUPPLIER</b> and fill in their name, contact number, and address.</li>
+                    <li>You can pick this supplier when recording a "Stock In" transaction in Inventory.</li>
+                </ol>
+                <ol class="help-steps help-lang-gu">
+                    <li>ડાબા મેનુમાં <b>Suppliers</b> પર ક્લિક કરો.</li>
+                    <li><b>NEW SUPPLIER</b> દબાવી નામ, ફોન નંબર, અને સરનામું ભરો.</li>
+                    <li>Inventory માં "Stock In" નોંધતી વખતે આ સપ્લાયર પસંદ કરી શકાશે.</li>
+                </ol>
+            </div>
+        </details>
+
+        <!-- 9. Payments report -->
+        <details class="help-section glass-panel p-5">
+            <summary class="flex items-center justify-between gap-3">
+                <span class="flex items-center gap-2.5 font-h3 text-base text-theme-primary">
+                    <span class="material-symbols-outlined text-[20px] text-secondary">payments</span>
+                    <span class="help-lang-en">9. Viewing Payment Reports</span>
+                    <span class="help-lang-gu">9. પેમેન્ટ રિપોર્ટ જોવો</span>
+                </span>
+                <span class="material-symbols-outlined help-chevron text-theme-muted">expand_more</span>
+            </summary>
+            <div class="pt-4">
+                <ol class="help-steps help-lang-en">
+                    <li>Click <b>Payments</b> in the left menu.</li>
+                    <li>Choose a date range to see all payments received, grouped by Cash, UPI, Card, and Bank Transfer.</li>
+                    <li>Use this at day-end to match your cash drawer, or before your accountant visits.</li>
+                </ol>
+                <ol class="help-steps help-lang-gu">
+                    <li>ડાબા મેનુમાં <b>Payments</b> પર ક્લિક કરો.</li>
+                    <li>તારીખ પસંદ કરી, Cash, UPI, Card, અને Bank Transfer પ્રમાણે મળેલા બધા પેમેન્ટ જુઓ.</li>
+                    <li>દિવસના અંતે કેશ ડ્રોઅર મેળવવા, અથવા એકાઉન્ટન્ટ આવે ત્યારે આ વાપરો.</li>
+                </ol>
+            </div>
+        </details>
+
+        <!-- 10. Search -->
+        <details class="help-section glass-panel p-5">
+            <summary class="flex items-center justify-between gap-3">
+                <span class="flex items-center gap-2.5 font-h3 text-base text-theme-primary">
+                    <span class="material-symbols-outlined text-[20px] text-secondary">search</span>
+                    <span class="help-lang-en">10. Finding a Customer or Order Fast</span>
+                    <span class="help-lang-gu">10. ગ્રાહક કે ઓર્ડર ઝડપથી શોધવો</span>
+                </span>
+                <span class="material-symbols-outlined help-chevron text-theme-muted">expand_more</span>
+            </summary>
+            <div class="pt-4">
+                <ol class="help-steps help-lang-en">
+                    <li>Use the search box at the top of the screen (magnifying glass icon).</li>
+                    <li>Type a customer's name, phone number, or an order number, then press Enter.</li>
+                    <li>It will take you straight to the matching customer or order.</li>
+                </ol>
+                <ol class="help-steps help-lang-gu">
+                    <li>સ્ક્રીનની ઉપર સર્ચ બોક્સ વાપરો (મેગ્નિફાઇંગ ગ્લાસ આઇકન).</li>
+                    <li>ગ્રાહકનું નામ, ફોન નંબર, અથવા ઓર્ડર નંબર ટાઈપ કરી Enter દબાવો.</li>
+                    <li>તે સીધા મળતા ગ્રાહક કે ઓર્ડર પર લઈ જશે.</li>
+                </ol>
+            </div>
+        </details>
+
+        <!-- FAQ -->
+        <details class="help-section glass-panel p-5">
+            <summary class="flex items-center justify-between gap-3">
+                <span class="flex items-center gap-2.5 font-h3 text-base text-theme-primary">
+                    <span class="material-symbols-outlined text-[20px] text-secondary">quiz</span>
+                    <span class="help-lang-en">Common Problems &amp; Answers</span>
+                    <span class="help-lang-gu">સામાન્ય પ્રશ્નો અને જવાબો</span>
+                </span>
+                <span class="material-symbols-outlined help-chevron text-theme-muted">expand_more</span>
+            </summary>
+            <div class="pt-4 space-y-4 text-sm">
+                <div>
+                    <p class="font-bold text-theme-primary help-lang-en">I can't find a customer in search.</p>
+                    <p class="font-bold text-theme-primary help-lang-gu">સર્ચમાં ગ્રાહક નથી મળતો.</p>
+                    <p class="text-theme-secondary help-lang-en">Try searching by just the phone number digits, or just the first name. If they're truly new, add them as a New Customer.</p>
+                    <p class="text-theme-secondary help-lang-gu">ફક્ત ફોન નંબરના આંકડા, અથવા ફક્ત પહેલું નામ સર્ચ કરી જુઓ. જો ખરેખર નવા હોય, તો New Customer તરીકે ઉમેરો.</p>
+                </div>
+                <div>
+                    <p class="font-bold text-theme-primary help-lang-en">The app warned me a phone number already belongs to someone else.</p>
+                    <p class="font-bold text-theme-primary help-lang-gu">એપે કહ્યું કે આ ફોન નંબર પહેલેથી બીજા કોઈનો છે.</p>
+                    <p class="text-theme-secondary help-lang-en">This means the same phone number is already saved under a different name. It could be the same customer (name spelled differently) or a family member sharing the phone. Open both customer profiles and check before deciding.</p>
+                    <p class="text-theme-secondary help-lang-gu">એટલે કે એ જ ફોન નંબર બીજા નામે પહેલેથી સેવ છે. તે એ જ ગ્રાહક હોઈ શકે (નામ અલગ રીતે લખાયું હોય) અથવા ઘરનો બીજો સભ્ય હોઈ શકે જે એ જ ફોન વાપરે છે. નિર્ણય લેતા પહેલા બંને પ્રોફાઇલ ખોલી ચેક કરો.</p>
+                </div>
+                <div>
+                    <p class="font-bold text-theme-primary help-lang-en">Stock Out or Payment was rejected with a red error message.</p>
+                    <p class="font-bold text-theme-primary help-lang-gu">Stock Out અથવા Payment લાલ ભૂલ (error) સાથે રિજેક્ટ થયું.</p>
+                    <p class="text-theme-secondary help-lang-en">This is the app protecting your data — it won't let stock go negative or accept a payment larger than the balance due. Read the red message; it explains exactly what's wrong.</p>
+                    <p class="text-theme-secondary help-lang-gu">આ એપ તમારો ડેટા સાચવવા માટે કરે છે — સ્ટોક નેગેટિવ નહીં જવા દે અથવા બાકી રકમથી વધુ પેમેન્ટ સ્વીકારશે નહીં. લાલ મેસેજ વાંચો; તેમાં ચોક્કસ ભૂલ સમજાવેલી હોય છે.</p>
+                </div>
+                <div>
+                    <p class="font-bold text-theme-primary help-lang-en">The page looks broken, blank, or won't load.</p>
+                    <p class="font-bold text-theme-primary help-lang-gu">પેજ બગડેલું, ખાલી દેખાય છે, અથવા લોડ નથી થતું.</p>
+                    <p class="text-theme-secondary help-lang-en">First, check your internet connection, then refresh the page (<span class="help-kbd">F5</span> or the reload button). If it still doesn't work, note down what you were doing and contact whoever manages the app.</p>
+                    <p class="text-theme-secondary help-lang-gu">પહેલા ઇન્ટરનેટ કનેક્શન ચેક કરો, પછી પેજ રિફ્રેશ કરો (<span class="help-kbd">F5</span> અથવા રિલોડ બટન). તોય કામ ન થાય, તો તમે શું કરી રહ્યા હતા તે નોંધી, એપ સંભાળનારનો સંપર્ક કરો.</p>
+                </div>
+                <div>
+                    <p class="font-bold text-theme-primary help-lang-en">I need to delete an order or customer.</p>
+                    <p class="font-bold text-theme-primary help-lang-gu">ઓર્ડર કે ગ્રાહક ડિલીટ કરવો છે.</p>
+                    <p class="text-theme-secondary help-lang-en">Deleting is permanent and cannot be undone. Only delete an order if it was created by mistake. To stop showing a customer without losing their history, use "Archive" instead of delete, from their profile page.</p>
+                    <p class="text-theme-secondary help-lang-gu">ડિલીટ કરવાનું કાયમી છે અને પાછું લાવી શકાતું નથી. ઓર્ડર ફક્ત ભૂલથી બન્યો હોય તો જ ડિલીટ કરો. ગ્રાહકનો ઇતિહાસ ગુમાવ્યા વગર તેને યાદીમાંથી હટાવવા, ડિલીટને બદલે તેની પ્રોફાઇલ પરથી "Archive" વાપરો.</p>
+                </div>
+            </div>
+        </details>
+
+    </div>
+
+    <div class="glass-panel p-5 mt-6 text-center">
+        <p class="text-sm text-theme-secondary help-lang-en">Still stuck? Contact whoever set up this app for you for further help.</p>
+        <p class="text-sm text-theme-secondary help-lang-gu">હજુ પણ અટવાયા છો? વધુ મદદ માટે જેણે તમારા માટે આ એપ બનાવી છે તેનો સંપર્ક કરો.</p>
+    </div>
+
+</div>
+
+<script>
+    (function () {
+        var STORAGE_KEY = 'haf-help-lang';
+        var enBtn = document.getElementById('helpLangEnBtn');
+        var guBtn = document.getElementById('helpLangGuBtn');
+
+        function applyLang(lang) {
+            document.body.classList.toggle('help-gu-active', lang === 'gu');
+            if (enBtn) {
+                enBtn.classList.toggle('bg-secondary', lang === 'en');
+                enBtn.classList.toggle('text-primary', lang === 'en');
+                enBtn.classList.toggle('text-theme-secondary', lang !== 'en');
+            }
+            if (guBtn) {
+                guBtn.classList.toggle('bg-secondary', lang === 'gu');
+                guBtn.classList.toggle('text-primary', lang === 'gu');
+                guBtn.classList.toggle('text-theme-secondary', lang !== 'gu');
+            }
+        }
+
+        function setLang(lang) {
+            try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) {}
+            applyLang(lang);
+        }
+
+        var saved = 'en';
+        try { saved = localStorage.getItem(STORAGE_KEY) || 'en'; } catch (e) {}
+        applyLang(saved);
+
+        if (enBtn) enBtn.addEventListener('click', function () { setLang('en'); });
+        if (guBtn) guBtn.addEventListener('click', function () { setLang('gu'); });
+    })();
+</script>
+{% endblock %}

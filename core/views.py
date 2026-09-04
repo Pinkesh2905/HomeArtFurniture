@@ -245,6 +245,11 @@ def global_search(request):
     return redirect(f"{reverse('order_list')}?q={q}")
 
 
+@login_required
+def help_center(request):
+    return render(request, 'core/help.html')
+
+
 def healthz(request):
     """Ultra-lightweight ping endpoint for uptime monitors and keep-alive cron jobs."""
     return HttpResponse("OK", content_type="text/plain")
