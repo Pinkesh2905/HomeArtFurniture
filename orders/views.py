@@ -136,8 +136,8 @@ def num2words(num):
 @login_required
 def order_print(request, order_id):
     order = get_object_or_404(Order, id=order_id)
-    items = order.items.all()
-    
+    items = order.items.select_related('dimension')
+
     # Get FurnitureDimensions for each item in the order
     FurnitureDimensions = []
     from measurements.models import get_all_furniture_parameters, get_all_furniture_types
@@ -286,9 +286,9 @@ def order_detail(request, order_id):
         except ValidationError as exc:
             messages.error(request, '; '.join(exc.messages))
         return redirect('order_detail', order_id=order.id)
-        
-    items = order.items.all()
-    
+
+    items = order.items.select_related('dimension')
+
     import urllib.parse
     # Generate WhatsApp Message
     msg = f"Hello {order.customer.full_name},\n\n"
@@ -643,8 +643,8 @@ def payment_report_print(request):
 
 def public_order_invoice(request, token):
     order = get_object_or_404(Order, access_token=token)
-    items = order.items.all()
-    
+    items = order.items.select_related('dimension')
+
     FurnitureDimensions = []
     from measurements.models import get_all_furniture_parameters, get_all_furniture_types
     all_params = get_all_furniture_parameters()
