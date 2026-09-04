@@ -314,8 +314,8 @@ def update_order_item_from_post(item, post_data):
     rate_str = post_data.get('rate')
     if rate_str:
         rate = money(rate_str)
-        if rate <= 0:
-            raise ValidationError('Rate must be greater than 0.')
+        if rate < 0:
+            raise ValidationError('Item rate cannot be negative.')
         if rate != item.rate:
             item.rate = rate
             item_changed.append('rate')
