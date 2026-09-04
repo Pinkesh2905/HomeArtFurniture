@@ -11,7 +11,6 @@ from customers.models import Customer
 from customers.utils import normalize_phone
 from orders.models import Order, OrderItem, OrderStatus
 from inventory.models import Material
-import json
 
 
 def format_inr(amount):
@@ -186,17 +185,17 @@ def dashboard(request):
         'total_advance_fmt': format_inr(total_advance),
         'cash_adv_fmt': format_inr(cash_adv),
         'online_adv_fmt': format_inr(online_adv),
-        'cash_orders_json': json.dumps(cash_orders_list),
-        'online_orders_json': json.dumps(online_orders_list),
-        'pending_orders_json': json.dumps(pending_orders_list),
+        'cash_orders_json': cash_orders_list,
+        'online_orders_json': online_orders_list,
+        'pending_orders_json': pending_orders_list,
         'avg_advance_fmt': format_inr(avg_advance),
         'total_pending_fmt': format_inr(total_pending),
         'avg_pending_fmt': format_inr(avg_pending),
         # Charts JSON
-        'trend_labels_json': json.dumps(trend_labels),
-        'trend_data_json': json.dumps(trend_data),
-        'prod_labels_json': json.dumps([p['description'] for p in prod_perf]),
-        'prod_qtys_json': json.dumps([p['qty'] for p in prod_perf]),
+        'trend_labels_json': trend_labels,
+        'trend_data_json': trend_data,
+        'prod_labels_json': [p['description'] for p in prod_perf],
+        'prod_qtys_json': [p['qty'] for p in prod_perf],
         'new_cust_count': new_customers,
         'repeat_cust_count': repeat_customers,
         # Lists

@@ -382,14 +382,21 @@
     </div>
 </div>
 
+{{ cash_orders_json|json_script:"cash-orders-data" }}
+{{ online_orders_json|json_script:"online-orders-data" }}
+{{ pending_orders_json|json_script:"pending-orders-data" }}
+{{ trend_labels_json|json_script:"trend-labels-data" }}
+{{ trend_data_json|json_script:"trend-data-data" }}
+{{ prod_labels_json|json_script:"prod-labels-data" }}
+{{ prod_qtys_json|json_script:"prod-qtys-data" }}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     let revenueTrendChart, productPerfChart;
 
     // ─── Advance Details Logic ───
-    const cashOrders = {{ cash_orders_json|safe }};
-    const onlineOrders = {{ online_orders_json|safe }};
-    const pendingOrders = {{ pending_orders_json|safe }};
+    const cashOrders = JSON.parse(document.getElementById('cash-orders-data').textContent);
+    const onlineOrders = JSON.parse(document.getElementById('online-orders-data').textContent);
+    const pendingOrders = JSON.parse(document.getElementById('pending-orders-data').textContent);
 
     window.showAdvanceDetails = function(type) {
         const modal = document.getElementById('advanceModal');
@@ -473,8 +480,8 @@ document.addEventListener('DOMContentLoaded', function() {
         Chart.defaults.font.family = "'DM Sans', sans-serif";
 
         // ─── Revenue Trend (Brass Line with Warm Gradient) ───
-        const trendLabels = {{ trend_labels_json|safe }};
-        const trendData = {{ trend_data_json|safe }};
+        const trendLabels = JSON.parse(document.getElementById('trend-labels-data').textContent);
+        const trendData = JSON.parse(document.getElementById('trend-data-data').textContent);
         const trendCtx = document.getElementById('revenueTrendChart').getContext('2d');
         const trendGrad = trendCtx.createLinearGradient(0, 0, 0, 260);
         trendGrad.addColorStop(0, 'rgba(160, 132, 94, 0.30)');
@@ -537,8 +544,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // ─── Product Performance (Espresso Wood Bars) ───
-        const prodLabels = {{ prod_labels_json|safe }};
-        const prodQtys = {{ prod_qtys_json|safe }};
+        const prodLabels = JSON.parse(document.getElementById('prod-labels-data').textContent);
+        const prodQtys = JSON.parse(document.getElementById('prod-qtys-data').textContent);
         if (productPerfChart) productPerfChart.destroy();
         productPerfChart = new Chart(document.getElementById('productPerfChart'), {
             type: 'bar',
