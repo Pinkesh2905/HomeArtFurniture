@@ -39,6 +39,8 @@ def record_stock_in(material, quantity, unit_cost=0, supplier=None, reference=''
     if quantity <= 0:
         raise ValidationError('Quantity must be greater than zero.')
 
+    material = Material.objects.select_for_update().get(pk=material.pk)
+
     txn = StockTransaction.objects.create(
         material=material,
         transaction_type=TransactionType.STOCK_IN,
@@ -62,6 +64,8 @@ def record_stock_out(material, quantity, reference='', notes='', date=None):
     quantity = positive_decimal(quantity, field_name='Quantity')
     if quantity <= 0:
         raise ValidationError('Quantity must be greater than zero.')
+
+    material = Material.objects.select_for_update().get(pk=material.pk)
     if material.current_stock < quantity:
         raise ValidationError(
             f'Insufficient stock. Available: {material.current_stock} {material.get_unit_display()}, '
@@ -86,6 +90,8 @@ def record_stock_out(material, quantity, reference='', notes='', date=None):
 def record_adjustment(material, new_quantity, notes='', date=None):
     """Set stock to an absolute value and record the delta as an adjustment."""
     new_quantity = positive_decimal(new_quantity, field_name='New quantity')
+
+    material = Material.objects.select_for_update().get(pk=material.pk)
     delta = new_quantity - material.current_stock
 
     txn = StockTransaction.objects.create(
@@ -107,6 +113,8 @@ def record_damage(material, quantity, notes='', date=None):
     quantity = positive_decimal(quantity, field_name='Quantity')
     if quantity <= 0:
         raise ValidationError('Quantity must be greater than zero.')
+
+    material = Material.objects.select_for_update().get(pk=material.pk)
     if material.current_stock < quantity:
         raise ValidationError(
             f'Insufficient stock. Available: {material.current_stock} {material.get_unit_display()}, '

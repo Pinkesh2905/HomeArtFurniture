@@ -75,10 +75,12 @@ class InventoryModelTests(TestCase):
     def test_low_stock_property(self):
         # min_stock is 100
         record_stock_in(self.material, Decimal('90.0'))
+        self.material.refresh_from_db()
         self.assertTrue(self.material.is_low_stock)
         self.assertFalse(self.material.is_out_of_stock)
 
         record_stock_in(self.material, Decimal('20.0')) # total 110
+        self.material.refresh_from_db()
         self.assertFalse(self.material.is_low_stock)
 
 
