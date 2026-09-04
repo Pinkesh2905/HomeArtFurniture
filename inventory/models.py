@@ -90,6 +90,12 @@ class Material(models.Model):
 
     class Meta:
         ordering = ['name']
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(current_stock__gte=0),
+                name='inventory_material_current_stock_gte_0',
+            ),
+        ]
 
     @property
     def is_low_stock(self):
