@@ -25,9 +25,9 @@ class Order(models.Model):
     access_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='orders')
     order_type = models.CharField(max_length=20, choices=OrderType.choices, default=OrderType.CUSTOM_BUILD)
-    status = models.CharField(max_length=20, choices=OrderStatus.choices, default=OrderStatus.PENDING)
-    
-    date = models.DateField(default=timezone.localdate)
+    status = models.CharField(max_length=20, choices=OrderStatus.choices, default=OrderStatus.PENDING, db_index=True)
+
+    date = models.DateField(default=timezone.localdate, db_index=True)
     notes = models.TextField(blank=True)
 
     is_red_flagged = models.BooleanField(
