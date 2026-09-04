@@ -164,7 +164,9 @@ def create_order_from_post(post_data, customer):
 
 
 @transaction.atomic
+@transaction.atomic
 def update_order_from_post(order, post_data):
+    order = Order.objects.select_for_update().get(pk=order.pk)
     changed = []
     new_status = post_data.get('status')
     if new_status:

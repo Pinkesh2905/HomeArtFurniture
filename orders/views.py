@@ -281,7 +281,7 @@ def order_detail(request, order_id):
     
     if request.method == 'POST':
         try:
-            update_order_from_post(order, request.POST)
+            order = update_order_from_post(order, request.POST)
             messages.success(request, 'Order updated.')
         except ValidationError as exc:
             messages.error(request, '; '.join(exc.messages))
@@ -466,7 +466,7 @@ def api_update_order_shortcut(request, order_id):
     errors = []
     if post_data:
         try:
-            update_order_from_post(order, post_data)
+            order = update_order_from_post(order, post_data)
         except ValidationError as exc:
             errors.extend(exc.messages)
             
